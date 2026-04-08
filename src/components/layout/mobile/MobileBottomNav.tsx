@@ -17,7 +17,7 @@ const ITEMS: NavItem[] = [
   { href: "/", label: "Home", icon: "home", match: (p) => p === "/" },
   { href: "/category", label: "Danh mục", icon: "grid_view", match: (p) => p.startsWith("/category") },
   { href: "/#contact", label: "Liên hệ", icon: "call" },
-  { href: "/#account", label: "Tài khoản", icon: "account_circle" },
+  { href: "/account", label: "Tài khoản", icon: "account_circle", match: (p) => p.startsWith("/account") },
 ];
 
 const CATEGORY_MENU: Array<{ key: string; label: string; icon: string }> = [
@@ -84,13 +84,15 @@ export function MobileBottomNav() {
         {ITEMS.map((it) => {
           const active = it.match ? it.match(pathname) : false;
           const showBadge = it.badge === "cart" && itemCount > 0;
+          const tabScale = active ? "scale-[1.03]" : "scale-100";
+          const tabOpacity = active ? "opacity-100" : "opacity-80";
 
           if (it.href === "/category") {
             return (
               <div key={it.label} className="relative" ref={categoryWrapRef}>
                 <button
                   type="button"
-                  className="relative flex w-full flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition active:scale-[0.98]"
+                  className={`relative flex w-full flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition ${categoryActive ? "scale-[1.03] opacity-100" : "opacity-80"} active:scale-[0.98]`}
                   style={{
                     color: categoryActive ? "var(--stitch-color-primary)" : "var(--stitch-color-on-surface-variant)",
                     background: categoryActive
@@ -180,7 +182,7 @@ export function MobileBottomNav() {
             <Link
               key={it.label}
               href={it.href}
-              className="relative flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition active:scale-[0.98]"
+              className={`relative flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition ${tabScale} ${tabOpacity} active:scale-[0.98]`}
               style={{
                 color: active ? "var(--stitch-color-primary)" : "var(--stitch-color-on-surface-variant)",
                 background: active

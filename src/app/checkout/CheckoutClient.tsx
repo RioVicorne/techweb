@@ -281,9 +281,16 @@ export function CheckoutClient() {
                 // 1) Prefer creating an order in Supabase (server-side). If not configured, fallback to local storage.
                 let orderId = "";
                 try {
+                  const { data: sessionData } = await supabase.auth.getSession();
+                  const accessToken = sessionData.session?.access_token || "";
+                  if (!accessToken) throw new Error("Bạn cần đăng nhập để thanh toán.");
+
                   const res = await fetch("/api/orders", {
                     method: "POST",
-                    headers: { "content-type": "application/json" },
+                    headers: {
+                      "content-type": "application/json",
+                      authorization: `Bearer ${accessToken}`,
+                    },
                     body: JSON.stringify({
                       customer,
                       lines: cartLines,

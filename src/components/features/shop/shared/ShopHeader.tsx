@@ -140,7 +140,7 @@ export function ShopHeader() {
             </Link>
             <button
               type="button"
-              className="flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95"
+              className="hidden h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 md:flex"
               style={{
                 background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
                 color: authed ? "var(--stitch-color-primary)" : "var(--stitch-color-on-surface-variant)",

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { getSupabaseServerAuth } from "@/lib/supabase/server-auth";
 import type { CartLine } from "@/context/cart-context";
 import { createOrderId } from "@/lib/orders";
 
@@ -19,6 +20,19 @@ type CreateOrderBody = {
 
 export async function POST(req: Request) {
   try {
+    const authHeader = req.headers.get("authorization") || "";
+    const token = authHeader.toLowerCase().startsWith("bearer ")
+      ? authHeader.slice("bearer ".length).trim()
+      : "";
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const authClient = getSupabaseServerAuth();
+    const { data: userData, error: userErr } = await authClient.auth.getUser(token);
+    if (userErr || !userData.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = (await req.json()) as Partial<CreateOrderBody>;
     const c = body.customer;
     if (!c || !c.name || !c.phone || !c.email || !c.address) {
@@ -41,6 +55,7 @@ export async function POST(req: Request) {
       .from("orders")
       .insert({
         order_code: orderId,
+        user_id: userData.user.id,
         status: "PENDING_PAYMENT",
         currency: "VND",
         subtotal: Math.round(subtotalVnd),
