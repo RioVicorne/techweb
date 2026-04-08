@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getCatalogCategories, getCatalogProductsByCategorySlug } from "@/lib/catalog";
-import { StarRow } from "@/components/ui/StarRow";
 
 type CategoryChip = {
   key: string;
@@ -139,9 +138,7 @@ export default async function CategoryPage({
                         </div>
                       ) : null}
 
-                      <div className="hidden md:block">
-                        <StarRow filled={p.stars} reviews={p.reviews} />
-                      </div>
+                      {/* Hide rating on list cards; show on product detail only. */}
                       <Link
                         href={`/product/${p.id}`}
                         className="block line-clamp-2 text-base font-bold leading-snug text-white"

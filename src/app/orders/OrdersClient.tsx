@@ -7,11 +7,13 @@ import { formatVndDisplay } from "@/data/products";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
 type OrderRow = {
+  id?: string;
   order_code: string;
   created_at: string;
   status: string;
   total: number;
   currency: string;
+  first_item?: { title: string; image: string; qty: number } | null;
 };
 
 type OrderDetail = {
@@ -151,7 +153,18 @@ export function OrdersClient() {
             borderColor: "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
           }}
         >
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="relative">
+            {/* Mobile: icon-only status rail (Shopee/TikTok-like) */}
+            <div
+              className="absolute left-6 right-6 top-5 h-[2px] sm:hidden"
+              style={{
+                background:
+                  "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 22%, transparent)",
+              }}
+              aria-hidden
+            />
+
+            <div className="flex items-center justify-between gap-3 sm:grid sm:grid-cols-4">
             {STATUS_TABS.map((t) => {
               const n = t.statuses.reduce((sum, s) => sum + (counts[s] ?? 0), 0);
               const active = t.key === activeTab.key;
@@ -159,9 +172,9 @@ export function OrdersClient() {
                 <button
                   key={t.key}
                   type="button"
-                  className="rounded-2xl border p-3 text-center transition active:scale-[0.99]"
+                  className="relative rounded-2xl p-0 text-center transition active:scale-[0.99] sm:rounded-2xl sm:border sm:p-3"
                   style={{
-                    background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+                    background: "transparent",
                     borderColor: active
                       ? "color-mix(in srgb, var(--stitch-color-primary) 45%, transparent)"
                       : "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
@@ -174,33 +187,59 @@ export function OrdersClient() {
                     router.push(`/orders?${sp.toString()}`);
                   }}
                 >
-                  <div
-                    className="relative mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl"
-                    style={{
-                      background:
-                        "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 20%, transparent)",
-                      color: "var(--stitch-color-primary)",
-                    }}
-                  >
-                    <span className="material-symbols-outlined text-[22px]" aria-hidden>
-                      {t.icon}
-                    </span>
-                    {n > 0 ? (
-                      <span
-                        className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black text-white"
-                        style={{ background: "var(--stitch-color-secondary)" }}
-                        aria-label={`${n} đơn ${t.label}`}
-                      >
-                        {n > 99 ? "99+" : n}
-                      </span>
-                    ) : null}
+                  {/* Mobile: circle icon only */}
+                  <div className="sm:hidden">
+                    <div
+                      className="mx-auto flex h-10 w-10 items-center justify-center rounded-full"
+                      style={{
+                        background: active
+                          ? "color-mix(in srgb, var(--stitch-color-primary) 18%, transparent)"
+                          : "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                        color: "var(--stitch-color-primary)",
+                        border: active
+                          ? "1px solid color-mix(in srgb, var(--stitch-color-primary) 45%, transparent)"
+                          : "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 18%, transparent)",
+                      }}
+                      aria-hidden
+                    >
+                      <span className="material-symbols-outlined text-[20px]">{t.icon}</span>
+                    </div>
                   </div>
-                  <div className="text-[11px] font-black leading-tight" style={{ color: "var(--stitch-color-on-surface)" }}>
-                    {t.label}
+
+                  {/* Desktop/tablet: original card with label + count */}
+                  <div className="hidden sm:block">
+                    <div
+                      className="relative mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl"
+                      style={{
+                        background:
+                          "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 20%, transparent)",
+                        color: "var(--stitch-color-primary)",
+                      }}
+                    >
+                      <span className="material-symbols-outlined text-[22px]" aria-hidden>
+                        {t.icon}
+                      </span>
+                      {n > 0 ? (
+                        <span
+                          className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black text-white"
+                          style={{ background: "var(--stitch-color-secondary)" }}
+                          aria-label={`${n} đơn ${t.label}`}
+                        >
+                          {n > 99 ? "99+" : n}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div
+                      className="text-[11px] font-black leading-tight"
+                      style={{ color: "var(--stitch-color-on-surface)" }}
+                    >
+                      {t.label}
+                    </div>
                   </div>
                 </button>
               );
             })}
+            </div>
           </div>
 
           <div className="mt-5">
@@ -227,7 +266,7 @@ export function OrdersClient() {
                   <button
                     key={o.order_code}
                     type="button"
-                    className="w-full rounded-2xl border p-4 text-left transition hover:opacity-95 active:scale-[0.99]"
+                    className="w-full rounded-3xl border p-4 text-left transition hover:opacity-95 active:scale-[0.99]"
                     style={{
                       background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
                       borderColor:
@@ -242,20 +281,92 @@ export function OrdersClient() {
                     }}
                   >
                     <div className="flex items-center justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-black text-white">{o.order_code}</div>
-                        <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                          {new Date(o.created_at).toLocaleString()}
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div
+                          className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border"
+                          style={{
+                            background: "var(--stitch-color-surface-container-low)",
+                            borderColor:
+                              "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+                          }}
+                        >
+                          {o.first_item?.image ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={o.first_item.image} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center opacity-60">
+                              <span className="material-symbols-outlined" aria-hidden>
+                                inventory_2
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="truncate text-sm font-black text-white">RioShop</div>
+                            <div className="text-xs font-black" style={{ color: "var(--stitch-color-primary)" }}>
+                              {statusLabel(String(o.status || ""))}
+                            </div>
+                          </div>
+
+                          <div className="mt-1 line-clamp-2 text-sm font-bold text-white">
+                            {o.first_item?.title || o.order_code}
+                          </div>
+
+                          <div className="mt-1 flex items-center justify-between gap-3">
+                            <div className="text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                              {new Date(o.created_at).toLocaleString()}
+                              {o.first_item?.qty ? ` • x${o.first_item.qty}` : ""}
+                            </div>
+                            <div className="text-sm font-black" style={{ color: "var(--stitch-color-on-surface)" }}>
+                              {formatVndDisplay(Number(o.total) || 0)} {o.currency || "VND"}
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                          {formatVndDisplay(Number(o.total) || 0)} {o.currency || "VND"}
+                    </div>
+
+                    <div
+                      className="mt-4 rounded-2xl border px-4 py-3"
+                      style={{
+                        background:
+                          "color-mix(in srgb, var(--stitch-color-secondary-container, var(--stitch-color-surface-container)) 55%, transparent)",
+                        borderColor:
+                          "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+                      }}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-xs font-black" style={{ color: "var(--stitch-color-on-surface)" }}>
+                            Ngày giao hàng dự kiến: —
+                          </div>
+                          <div className="mt-1 truncate text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                            Theo dõi đơn để xem tiến độ cập nhật mới nhất.
+                          </div>
                         </div>
-                        <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                          {statusLabel(String(o.status || ""))}
-                        </div>
+                        <span className="material-symbols-outlined" style={{ color: "var(--stitch-color-on-surface-variant)" }} aria-hidden>
+                          chevron_right
+                        </span>
                       </div>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-end gap-3">
+                      <div className="text-xs font-black" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                        Mã đơn: <span className="text-white">{o.order_code}</span>
+                      </div>
+                      <span
+                        className="inline-flex items-center justify-center rounded-xl px-5 py-2 text-sm font-black transition active:scale-[0.99]"
+                        style={{
+                          background:
+                            "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                          color: "var(--stitch-color-primary)",
+                          border:
+                            "1px solid color-mix(in srgb, var(--stitch-color-primary) 35%, transparent)",
+                        }}
+                      >
+                        Theo dõi đơn
+                      </span>
                     </div>
                   </button>
                 ))}

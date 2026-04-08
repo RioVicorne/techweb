@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { Product } from "@/data/products";
 import { ProductCardActions } from "@/components/features/shop/shared/ProductCardActions";
 import { StickyProductCTA } from "@/components/features/shop/shared/StickyProductCTA";
-import { StarRow } from "@/components/ui/StarRow";
 import { MetricCard } from "@/components/features/product/shared/MetricCard";
 import { ProductHeroCarousel } from "@/components/features/product/shared/ProductHeroCarousel";
 
@@ -46,7 +45,6 @@ export function ProductPageView({ product }: { product: Product }) {
         <section className="mb-6">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <StarRow filled={product.stars} reviews={product.reviews} className="flex flex-wrap items-center gap-1" />
               <h1
                 className="mt-3 line-clamp-2 text-3xl font-black italic leading-tight tracking-tighter text-white"
                 style={{ fontFamily: "var(--stitch-font-headline)" }}
@@ -59,6 +57,10 @@ export function ProductPageView({ product }: { product: Product }) {
               <p className="mt-3 text-sm font-medium" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 Engineered for elite competitive play. Pure kinetic energy, tuned for dominance.
               </p>
+
+              <div className="mt-4 md:hidden">
+                <StickyProductCTA product={product} />
+              </div>
 
               <div className="mt-5 hidden max-w-md md:block">
                 <ProductCardActions product={product} />
@@ -198,9 +200,7 @@ export function ProductPageView({ product }: { product: Product }) {
         </section>
       </main>
 
-      <div className="md:hidden">
-        <StickyProductCTA product={product} />
-      </div>
+      {/* Mobile CTAs are rendered near the price block above. */}
     </>
   );
 }

@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { HERO_IMG } from "@/components/features/home/shared/homeImages";
-import { StarRow } from "@/components/ui/StarRow";
 import type { CatalogProduct } from "@/lib/catalog";
 
 export function HomeMobile({ products }: { products: CatalogProduct[] }) {
@@ -203,7 +202,7 @@ export function HomeMobile({ products }: { products: CatalogProduct[] }) {
                     </Link>
 
                     <div className="min-w-0 flex-1">
-                      <StarRow filled={p.stars} reviews={p.reviews} />
+                      {/* Hide rating on list cards; show on product detail only. */}
                       <Link
                         href={`/product/${p.id}`}
                         className="mt-1 block line-clamp-2 text-base font-bold leading-snug text-white"

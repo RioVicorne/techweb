@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { HERO_IMG, SIDE_CONSOLE, SIDE_PC } from "@/components/features/home/shared/homeImages";
-import { StarRow } from "@/components/ui/StarRow";
 import type { CatalogProduct } from "@/lib/catalog";
 
 export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
@@ -223,7 +222,7 @@ export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
                     unoptimized
                   />
                 </div>
-                <StarRow filled={p.stars} reviews={p.reviews} />
+                {/* Hide rating on list cards; show on product detail only. */}
                 <h3 className="mb-2 line-clamp-1 text-lg font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
                   {p.title}
                 </h3>
