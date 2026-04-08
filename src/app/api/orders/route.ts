@@ -36,19 +36,49 @@ export async function POST(req: Request) {
 
     const orderId = createOrderId();
     const supabase = getSupabaseAdmin();
-    const { error } = await supabase.from("orders").insert({
-      id: orderId,
-      customer: c,
-      lines: body.lines,
-      subtotal_vnd: Math.round(subtotalVnd),
-      shipping_vnd: Math.round(shippingVnd),
-      total_vnd: Math.round(totalVnd),
-      status: "created",
-      payment_provider: null,
-      payment_status: "unpaid",
-    });
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    // RioShop schema stores order header + order items separately.
+    const { data: inserted, error: orderErr } = await supabase
+      .from("orders")
+      .insert({
+        order_code: orderId,
+        status: "PENDING_PAYMENT",
+        currency: "VND",
+        subtotal: Math.round(subtotalVnd),
+        shipping_fee: Math.round(shippingVnd),
+        discount: 0,
+        total: Math.round(totalVnd),
+        full_name: c.name,
+        phone: c.phone,
+        address_line: c.address,
+        city: "",
+        // Persist email in a nullable text field (no dedicated email column in this schema).
+        grid_code: c.email,
+        note: c.note || null,
+        delivery_method: "STANDARD",
+      })
+      .select("id,order_code,created_at")
+      .single();
+    if (orderErr || !inserted) {
+      return NextResponse.json({ error: orderErr?.message || "Failed to create order" }, { status: 500 });
+    }
+
+    const orderItems = body.lines.map((l) => ({
+      order_id: inserted.id,
+      product_id: null,
+      variant_id: null,
+      product_name_snapshot: l.title,
+      variant_name_snapshot: null,
+      sku_snapshot: l.productId,
+      image_url_snapshot: l.image || null,
+      unit_price: Math.round(Number(l.priceVnd) || 0),
+      qty: Math.max(1, Math.floor(Number(l.qty) || 1)),
+      line_total: Math.round((Number(l.priceVnd) || 0) * Math.max(1, Math.floor(Number(l.qty) || 1))),
+    }));
+
+    const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
+    if (itemsErr) {
+      // Keep order header; surface error so dev can diagnose.
+      return NextResponse.json({ error: itemsErr.message }, { status: 500 });
     }
 
     return NextResponse.json({ orderId }, { status: 200 });

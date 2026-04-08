@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CyberPulse | Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "error-dim": "#d73357",
+                      "tertiary-container": "#fcbc05",
+                      "on-surface": "#e6e3fb",
+                      "surface-bright": "#2a2a43",
+                      "tertiary-fixed": "#fcbc05",
+                      "on-primary-fixed": "#000000",
+                      "surface-variant": "#24233b",
+                      "secondary-dim": "#e50062",
+                      "on-secondary": "#48001a",
+                      "surface-container-highest": "#24233b",
+                      "secondary": "#ff6c90",
+                      "surface-container-low": "#121223",
+                      "inverse-surface": "#fcf8ff",
+                      "tertiary-fixed-dim": "#ebaf00",
+                      "on-tertiary-fixed": "#3b2900",
+                      "on-tertiary-container": "#543c00",
+                      "tertiary-dim": "#ebaf00",
+                      "surface-container-lowest": "#000000",
+                      "secondary-fixed": "#ffc2cc",
+                      "error-container": "#a70138",
+                      "surface-tint": "#85adff",
+                      "primary-fixed-dim": "#5291ff",
+                      "surface-container-high": "#1d1d33",
+                      "outline": "#757388",
+                      "surface-container": "#18182b",
+                      "on-secondary-container": "#fff5f6",
+                      "background": "#0c0c1d",
+                      "on-secondary-fixed": "#6d002b",
+                      "primary-fixed": "#6d9fff",
+                      "surface": "#0c0c1d",
+                      "surface-dim": "#0c0c1d",
+                      "outline-variant": "#474659",
+                      "on-tertiary-fixed-variant": "#5f4500",
+                      "secondary-container": "#bc004f",
+                      "on-error-container": "#ffb2b9",
+                      "on-secondary-fixed-variant": "#a20043",
+                      "on-error": "#490013",
+                      "primary-dim": "#1470e8",
+                      "on-surface-variant": "#aba9bf",
+                      "inverse-primary": "#005bc3",
+                      "tertiary": "#ffcd65",
+                      "on-tertiary": "#5f4500",
+                      "on-primary-container": "#00214f",
+                      "secondary-fixed-dim": "#ffadbc",
+                      "on-primary": "#002c66",
+                      "error": "#ff6e84",
+                      "primary-container": "#6d9fff",
+                      "primary": "#85adff",
+                      "on-background": "#e6e3fb",
+                      "on-primary-fixed-variant": "#002a61",
+                      "inverse-on-surface": "#545366"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Space Grotesk"],
+                      "body": ["Manrope"],
+                      "label": ["Manrope"]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .kinetic-bg {
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(133, 173, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 108, 144, 0.05) 0%, transparent 40%);
+        }
+        .glass-panel {
+            background: rgba(24, 24, 43, 0.7);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary selection:text-on-primary-container min-h-screen flex items-center justify-center p-4 kinetic-bg">
+<div class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-0 overflow-hidden rounded-[2rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-outline-variant/10">
+<div class="hidden md:flex flex-col justify-between p-12 bg-surface-container-low relative overflow-hidden">
+<div class="absolute inset-0 opacity-20" data-alt="abstract tech grid with glowing neon blue lines and floating particles on a dark background">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/10"></div>
+<div class="w-full h-full opacity-10" style="background-image: radial-gradient(circle, #85adff 1px, transparent 1px); background-size: 30px 30px;"></div>
+</div>
+<div class="relative z-10">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(133,173,255,0.4)]">
+<span class="material-symbols-outlined text-on-primary-container font-bold" data-icon="bolt">bolt</span>
+</div>
+<span class="font-headline font-bold text-2xl tracking-tighter text-on-surface">CYBERPULSE</span>
+</div>
+</div>
+<div class="relative z-10">
+<h1 class="font-headline text-5xl font-bold leading-tight mb-6">
+                    ENGINEERED FOR <span class="text-primary italic">VELOCITY</span>.
+                </h1>
+<p class="text-on-surface-variant text-lg max-w-md">
+                    Access the next generation of high-performance tech ecosystem. Your kinetic journey starts here.
+                </p>
+</div>
+<div class="relative z-10 flex gap-4">
+<div class="flex -space-x-3">
+<div class="w-10 h-10 rounded-full border-2 border-surface-container-low overflow-hidden" data-alt="portrait of a focused gamer with blue neon lighting reflection on face">
+<img alt="User 1" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2MSvS0jcZxl3TwbrDOPnomEEG-abvtWjBgiyvNkwdSNuHny2x_yUoteUvjZR_Qo3dqLKIHwN2i1lLlOxzKsv7RfLWKeCwmuhVc4l3XyMtQXCunN7EWNTWI5VnAPds2uHDVpiRDv-8DFjNUz4dFApTH2xIJhstRRT-RjkO6rJXbg_nr4Wu7tcexONw5iwDxNrDrqmXAHhy_S5b3-1iKF6OKug_LpBrzTGgzdnFe2Nh0RTO78Im8x-a9L2OufHYs7hSUSV7MlQ8WYGA"/>
+</div>
+<div class="w-10 h-10 rounded-full border-2 border-surface-container-low overflow-hidden" data-alt="portrait of a tech professional woman in a high-tech lab setting with soft purple highlights">
+<img alt="User 2" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdjs8Ak4NEXbTgvqCSFEI_TR2CNvbkpHsXlUOFU21AErloZT4BePBulr8rL47CjPwb1vO2gRHCOBnycY87CgyyavPBX_xUn6P09jZzYVx02gZlUqCYcPF84GMpfNgTBAVUaKrJqHUKT3zXaJBzyaMsPe3RCQ-0OsERCc5g79CJEV4h7oWOnRZozA_kpNPOKtsN1cascODfP6MzfJHmRBH32SQ4C2yO6y6uAJlayrprKeriWHhf22usNpE2i11LBuAiEADU_JfL5AtW"/>
+</div>
+<div class="w-10 h-10 rounded-full border-2 border-surface-container-low overflow-hidden" data-alt="close up of eyes reflecting digital computer code in neon green and blue">
+<img alt="User 3" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaEVqJLrtcX1gjw2n7kQb0DVnaXcwBlpakLLJi4y8QoGZkpyC-LZZmLwNTN4N993FAZT4FCN8xXbd7N8ne7Eb_OTxmO8g4aBrEC3ZvMXtTniuffSBqTXvVjkXrdL9yjYu-L57H4S57L7PzBqukcWLwnWxaJXnRHZnmqh_z05JZWqhe_GI9a1523fC02tWyia2W1LCmb4JRr-15nIgFKZcSUUwJllheTy4inmmb1VAFN7hayETCbujfvqe-2WhcmV5iTNEX9x9aBPaJ"/>
+</div>
+</div>
+<div class="text-sm font-medium">
+<p class="text-on-surface">50k+ Members</p>
+<p class="text-on-surface-variant">Live in the pulse</p>
+</div>
+</div>
+</div>
+<div class="p-8 md:p-16 glass-panel flex flex-col justify-center">
+<div class="md:hidden flex items-center gap-3 mb-12">
+<div class="w-8 h-8 bg-primary rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-xl" data-icon="bolt">bolt</span>
+</div>
+<span class="font-headline font-bold text-xl tracking-tighter">CYBERPULSE</span>
+</div>
+<div class="mb-10">
+<h2 class="font-headline text-3xl font-bold text-on-surface mb-2">Welcome Back</h2>
+<p class="text-on-surface-variant font-medium">Enter your credentials to synchronize.</p>
+</div>
+<form class="space-y-6">
+<div>
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1">Identity</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-outline group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="alternate_email">alternate_email</span>
+</div>
+<input class="w-full bg-surface-container-high border-none rounded-xl py-4 pl-12 pr-4 text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/50 transition-all" placeholder="Username or Email" type="text"/>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2 ml-1">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant">Access Key</label>
+<a class="text-xs font-bold text-secondary-dim hover:text-secondary transition-colors uppercase tracking-widest" href="#">Forgot Link?</a>
+</div>
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-outline group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="lock_open">lock_open</span>
+</div>
+<input class="w-full bg-surface-container-high border-none rounded-xl py-4 pl-12 pr-12 text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/50 transition-all" placeholder="••••••••" type="password"/>
+<button class="absolute inset-y-0 right-4 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-2 px-1">
+<input class="w-5 h-5 rounded border-outline-variant bg-surface-container-high text-primary focus:ring-primary focus:ring-offset-background" id="remember" type="checkbox"/>
+<label class="text-sm font-medium text-on-surface-variant cursor-pointer select-none" for="remember">Maintain Active Session</label>
+</div>
+<button class="w-full bg-gradient-to-r from-primary to-primary-dim text-on-primary-fixed font-headline font-bold py-4 rounded-xl shadow-[0_0_25px_rgba(133,173,255,0.3)] hover:shadow-[0_0_35px_rgba(133,173,255,0.5)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg" type="submit">
+<span>INITIALIZE LOGIN</span>
+<span class="material-symbols-outlined" data-icon="login">login</span>
+</button>
+</form>
+<div class="mt-10">
+<div class="relative flex items-center py-4">
+<div class="flex-grow border-t border-outline-variant/30"></div>
+<span class="flex-shrink mx-4 text-xs font-bold text-on-surface-variant uppercase tracking-[0.2em]">External Protocols</span>
+<div class="flex-grow border-t border-outline-variant/30"></div>
+</div>
+<div class="grid grid-cols-3 gap-4 mt-6">
+<button class="bg-surface-container-high hover:bg-surface-bright p-3 rounded-xl flex items-center justify-center border border-white/5 transition-all group active:scale-95" title="Google">
+<svg class="w-6 h-6 group-hover:scale-110 transition-transform" viewbox="0 0 24 24">
+<path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" fill="currentColor"></path>
+</svg>
+</button>
+<button class="bg-surface-container-high hover:bg-surface-bright p-3 rounded-xl flex items-center justify-center border border-white/5 transition-all group active:scale-95" title="Discord">
+<svg class="w-6 h-6 group-hover:scale-110 transition-transform" viewbox="0 0 24 24">
+<path d="M19.27 4.57C17.77 3.86 16.16 3.36 14.48 3.1c-.21.37-.44.84-.6 1.22a18.44 18.44 0 0 0-5.76 0 11.19 11.19 0 0 0-.61-1.22c-1.68.26-3.29.76-4.79 1.47A18.573 18.573 0 0 0 .95 17.94c2 1.46 3.89 2.35 5.76 2.93a13.3 13.3 0 0 0 1.28-2.09 12.86 12.86 0 0 1-2.1-1c.17-.12.33-.26.49-.4 3.76 1.74 7.84 1.74 11.53 0 .16.14.32.28.49.4-.64.44-1.34.78-2.1 1 .46.77.9 1.48 1.28 2.09 1.87-.58 3.76-1.47 5.76-2.93a18.53 18.53 0 0 0-3.07-13.37zM8.02 15.33c-1.18 0-2.13-1.08-2.13-2.42 0-1.33.95-2.42 2.13-2.42s2.14 1.08 2.13 2.42c0 1.34-.95 2.42-2.13 2.42zm7.97 0c-1.18 0-2.13-1.08-2.13-2.42 0-1.33.95-2.42 2.13-2.42s2.14 1.08 2.13 2.42c0 1.34-.95 2.42-2.13 2.42z" fill="currentColor"></path>
+</svg>
+</button>
+<button class="bg-surface-container-high hover:bg-surface-bright p-3 rounded-xl flex items-center justify-center border border-white/5 transition-all group active:scale-95" title="Steam">
+<svg class="w-6 h-6 group-hover:scale-110 transition-transform" viewbox="0 0 24 24">
+<path d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2zm4.19 12.63c.41 1.63-1.4 3.12-3.03 2.71l-1.89-1.89a3.52 3.52 0 1 1 0-3.52l1.89-1.89c1.63-.41 3.44 1.08 3.03 2.71l-1.02 1.02a1.4 1.4 0 0 0 0 1.95l1.02 1.02zM10.8 12c0-.66.54-1.2 1.2-1.2s1.2.54 1.2 1.2s-.54 1.2-1.2 1.2s-1.2-.54-1.2-1.2z" fill="currentColor"></path>
+</svg>
+</button>
+</div>
+</div>
+<div class="mt-12 text-center">
+<p class="text-on-surface-variant font-medium">
+                    New to the network? 
+                    <a class="text-primary font-bold ml-1 hover:underline underline-offset-4 decoration-2" href="#">Request Uplink (Sign Up)</a>
+</p>
+</div>
+</div>
+</div>
+<!-- Background Decorative Elements -->
+<div class="fixed bottom-0 right-0 p-8 pointer-events-none opacity-20">
+<span class="font-headline font-black text-8xl tracking-tighter select-none">CYBER</span>
+</div>
+<div class="fixed top-0 left-0 p-8 pointer-events-none opacity-10">
+<span class="font-headline font-black text-8xl tracking-tighter select-none">PULSE</span>
+</div>
+</body></html>

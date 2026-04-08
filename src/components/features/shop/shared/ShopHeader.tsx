@@ -1,10 +1,32 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/context/cart-context";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
 export function ShopHeader() {
   const { itemCount } = useCart();
+  const router = useRouter();
+  const supabase = useMemo(() => getSupabaseBrowser(), []);
+  const [authed, setAuthed] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      setAuthed(!!data.session);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => {
+      if (!mounted) return;
+      setAuthed(!!session);
+    });
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   return (
     <header
@@ -118,19 +140,22 @@ export function ShopHeader() {
             </Link>
             <button
               type="button"
-              className="hidden text-sm font-medium text-slate-400 transition-colors hover:text-white md:inline-flex"
-            >
-              Login
-            </button>
-            <button
-              type="button"
-              className="hidden rounded-full px-5 py-2 text-sm font-bold shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 md:inline-flex"
+              className="flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95"
               style={{
-                background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
-                color: "var(--stitch-color-on-primary)",
+                background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+                color: authed ? "var(--stitch-color-primary)" : "var(--stitch-color-on-surface-variant)",
+                border:
+                  "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 20%, transparent)",
+              }}
+              aria-label={authed ? "Tài khoản" : "Đăng nhập"}
+              title={authed ? "Tài khoản" : "Đăng nhập"}
+              onClick={() => {
+                router.push(authed ? "/account" : "/login");
               }}
             >
-              Sign Up
+              <span className="material-symbols-outlined text-[22px] leading-none" aria-hidden>
+                person
+              </span>
             </button>
           </div>
         </div>

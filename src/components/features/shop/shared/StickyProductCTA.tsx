@@ -3,10 +3,13 @@
 import type { Product } from "@/data/products";
 import { useCart } from "@/context/cart-context";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
 export function StickyProductCTA({ product }: { product: Product }) {
   const router = useRouter();
   const { addItem } = useCart();
+  const supabase = useMemo(() => getSupabaseBrowser(), []);
 
   return (
     <div
@@ -43,7 +46,14 @@ export function StickyProductCTA({ product }: { product: Product }) {
             border:
               "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 25%, transparent)",
           }}
-          onClick={() => {
+          onClick={async () => {
+            const { data } = await supabase.auth.getSession();
+            if (!data.session) {
+              const qs = new URLSearchParams();
+              qs.set("returnTo", `/checkout?buyNow=${encodeURIComponent(product.id)}`);
+              router.push(`/login?${qs.toString()}`);
+              return;
+            }
             router.push(`/checkout?buyNow=${encodeURIComponent(product.id)}`);
           }}
         >

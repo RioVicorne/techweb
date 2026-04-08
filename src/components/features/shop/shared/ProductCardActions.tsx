@@ -1,12 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { useCart } from "@/context/cart-context";
 import type { Product } from "@/data/products";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
 export function ProductCardActions({ product }: { product: Product }) {
   const { addItem } = useCart();
   const router = useRouter();
+  const supabase = useMemo(() => getSupabaseBrowser(), []);
 
   return (
     <div className="flex gap-2">
@@ -32,7 +35,14 @@ export function ProductCardActions({ product }: { product: Product }) {
           background:
             "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
         }}
-        onClick={() => {
+        onClick={async () => {
+          const { data } = await supabase.auth.getSession();
+          if (!data.session) {
+            const qs = new URLSearchParams();
+            qs.set("returnTo", `/checkout?buyNow=${encodeURIComponent(product.id)}`);
+            router.push(`/login?${qs.toString()}`);
+            return;
+          }
           router.push(`/checkout?buyNow=${encodeURIComponent(product.id)}`);
         }}
       >

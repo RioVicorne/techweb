@@ -8,6 +8,7 @@ import { useCart } from "@/context/cart-context";
 import type { CartLine } from "@/context/cart-context";
 import { formatVndDisplay, parseDisplayPriceToVnd } from "@/data/products";
 import { createOrderId, saveOrder, type OrderCustomer } from "@/lib/orders";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
 const inputClass =
   "w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)]";
@@ -25,6 +26,7 @@ export function CheckoutClient() {
   const { lines, subtotalVnd, setQty, removeLine, clearCart } = useCart();
   const buyNowId = searchParams.get("buyNow");
   const paymentMethodId = searchParams.get("pm") || "COD";
+  const supabase = useMemo(() => getSupabaseBrowser(), []);
   const [buyNowLine, setBuyNowLine] = useState<CartLine | null>(null);
   const [placing, setPlacing] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -39,6 +41,23 @@ export function CheckoutClient() {
   const cartLines = lines.length > 0 ? lines : buyNowLine ? [buyNowLine] : [];
   const cartSubtotalVnd =
     lines.length > 0 ? subtotalVnd : buyNowLine ? buyNowLine.priceVnd * buyNowLine.qty : 0;
+
+  useEffect(() => {
+    let cancelled = false;
+    async function guard() {
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (!data.session) {
+        const qs = new URLSearchParams();
+        qs.set("returnTo", `/checkout?${searchParams.toString()}`);
+        router.replace(`/login?${qs.toString()}`);
+      }
+    }
+    guard();
+    return () => {
+      cancelled = true;
+    };
+  }, [router, searchParams, supabase]);
 
   useEffect(() => {
     let cancelled = false;
