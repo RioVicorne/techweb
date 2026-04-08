@@ -180,14 +180,16 @@ export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
 
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
             {products.map((p) => (
-              <div
+              <Link
                 key={p.id}
-                className="group/card relative rounded-3xl border p-4 transition-all duration-300 hover:bg-[var(--stitch-color-surface-bright,var(--stitch-color-surface-container))]"
+                href={`/product/${p.id}`}
+                className="group/card relative block rounded-3xl border p-4 transition-all duration-300 hover:opacity-95 active:scale-[0.99] hover:bg-[var(--stitch-color-surface-bright,var(--stitch-color-surface-container))]"
                 style={{
                   background: "var(--stitch-color-surface-container)",
                   borderColor:
                     "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
                 }}
+                aria-label={`Xem sản phẩm: ${p.title}`}
               >
                 {"badge" in p && p.badge ? (
                   <div className="absolute right-4 top-4 z-10">
@@ -232,17 +234,7 @@ export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
                 <p className="mb-4 text-lg font-black" style={{ color: "var(--stitch-color-primary)" }}>
                   {p.price} <span className="text-xs font-normal">VND</span>
                 </p>
-                <Link
-                  href={`/product/${p.id}`}
-                  className="flex w-full items-center justify-center rounded-xl py-2.5 text-sm font-bold text-white transition-all hover:bg-[var(--stitch-color-primary)] hover:text-[var(--stitch-color-on-primary)] active:scale-95"
-                  style={{
-                    background:
-                      "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
-                  }}
-                >
-                  Xem chi tiết
-                </Link>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
