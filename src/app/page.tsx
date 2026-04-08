@@ -375,7 +375,7 @@ export default function Home() {
                 color: "var(--stitch-color-primary)",
               }}
             >
-              NEON KINETIC
+              RioShop
             </div>
             <p className="text-sm leading-relaxed text-slate-500">
               Pushing the boundaries of digital commerce with elite tech for elite players. Join
@@ -467,7 +467,7 @@ export default function Home() {
           }}
         >
           <p className="text-xs text-slate-500">
-            © 2026 NEON KINETIC. High-Octane Tech Editorial.
+            © 2026 RioShop. High-Octane Tech Editorial.
           </p>
           <div className="flex gap-6 opacity-50 grayscale">
             <span className="material-symbols-outlined">payments</span>

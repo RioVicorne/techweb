@@ -25,7 +25,7 @@ export function ShopHeader() {
               color: "var(--stitch-color-primary)",
             }}
           >
-            NEON KINETIC
+            RioShop
           </Link>
           <nav
             className="hidden items-center gap-8 lg:flex"

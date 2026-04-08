@@ -4,7 +4,7 @@ import { CheckoutClient } from "./CheckoutClient";
 
 export const metadata: Metadata = {
   title: "Thanh toán",
-  description: "Giỏ hàng và thanh toán — NEON KINETIC",
+  description: "Giỏ hàng và thanh toán — RioShop",
 };
 
 export default function CheckoutPage() {

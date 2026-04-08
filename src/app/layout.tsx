@@ -45,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = await getStitchProjectTitle();
   return {
     title: title ? `${title} — Stitch` : "Stitch Design — Next.js",
-    description: "NEON KINETIC — theme từ design tokens Stitch",
+    description: "RioShop — theme từ design tokens Stitch",
   };
 }
 

@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState, type CSSProperties } from "react";
 import { useCart } from "@/context/cart-context";
 import { formatVndDisplay } from "@/data/products";
+import { createOrderId, saveOrder, type OrderCustomer } from "@/lib/orders";
 
 const inputClass =
   "w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)]";
@@ -17,8 +19,10 @@ const inputStyle: CSSProperties = {
 };
 
 export function CheckoutClient() {
-  const { lines, subtotalVnd, setQty, removeLine } = useCart();
-  const [submitted, setSubmitted] = useState(false);
+  const router = useRouter();
+  const { lines, subtotalVnd, setQty, removeLine, clearCart } = useCart();
+  const [placing, setPlacing] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -70,48 +74,6 @@ export function CheckoutClient() {
     );
   }
 
-  if (submitted) {
-    return (
-      <main className="mx-auto max-w-screen-lg px-6 pb-20 pt-28 md:px-12">
-        <div
-          className="rounded-3xl border p-10 text-center"
-          style={{
-            background: "var(--stitch-color-surface-container)",
-            borderColor:
-              "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
-          }}
-        >
-          <span
-            className="material-symbols-outlined mb-4 text-5xl"
-            style={{ color: "var(--stitch-color-tertiary, var(--stitch-color-secondary))" }}
-          >
-            check_circle
-          </span>
-          <h1
-            className="mb-2 text-xl font-bold text-white"
-            style={{ fontFamily: "var(--stitch-font-headline)" }}
-          >
-            Đã nhận đơn hàng (demo)
-          </h1>
-          <p className="mb-8 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-            Cảm ơn bạn, {form.name || "khách hàng"}. Đây là giao diện minh họa — chưa kết nối cổng thanh
-            toán.
-          </p>
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center rounded-xl px-8 py-3 text-sm font-bold transition active:scale-95"
-            style={{
-              background: "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
-              color: "var(--stitch-color-primary)",
-            }}
-          >
-            Tiếp tục mua sắm
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
   return (
     <main className="mx-auto max-w-screen-2xl px-6 pb-20 pt-28 md:px-12">
       <nav className="mb-8 flex flex-wrap items-center gap-2 text-sm" aria-label="Breadcrumb">
@@ -131,7 +93,7 @@ export function CheckoutClient() {
           Thanh toán
         </h1>
         <p className="mt-2 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-          Hoàn tất thông tin giao hàng — cùng phong cách NEON KINETIC / Stitch tokens.
+          Hoàn tất thông tin giao hàng — cùng phong cách RioShop / Stitch tokens.
         </p>
       </div>
 
@@ -152,9 +114,82 @@ export function CheckoutClient() {
           </h2>
           <form
             className="space-y-4"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              setSubmitted(true);
+              if (placing) return;
+              setSubmitError(null);
+              setPlacing(true);
+              try {
+                const customer: OrderCustomer = {
+                  name: form.name.trim(),
+                  phone: form.phone.trim(),
+                  email: form.email.trim(),
+                  address: form.address.trim(),
+                  note: form.note.trim() || undefined,
+                };
+                if (!customer.name || !customer.phone || !customer.email || !customer.address) {
+                  throw new Error("Vui lòng điền đầy đủ thông tin giao hàng.");
+                }
+                if (lines.length === 0) {
+                  throw new Error("Giỏ hàng trống.");
+                }
+
+                // 1) Prefer creating an order in Supabase (server-side). If not configured, fallback to local storage.
+                let orderId = "";
+                try {
+                  const res = await fetch("/api/orders", {
+                    method: "POST",
+                    headers: { "content-type": "application/json" },
+                    body: JSON.stringify({
+                      customer,
+                      lines,
+                      subtotalVnd,
+                      shippingVnd,
+                      totalVnd,
+                    }),
+                  });
+                  const json = (await res.json()) as { orderId?: string; error?: string };
+                  if (!res.ok || !json.orderId) throw new Error(json.error || "Không thể tạo đơn hàng.");
+                  orderId = json.orderId;
+                } catch {
+                  orderId = createOrderId();
+                }
+
+                // Always keep a local copy for UI fallback.
+                saveOrder({
+                  id: orderId,
+                  createdAt: new Date().toISOString(),
+                  customer,
+                  lines,
+                  subtotalVnd,
+                  shippingVnd,
+                  totalVnd,
+                });
+
+                // 2) Try Stripe Checkout if configured; otherwise go to success immediately.
+                try {
+                  const res = await fetch("/api/stripe/checkout-session", {
+                    method: "POST",
+                    headers: { "content-type": "application/json" },
+                    body: JSON.stringify({ orderId }),
+                  });
+                  const json = (await res.json()) as { url?: string; error?: string };
+                  if (res.ok && json.url) {
+                    clearCart();
+                    window.location.href = json.url;
+                    return;
+                  }
+                } catch {
+                  // ignore stripe failure and continue to success page
+                }
+
+                clearCart();
+                router.push(`/checkout/success?orderId=${encodeURIComponent(orderId)}`);
+              } catch (err) {
+                setSubmitError(err instanceof Error ? err.message : "Đặt hàng thất bại. Vui lòng thử lại.");
+              } finally {
+                setPlacing(false);
+              }
             }}
           >
             <div>
@@ -226,13 +261,19 @@ export function CheckoutClient() {
             </div>
             <button
               type="submit"
-              className="mt-2 w-full rounded-xl py-3.5 text-sm font-bold text-white shadow-lg transition active:scale-[0.98] sm:w-auto sm:px-12"
+              disabled={placing}
+              className="mt-2 w-full rounded-xl py-3.5 text-sm font-bold text-white shadow-lg transition disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98] sm:w-auto sm:px-12"
               style={{
                 background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
               }}
             >
-              Đặt hàng
+              {placing ? "Đang đặt hàng..." : "Đặt hàng"}
             </button>
+            {submitError ? (
+              <p className="text-sm font-medium" style={{ color: "var(--stitch-color-secondary)" }}>
+                {submitError}
+              </p>
+            ) : null}
           </form>
         </section>
 
@@ -353,7 +394,7 @@ export function CheckoutClient() {
             </div>
 
             <p className="mt-4 text-xs leading-relaxed" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-              Đơn từ 2.000.000 VND được miễn phí giao hàng tiêu chuẩn (demo).
+              Đơn từ 2.000.000 VND được miễn phí giao hàng tiêu chuẩn.
             </p>
           </div>
         </aside>
