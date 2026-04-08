@@ -42,6 +42,48 @@ export function CheckoutClient() {
   const cartSubtotalVnd =
     lines.length > 0 ? subtotalVnd : buyNowLine ? buyNowLine.priceVnd * buyNowLine.qty : 0;
 
+  type VoucherDef = {
+    code: string;
+    title: string;
+    subtitle: string;
+    kind: "PERCENT" | "AMOUNT" | "FREESHIP";
+    value: number; // percent 0-100, or amount VND
+    minSubtotalVnd?: number;
+    maxDiscountVnd?: number;
+  };
+
+  const availableVouchers = useMemo<VoucherDef[]>(
+    () => [
+      {
+        code: "FREESHIP",
+        title: "FREESHIP",
+        subtitle: "Miễn phí vận chuyển",
+        kind: "FREESHIP",
+        value: 0,
+      },
+      {
+        code: "-50K",
+        title: "-50K",
+        subtitle: "Giảm 50K đơn từ 499K",
+        kind: "AMOUNT",
+        value: 50_000,
+        minSubtotalVnd: 499_000,
+      },
+      {
+        code: "VIP10",
+        title: "VIP10",
+        subtitle: "Giảm 10% (tối đa 200K)",
+        kind: "PERCENT",
+        value: 10,
+        maxDiscountVnd: 200_000,
+      },
+    ],
+    []
+  );
+
+  const [appliedVoucher, setAppliedVoucher] = useState<VoucherDef | null>(null);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
+
   useEffect(() => {
     let cancelled = false;
     async function guard() {
@@ -119,7 +161,30 @@ export function CheckoutClient() {
     if (deliveryMethod === "HYPERSONIC") return 45_000;
     return cartSubtotalVnd >= 2_000_000 ? 0 : 30_000;
   }, [deliveryMethod, cartSubtotalVnd]);
-  const totalVnd = cartSubtotalVnd + shippingVnd;
+
+  const voucherDiscountVnd = useMemo(() => {
+    if (!appliedVoucher) return 0;
+    if (typeof appliedVoucher.minSubtotalVnd === "number" && cartSubtotalVnd < appliedVoucher.minSubtotalVnd) {
+      return 0;
+    }
+    if (appliedVoucher.kind === "FREESHIP") return Math.min(shippingVnd, 45_000);
+    if (appliedVoucher.kind === "AMOUNT") return Math.min(appliedVoucher.value, cartSubtotalVnd);
+    const raw = Math.floor((cartSubtotalVnd * appliedVoucher.value) / 100);
+    const capped = typeof appliedVoucher.maxDiscountVnd === "number" ? Math.min(raw, appliedVoucher.maxDiscountVnd) : raw;
+    return Math.max(0, Math.min(capped, cartSubtotalVnd));
+  }, [appliedVoucher, cartSubtotalVnd, shippingVnd]);
+
+  const totalVnd = Math.max(0, cartSubtotalVnd + shippingVnd - voucherDiscountVnd);
+
+  useEffect(() => {
+    // If cart changes and voucher no longer qualifies, keep it applied but show error.
+    if (!appliedVoucher) return;
+    if (typeof appliedVoucher.minSubtotalVnd === "number" && cartSubtotalVnd < appliedVoucher.minSubtotalVnd) {
+      setVoucherError(`Voucher ${appliedVoucher.code} áp dụng cho đơn từ ${formatVndDisplay(appliedVoucher.minSubtotalVnd)} VND.`);
+      return;
+    }
+    setVoucherError(null);
+  }, [appliedVoucher, cartSubtotalVnd]);
 
   const paymentLabel =
     paymentMethodId === "MOMO"
@@ -433,6 +498,79 @@ export function CheckoutClient() {
               />
             </div>
 
+            {/* Voucher */}
+            <div className="rounded-2xl border p-4" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 15%, transparent)" }}>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-xs font-black uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                    Voucher
+                  </div>
+                  <div className="mt-1 text-sm font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                    Chọn / nhập mã giảm giá
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {availableVouchers.map((v) => {
+                  const active = appliedVoucher?.code === v.code;
+                  const disabled =
+                    typeof v.minSubtotalVnd === "number" ? cartSubtotalVnd < v.minSubtotalVnd : false;
+                  return (
+                    <button
+                      key={v.code}
+                      type="button"
+                      className="rounded-full border px-3 py-2 text-left transition active:scale-[0.99] disabled:opacity-50"
+                      style={{
+                        background: active
+                          ? "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 22%, transparent)"
+                          : "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+                        borderColor: active
+                          ? "color-mix(in srgb, var(--stitch-color-primary) 25%, transparent)"
+                          : "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 12%, transparent)",
+                      }}
+                      disabled={disabled}
+                      onClick={() => {
+                        if (active) {
+                          setAppliedVoucher(null);
+                          setVoucherError(null);
+                          return;
+                        }
+
+                        setAppliedVoucher(v);
+                        if (typeof v.minSubtotalVnd === "number" && cartSubtotalVnd < v.minSubtotalVnd) {
+                          setVoucherError(`Voucher ${v.code} áp dụng cho đơn từ ${formatVndDisplay(v.minSubtotalVnd)} VND.`);
+                        } else {
+                          setVoucherError(null);
+                        }
+                      }}
+                      title={disabled && typeof v.minSubtotalVnd === "number" ? `Đơn tối thiểu ${formatVndDisplay(v.minSubtotalVnd)} VND` : v.subtitle}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-black tracking-wider" style={{ color: "var(--stitch-color-primary)" }}>
+                          {v.title}
+                        </span>
+                        <span className="text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                          {v.subtitle}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {voucherError ? (
+                <div className="mt-3 text-sm font-medium" style={{ color: "var(--stitch-color-secondary)" }}>
+                  {voucherError}
+                </div>
+              ) : appliedVoucher ? (
+                <div className="mt-3 text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                  Đã áp dụng <span className="text-white">{appliedVoucher.code}</span> — giảm{" "}
+                  <span style={{ color: "var(--stitch-color-primary)" }}>{formatVndDisplay(voucherDiscountVnd)} VND</span>
+                </div>
+              ) : null}
+            </div>
+
             {/* Mobile delivery protocol (Stitch: Delivery Protocol + trust badges) */}
             <div className="rounded-3xl p-4 md:hidden" style={{ background: "var(--stitch-color-surface-container)" }}>
               <h3 className="mb-3 flex items-center gap-2 text-sm font-black uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -648,6 +786,14 @@ export function CheckoutClient() {
                     {shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(shippingVnd)} VND`}
                   </span>
                 </div>
+                {voucherDiscountVnd > 0 ? (
+                  <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                    <span>Giảm giá</span>
+                    <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
+                      -{formatVndDisplay(voucherDiscountVnd)} VND
+                    </span>
+                  </div>
+                ) : null}
                 <div className="flex justify-between text-base font-black">
                   <span style={{ color: "var(--stitch-color-on-surface)" }}>Tổng cộng</span>
                   <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
@@ -767,6 +913,14 @@ export function CheckoutClient() {
                   {shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(shippingVnd)} VND`}
                 </span>
               </div>
+              {voucherDiscountVnd > 0 ? (
+                <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                  <span>Giảm giá</span>
+                  <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
+                    -{formatVndDisplay(voucherDiscountVnd)} VND
+                  </span>
+                </div>
+              ) : null}
               <div className="flex justify-between text-base font-black">
                 <span style={{ color: "var(--stitch-color-on-surface)" }}>Tổng cộng</span>
                 <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>

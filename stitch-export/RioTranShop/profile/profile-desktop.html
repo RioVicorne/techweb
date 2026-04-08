@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(42, 42, 67, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .neon-glow-blue {
+            box-shadow: 0 0 15px -5px rgba(133, 173, 255, 0.4);
+        }
+        .neon-glow-pink {
+            box-shadow: 0 0 15px -5px rgba(255, 108, 144, 0.4);
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0c0c1d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #85adff;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ff6e84",
+                        "surface-bright": "#2a2a43",
+                        "on-error-container": "#ffb2b9",
+                        "on-surface-variant": "#aba9bf",
+                        "on-primary-container": "#00214f",
+                        "on-tertiary-fixed": "#3b2900",
+                        "inverse-on-surface": "#545366",
+                        "on-tertiary-fixed-variant": "#5f4500",
+                        "inverse-surface": "#fcf8ff",
+                        "primary-dim": "#1470e8",
+                        "on-secondary-container": "#fff5f6",
+                        "secondary": "#ff6c90",
+                        "tertiary-container": "#fcbc05",
+                        "outline": "#757388",
+                        "on-secondary-fixed-variant": "#a20043",
+                        "inverse-primary": "#005bc3",
+                        "tertiary-fixed-dim": "#ebaf00",
+                        "secondary-fixed-dim": "#ffadbc",
+                        "primary-fixed": "#6d9fff",
+                        "surface": "#0c0c1d",
+                        "on-tertiary-container": "#543c00",
+                        "surface-container-low": "#121223",
+                        "surface-container-lowest": "#000000",
+                        "on-surface": "#e6e3fb",
+                        "surface-container-highest": "#24233b",
+                        "surface-tint": "#85adff",
+                        "primary-container": "#6d9fff",
+                        "outline-variant": "#474659",
+                        "on-background": "#e6e3fb",
+                        "tertiary-dim": "#ebaf00",
+                        "on-primary": "#002c66",
+                        "error-container": "#a70138",
+                        "background": "#0c0c1d",
+                        "surface-variant": "#24233b",
+                        "secondary-dim": "#e50062",
+                        "surface-dim": "#0c0c1d",
+                        "on-secondary": "#48001a",
+                        "secondary-container": "#bc004f",
+                        "tertiary": "#ffcd65",
+                        "on-error": "#490013",
+                        "on-tertiary": "#5f4500",
+                        "primary-fixed-dim": "#5291ff",
+                        "primary": "#85adff",
+                        "on-primary-fixed": "#000000",
+                        "on-secondary-fixed": "#6d002b",
+                        "on-primary-fixed-variant": "#002a61",
+                        "secondary-fixed": "#ffc2cc",
+                        "error-dim": "#d73357",
+                        "surface-container-high": "#1d1d33",
+                        "tertiary-fixed": "#fcbc05",
+                        "surface-container": "#18182b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-secondary selection:text-white">
+<nav class="fixed top-0 w-full z-50 bg-[#0c0c1d]/80 backdrop-blur-xl dark:bg-[#0c0c1d]/80 no-border bg-gradient-to-b from-[#121223] to-transparent shadow-[0_0_30px_-15px_rgba(133,173,255,0.3)]">
+<div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="text-2xl font-black italic tracking-tighter text-blue-400 dark:text-blue-400 font-['Space_Grotesk']">CYBERPULSE</div>
+<div class="hidden md:flex items-center gap-8 font-['Space_Grotesk'] tracking-tight">
+<a class="text-slate-400 hover:text-white transition-colors hover:text-blue-300 transition-all duration-300 active:scale-95 transform" href="#">Hardware</a>
+<a class="text-slate-400 hover:text-white transition-colors hover:text-blue-300 transition-all duration-300 active:scale-95 transform" href="#">Systems</a>
+<a class="text-slate-400 hover:text-white transition-colors hover:text-blue-300 transition-all duration-300 active:scale-95 transform" href="#">Gear</a>
+<a class="text-slate-400 hover:text-white transition-colors hover:text-blue-300 transition-all duration-300 active:scale-95 transform" href="#">Editorial</a>
+</div>
+<div class="flex items-center gap-6">
+<button class="material-symbols-outlined text-slate-400 hover:text-blue-400 transition-colors">shopping_cart</button>
+<button class="material-symbols-outlined text-blue-400 transition-colors border-b-2 border-blue-400 pb-1">account_circle</button>
+</div>
+</div>
+</nav>
+<main class="pt-24 pb-12 px-8 max-w-screen-2xl mx-auto min-h-screen">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+<aside class="md:col-span-3 space-y-2">
+<nav class="flex flex-col gap-1">
+<button class="flex items-center gap-4 px-6 py-4 bg-primary-container/10 text-primary border-l-4 border-primary font-headline transition-all text-left">
+<span class="material-symbols-outlined" data-weight="fill">grid_view</span>
+<span>Profile Overview</span>
+</button>
+<button class="flex items-center gap-4 px-6 py-4 text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all font-headline text-left">
+<span class="material-symbols-outlined">receipt_long</span>
+<span>Order History</span>
+</button>
+<button class="flex items-center gap-4 px-6 py-4 text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all font-headline text-left">
+<span class="material-symbols-outlined">security</span>
+<span>Security Settings</span>
+</button>
+<button class="flex items-center gap-4 px-6 py-4 text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all font-headline text-left">
+<span class="material-symbols-outlined">payments</span>
+<span>Payment Methods</span>
+</button>
+<button class="flex items-center gap-4 px-6 py-4 text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all font-headline text-left">
+<span class="material-symbols-outlined">support_agent</span>
+<span>Support</span>
+</button>
+</nav>
+<div class="mt-8 p-6 glass-panel rounded-xl border border-outline-variant/20 neon-glow-blue overflow-hidden relative group">
+<div class="absolute -right-8 -top-8 w-24 h-24 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/30 transition-all"></div>
+<p class="text-xs font-label uppercase tracking-widest text-on-surface-variant mb-2">Member Since</p>
+<p class="font-headline font-bold text-lg text-primary">MARCH 2077</p>
+</div>
+</aside>
+<section class="md:col-span-9 space-y-8">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 relative p-8 glass-panel rounded-xl border border-outline-variant/10 overflow-hidden flex flex-col md:flex-row items-center gap-8 neon-glow-blue">
+<div class="relative w-32 h-32 flex-shrink-0">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary to-secondary rounded-full animate-pulse opacity-20"></div>
+<img alt="Operator Identity Avatar" class="w-full h-full rounded-full border-2 border-primary/50 relative z-10 bg-surface shadow-2xl" data-alt="Futuristic cyborg avatar with neon blue circuitry lines on face, dark sleek tech-wear, glowing eyes, stylized digital art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYeQiZqgtmnGD9GvVu4YPBG7tmPnCD7be9NwBW5499UIxrUpxE6GEFVSqW35TcSFtkDVAN2cm23Qj1LN0X4K-2Jsn4Nf1H0iR4OrtEZM3DUsvWOHWPaL0jDkquzZhoJsAKoW6O0CugCCGU5SpUXVbttx3z3ld7ras7wY446Tr0NNGDxYR2x32cjjeZ4HskVRIBlUPL7qtAhVOhiT6E-Ax7Rr4_y1N-RMSJgUM4V5pqtySaUwLzhQADUpfJzglSO_RXYlrsalXzyxgZ"/>
+<div class="absolute -bottom-2 -right-2 bg-tertiary text-on-tertiary text-[10px] font-black px-2 py-1 rounded-full uppercase tracking-tighter">Verified</div>
+</div>
+<div class="flex-grow text-center md:text-left">
+<h1 class="text-4xl font-headline font-black italic tracking-tighter text-on-surface mb-1">OPERATOR_X</h1>
+<p class="text-secondary font-headline font-bold text-sm tracking-widest uppercase mb-4">Elite Tier / Vanguard Division</p>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-label uppercase tracking-widest text-on-surface-variant">
+<span>XP PROGRESSION</span>
+<span>8,450 / 10,000 XP</span>
+</div>
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-secondary w-[84%] relative">
+<div class="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:1rem_1rem]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-8 glass-panel rounded-xl border border-outline-variant/10 flex flex-col justify-center items-center text-center bg-gradient-to-br from-surface-container-low to-surface-container neon-glow-pink">
+<span class="material-symbols-outlined text-4xl text-secondary mb-2" data-weight="fill">token</span>
+<h3 class="text-3xl font-headline font-black text-on-surface">42,000</h3>
+<p class="text-xs font-label uppercase tracking-widest text-on-surface-variant">CyberPulse Credits</p>
+<button class="mt-4 text-xs font-headline font-bold text-secondary border-b border-secondary/30 hover:border-secondary transition-all pb-1">REDEEM LOYALTY GEAR</button>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<h2 class="text-xl font-headline font-black italic tracking-tight flex items-center gap-3">
+<span class="w-8 h-1 bg-primary rounded-full"></span>
+                            ORDER LOGS
+                        </h2>
+<button class="text-xs font-label text-on-surface-variant hover:text-primary transition-all">VIEW ALL ENTRIES</button>
+</div>
+<div class="space-y-3">
+<div class="group flex items-center justify-between p-6 glass-panel rounded-xl border border-outline-variant/5 hover:border-primary/20 hover:bg-surface-bright/40 transition-all">
+<div class="flex items-center gap-6">
+<div class="w-14 h-14 rounded-lg bg-surface flex items-center justify-center border border-outline-variant/20 group-hover:neon-glow-blue transition-all">
+<span class="material-symbols-outlined text-primary text-2xl">memory</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface">NeuralLink RTX 5090 Edition</h4>
+<p class="text-xs text-on-surface-variant font-label">ORDER ID: #CP-9902-X</p>
+</div>
+</div>
+<div class="hidden md:block text-center">
+<p class="text-xs font-label uppercase tracking-widest text-on-surface-variant mb-1">Status</p>
+<span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase tracking-widest border border-primary/20">Delivered</span>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-on-surface">$1,999.00</p>
+<p class="text-[10px] text-on-surface-variant font-label">Oct 12, 2024</p>
+</div>
+</div>
+<div class="group flex items-center justify-between p-6 glass-panel rounded-xl border border-outline-variant/5 hover:border-secondary/20 hover:bg-surface-bright/40 transition-all">
+<div class="flex items-center gap-6">
+<div class="w-14 h-14 rounded-lg bg-surface flex items-center justify-center border border-outline-variant/20 group-hover:neon-glow-pink transition-all">
+<span class="material-symbols-outlined text-secondary text-2xl">mouse</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface">Apex Ghost Wired-X Mouse</h4>
+<p class="text-xs text-on-surface-variant font-label">ORDER ID: #CP-8841-B</p>
+</div>
+</div>
+<div class="hidden md:block text-center">
+<p class="text-xs font-label uppercase tracking-widest text-on-surface-variant mb-1">Status</p>
+<span class="px-3 py-1 bg-tertiary/10 text-tertiary text-[10px] font-bold rounded-full uppercase tracking-widest border border-tertiary/20">In Transit</span>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-on-surface">$149.00</p>
+<p class="text-[10px] text-on-surface-variant font-label">Oct 24, 2024</p>
+</div>
+</div>
+</div>
+</div>
+<div class="p-8 glass-panel rounded-xl border border-outline-variant/10">
+<h2 class="text-xl font-headline font-black italic tracking-tight mb-8 flex items-center gap-3">
+<span class="w-8 h-1 bg-secondary rounded-full"></span>
+                        ACCOUNT CALIBRATION
+                    </h2>
+<form class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+<div class="space-y-2">
+<label class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Identity Designation (Email)</label>
+<input class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3 focus:ring-0 focus:border-secondary transition-all text-on-surface font-headline" type="email" value="operator_x@cyberpulse.net"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Encryption Key (Password)</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3 focus:ring-0 focus:border-secondary transition-all text-on-surface font-headline" type="password" value="••••••••••••"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-sm" type="button">visibility</button>
+</div>
+</div>
+<div class="md:col-span-2 space-y-2">
+<label class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Terminal Delivery Address</label>
+<textarea class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-4 py-3 focus:ring-0 focus:border-secondary transition-all text-on-surface font-headline" rows="3">Sector 7, Neo-Tokyo District 4, Block 88, Suite 404</textarea>
+</div>
+<div class="md:col-span-2 flex justify-end pt-4">
+<button class="px-8 py-3 bg-gradient-to-br from-primary to-primary-dim text-on-primary font-headline font-black italic uppercase tracking-widest rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg neon-glow-blue" type="button">
+                                Update Credentials
+                            </button>
+</div>
+</form>
+</div>
+</section>
+</div>
+</main>
+<footer class="bg-[#0c0c1d] dark:bg-[#0c0c1d] w-full py-12 px-8 mt-auto bg-[#121223] border-t border-white/5">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-screen-2xl mx-auto">
+<div class="space-y-4">
+<div class="font-['Space_Grotesk'] font-bold text-blue-400 text-xl tracking-tighter">CYBERPULSE KINETIC</div>
+<p class="text-slate-500 font-['Manrope'] text-xs uppercase tracking-widest">© 2024 CYBERPULSE KINETIC. ENGINEERED FOR PERFORMANCE.</p>
+</div>
+<div class="flex flex-wrap md:justify-end gap-x-8 gap-y-4">
+<a class="text-slate-500 font-['Manrope'] text-xs uppercase tracking-widest hover:text-pink-500 transition-colors" href="#">Warranty</a>
+<a class="text-slate-500 font-['Manrope'] text-xs uppercase tracking-widest hover:text-pink-500 transition-colors" href="#">Support</a>
+<a class="text-slate-500 font-['Manrope'] text-xs uppercase tracking-widest hover:text-pink-500 transition-colors" href="#">Privacy</a>
+<a class="text-slate-500 font-['Manrope'] text-xs uppercase tracking-widest hover:text-pink-500 transition-colors" href="#">Terms</a>
+</div>
+</div>
+</footer>
+</body></html>

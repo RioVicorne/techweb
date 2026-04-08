@@ -46,6 +46,24 @@ export function AccountClient() {
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
+  const loyaltyPoints = useMemo(() => {
+    // Heuristic points: 10 points per purchased item quantity
+    return purchases.reduce((sum, x) => sum + (Number(x.total_qty) || 0) * 10, 0);
+  }, [purchases]);
+
+  const loyaltyTierTarget = 500;
+  const loyaltyProgress = Math.max(0, Math.min(1, loyaltyPoints / loyaltyTierTarget));
+  const loyaltyRemaining = Math.max(0, loyaltyTierTarget - loyaltyPoints);
+
+  const vouchers = useMemo(
+    () => [
+      { code: "FREESHIP", desc: "Miễn phí vận chuyển" },
+      { code: "-50K", desc: "Giảm 50K đơn từ 499K" },
+      { code: "VIP10", desc: "Giảm 10% (thành viên)" },
+    ],
+    []
+  );
+
   useEffect(() => {
     let cancelled = false;
     async function run() {
@@ -93,70 +111,123 @@ export function AccountClient() {
 
   return (
     <main className="mx-auto max-w-screen-2xl px-6 pb-20 pt-28 md:px-12">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* Section 1: Account / Edit */}
-        <section
-          className="rounded-3xl border p-6 md:p-8 lg:col-span-5"
-          style={{
-            background: "var(--stitch-color-surface-container)",
-            borderColor:
-              "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
-          }}
-        >
-          {/* Compact summary (tap to edit) */}
-          {!editing ? (
-            <button
-              type="button"
-              className="w-full text-left"
-              onClick={() => {
-                setSaveError(null);
-                setEditing(true);
-              }}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex min-w-0 items-center gap-3">
-                  <div
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
-                    style={{
-                      background:
-                        "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 22%, transparent)",
-                      border:
-                        "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 18%, transparent)",
-                    }}
-                    aria-hidden
-                  >
-                    <span
-                      className="text-lg font-black"
-                      style={{ color: "var(--stitch-color-primary)", fontFamily: "var(--stitch-font-headline)" }}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
+        <div className="grid gap-6 lg:col-span-5">
+          {/* Section 1: Account / Edit */}
+          <section
+            className="h-fit rounded-3xl border p-6 md:p-8"
+            style={{
+              background: "var(--stitch-color-surface-container)",
+              borderColor:
+                "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+            }}
+          >
+            {/* Compact summary (tap to edit) */}
+            {!editing ? (
+              <div
+                role="button"
+                tabIndex={0}
+                className="w-full cursor-pointer text-left"
+                onClick={() => {
+                  setSaveError(null);
+                  setEditing(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSaveError(null);
+                    setEditing(true);
+                  }
+                }}
+                aria-label="Open profile editor"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
+                      style={{
+                        background:
+                          "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 22%, transparent)",
+                        border:
+                          "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 18%, transparent)",
+                      }}
+                      aria-hidden
                     >
-                      {email ? email.trim().slice(0, 1).toUpperCase() : "R"}
-                    </span>
+                      <span
+                        className="text-lg font-black"
+                        style={{ color: "var(--stitch-color-primary)", fontFamily: "var(--stitch-font-headline)" }}
+                      >
+                        {email ? email.trim().slice(0, 1).toUpperCase() : "R"}
+                      </span>
+                    </div>
+
+                    <div className="min-w-0">
+                      <div
+                        className="line-clamp-1 text-base font-black text-white"
+                        style={{ fontFamily: "var(--stitch-font-headline)" }}
+                      >
+                        {fullName ? fullName : "Tài khoản"}
+                      </div>
+                      <div
+                        className="mt-1 truncate text-xs"
+                        style={{ color: "var(--stitch-color-on-surface-variant)" }}
+                      >
+                        {email || "—"}
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="min-w-0">
+                  <div className="flex items-center gap-2">
                     <div
-                      className="line-clamp-1 text-base font-black text-white"
-                      style={{ fontFamily: "var(--stitch-font-headline)" }}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl"
+                      style={{
+                        background:
+                          "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 20%, transparent)",
+                        color: "var(--stitch-color-primary)",
+                      }}
+                      aria-hidden
                     >
-                      {fullName ? fullName : "Tài khoản"}
+                      <span className="material-symbols-outlined text-[22px] leading-none">edit</span>
                     </div>
-                    <div className="mt-1 truncate text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                      {email || "—"}
-                    </div>
+                    <button
+                      type="button"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl transition active:scale-95"
+                      style={{
+                        background:
+                          "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                        color: "var(--stitch-color-primary)",
+                        border:
+                          "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 25%, transparent)",
+                      }}
+                      aria-label="Sign out"
+                      title="Sign out"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        await supabase.auth.signOut();
+                        router.replace("/");
+                      }}
+                    >
+                      <span className="material-symbols-outlined text-[22px] leading-none" aria-hidden>
+                        logout
+                      </span>
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <div
-                    className="flex h-10 w-10 items-center justify-center rounded-xl"
-                    style={{
-                      background:
-                        "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 20%, transparent)",
-                      color: "var(--stitch-color-primary)",
-                    }}
-                    aria-hidden
-                  >
-                    <span className="material-symbols-outlined text-[22px] leading-none">edit</span>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h1
+                      className="text-2xl font-black italic tracking-tighter text-white"
+                      style={{ fontFamily: "var(--stitch-font-headline)" }}
+                    >
+                      Edit profile
+                    </h1>
+                    <p className="mt-1 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                      {email}
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -164,143 +235,305 @@ export function AccountClient() {
                     style={{
                       background:
                         "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
-                      color: "var(--stitch-color-primary)",
+                      color: "var(--stitch-color-on-surface-variant)",
                       border:
                         "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 25%, transparent)",
                     }}
-                    aria-label="Sign out"
-                    title="Sign out"
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      await supabase.auth.signOut();
-                      router.replace("/");
+                    aria-label="Back"
+                    title="Back"
+                    onClick={() => {
+                      setEditing(false);
+                      setSaveError(null);
                     }}
                   >
                     <span className="material-symbols-outlined text-[22px] leading-none" aria-hidden>
-                      logout
+                      arrow_back
                     </span>
                   </button>
                 </div>
-              </div>
 
-            </button>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl font-black italic tracking-tighter text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
-                    Edit profile
-                  </h1>
-                  <p className="mt-1 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                    {email}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="flex h-10 w-10 items-center justify-center rounded-xl transition active:scale-95"
-                  style={{
-                    background:
-                      "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
-                    color: "var(--stitch-color-on-surface-variant)",
-                    border:
-                      "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 25%, transparent)",
-                  }}
-                  aria-label="Back"
-                  title="Back"
-                  onClick={() => {
-                    setEditing(false);
-                    setSaveError(null);
-                  }}
-                >
-                  <span className="material-symbols-outlined text-[22px] leading-none" aria-hidden>
-                    arrow_back
-                  </span>
-                </button>
-              </div>
-
-              <div className="grid gap-3">
-                <div className="rounded-2xl border p-4" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 12%, transparent)" }}>
-                  <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                    Full name
+                <div className="grid gap-3">
+                  <div
+                    className="rounded-2xl border p-4"
+                    style={{
+                      borderColor:
+                        "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 12%, transparent)",
+                    }}
+                  >
+                    <div
+                      className="text-[11px] font-bold uppercase tracking-widest"
+                      style={{ color: "var(--stitch-color-on-surface-variant)" }}
+                    >
+                      Full name
+                    </div>
+                    <input
+                      className="mt-2 w-full bg-transparent text-sm font-bold text-white outline-none"
+                      placeholder="Your name"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                    />
                   </div>
-                  <input
-                    className="mt-2 w-full bg-transparent text-sm font-bold text-white outline-none"
-                    placeholder="Your name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                  />
-                </div>
 
-                <div className="rounded-2xl border p-4" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 12%, transparent)" }}>
-                  <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                    Phone
+                  <div
+                    className="rounded-2xl border p-4"
+                    style={{
+                      borderColor:
+                        "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 12%, transparent)",
+                    }}
+                  >
+                    <div
+                      className="text-[11px] font-bold uppercase tracking-widest"
+                      style={{ color: "var(--stitch-color-on-surface-variant)" }}
+                    >
+                      Phone
+                    </div>
+                    <input
+                      className="mt-2 w-full bg-transparent text-sm font-bold text-white outline-none"
+                      placeholder="090..."
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
                   </div>
-                  <input
-                    className="mt-2 w-full bg-transparent text-sm font-bold text-white outline-none"
-                    placeholder="090..."
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
                 </div>
-              </div>
 
-              {saveError ? (
-                <div className="rounded-2xl border px-4 py-3 text-sm" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-error) 35%, transparent)", color: "var(--stitch-color-on-surface)" }}>
-                  {saveError}
-                </div>
-              ) : null}
+                {saveError ? (
+                  <div
+                    className="rounded-2xl border px-4 py-3 text-sm"
+                    style={{
+                      borderColor: "color-mix(in srgb, var(--stitch-color-error) 35%, transparent)",
+                      color: "var(--stitch-color-on-surface)",
+                    }}
+                  >
+                    {saveError}
+                  </div>
+                ) : null}
 
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  className="flex flex-1 items-center justify-center rounded-xl py-3 text-sm font-bold text-white transition active:scale-[0.99] disabled:opacity-60"
-                  style={{
-                    background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
-                    color: "var(--stitch-color-on-primary-fixed, black)",
-                  }}
-                  disabled={saving}
-                  onClick={async () => {
-                    setSaving(true);
-                    setSaveError(null);
-                    try {
-                      const { error } = await supabase.auth.updateUser({
-                        data: { full_name: fullName.trim(), phone: phone.trim() },
-                      });
-                      if (error) throw error;
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    className="flex flex-1 items-center justify-center rounded-xl py-3 text-sm font-bold text-white transition active:scale-[0.99] disabled:opacity-60"
+                    style={{
+                      background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
+                      color: "var(--stitch-color-on-primary-fixed, black)",
+                    }}
+                    disabled={saving}
+                    onClick={async () => {
+                      setSaving(true);
+                      setSaveError(null);
+                      try {
+                        const { error } = await supabase.auth.updateUser({
+                          data: { full_name: fullName.trim(), phone: phone.trim() },
+                        });
+                        if (error) throw error;
+                        setEditing(false);
+                      } catch (e) {
+                        setSaveError(e instanceof Error ? e.message : "Không thể lưu");
+                      } finally {
+                        setSaving(false);
+                      }
+                    }}
+                  >
+                    Lưu
+                  </button>
+                  <button
+                    type="button"
+                    className="flex flex-1 items-center justify-center rounded-xl py-3 text-sm font-bold transition active:scale-[0.99]"
+                    style={{
+                      background:
+                        "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                      color: "var(--stitch-color-on-surface-variant)",
+                      border:
+                        "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 20%, transparent)",
+                    }}
+                    onClick={() => {
                       setEditing(false);
-                    } catch (e) {
-                      setSaveError(e instanceof Error ? e.message : "Không thể lưu");
-                    } finally {
-                      setSaving(false);
-                    }
-                  }}
-                >
-                  Lưu
-                </button>
-                <button
-                  type="button"
-                  className="flex flex-1 items-center justify-center rounded-xl py-3 text-sm font-bold transition active:scale-[0.99]"
+                      setSaveError(null);
+                    }}
+                  >
+                    Huỷ
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* Section 2: Shipping status (desktop: left column with account) */}
+          <section
+            className="rounded-3xl border p-6 md:p-8"
+            style={{
+              background: "var(--stitch-color-surface-container)",
+              borderColor:
+                "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+            }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-lg font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                Trạng thái giao hàng
+              </h2>
+              <Link
+                href="/checkout"
+                className="text-sm font-bold transition hover:underline"
+                style={{ color: "var(--stitch-color-primary)" }}
+              >
+                Mua thêm
+              </Link>
+            </div>
+
+            <div className="mt-5 grid grid-cols-4 gap-3">
+              {[
+                {
+                  label: "Chờ xác nhận",
+                  icon: "hourglass_top",
+                  statuses: ["PENDING_PAYMENT", "PENDING_CONFIRMATION"],
+                },
+                { label: "Đang chuẩn bị", icon: "inventory_2", statuses: ["CONFIRMED", "PROCESSING", "PACKING"] },
+                {
+                  label: "Đang giao",
+                  icon: "local_shipping",
+                  statuses: ["SHIPPING", "IN_TRANSIT", "OUT_FOR_DELIVERY"],
+                },
+                { label: "Đã giao", icon: "verified", statuses: ["DELIVERED", "COMPLETED"] },
+              ].map((x) => {
+                const n = x.statuses.reduce((sum, s) => sum + (statusCounts[s] ?? 0), 0);
+                return (
+                  <div
+                    key={x.label}
+                    className="rounded-2xl border p-3 text-center"
+                    style={{
+                      background:
+                        "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+                      borderColor:
+                        "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+                    }}
+                  >
+                    <div
+                      className="relative mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl"
+                      style={{
+                        background:
+                          "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 20%, transparent)",
+                        color: "var(--stitch-color-primary)",
+                      }}
+                    >
+                      <span className="material-symbols-outlined text-[22px]" aria-hidden>
+                        {x.icon}
+                      </span>
+                      {n > 0 ? (
+                        <span
+                          className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black text-white"
+                          style={{ background: "var(--stitch-color-secondary)" }}
+                          aria-label={`${n} đơn ${x.label}`}
+                        >
+                          {n > 99 ? "99+" : n}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="text-[11px] font-black leading-tight" style={{ color: "var(--stitch-color-on-surface)" }}>
+                      {x.label}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Desktop-only: Vouchers */}
+          <section
+            className="hidden rounded-3xl border p-6 md:p-8 lg:block"
+            style={{
+              background: "var(--stitch-color-surface-container)",
+              borderColor:
+                "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+            }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-lg font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                Voucher / Ưu đãi của bạn
+              </h2>
+              <button
+                type="button"
+                className="text-sm font-bold opacity-60"
+                style={{ color: "var(--stitch-color-primary)" }}
+                disabled
+                aria-disabled="true"
+                title="Sắp ra mắt"
+              >
+                Xem tất cả
+              </button>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {vouchers.slice(0, 3).map((v) => (
+                <div
+                  key={v.code}
+                  className="inline-flex items-center gap-2 rounded-full border px-3 py-2"
                   style={{
                     background:
-                      "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
-                    color: "var(--stitch-color-on-surface-variant)",
-                    border:
-                      "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 20%, transparent)",
-                  }}
-                  onClick={() => {
-                    setEditing(false);
-                    setSaveError(null);
+                      "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+                    borderColor:
+                      "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
                   }}
                 >
-                  Huỷ
-                </button>
+                  <span
+                    className="text-[11px] font-black tracking-wider"
+                    style={{ color: "var(--stitch-color-primary)", fontFamily: "var(--stitch-font-headline)" }}
+                  >
+                    {v.code}
+                  </span>
+                  <span className="text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                    {v.desc}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Desktop-only: Loyalty */}
+          <section
+            className="hidden rounded-3xl border p-6 md:p-8 lg:block"
+            style={{
+              background: "var(--stitch-color-surface-container)",
+              borderColor:
+                "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+            }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-lg font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                Điểm tích luỹ / Hạng thành viên
+              </h2>
+              <div className="text-xs font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                {loyaltyPoints} điểm
               </div>
             </div>
-          )}
-        </section>
 
-        {/* Section 2: Shipping status */}
+            <div
+              className="mt-4 h-3 overflow-hidden rounded-full border"
+              style={{
+                background: "var(--stitch-color-surface-container-low)",
+                borderColor:
+                  "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+              }}
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={loyaltyTierTarget}
+              aria-valuenow={loyaltyPoints}
+              aria-label="Loyalty progress"
+            >
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.round(loyaltyProgress * 100)}%`,
+                  background: `linear-gradient(90deg, var(--stitch-color-primary) 0%, var(--stitch-color-secondary) 100%)`,
+                }}
+              />
+            </div>
+
+            <div className="mt-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+              Còn <span className="font-black text-white">{loyaltyRemaining}</span> điểm lên hạng.
+            </div>
+          </section>
+        </div>
+
+        {/* Section 3: Purchased / Suggested + Recent orders (desktop: right column) */}
         <section
           className="rounded-3xl border p-6 md:p-8 lg:col-span-7"
           style={{
@@ -309,67 +542,7 @@ export function AccountClient() {
               "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
           }}
         >
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-lg font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
-              Trạng thái giao hàng
-            </h2>
-            <Link href="/checkout" className="text-sm font-bold transition hover:underline" style={{ color: "var(--stitch-color-primary)" }}>
-              Mua thêm
-            </Link>
-          </div>
-
-          <div className="mt-5 grid grid-cols-4 gap-3">
-            {[
-              { label: "Chờ xác nhận", icon: "hourglass_top", statuses: ["PENDING_PAYMENT", "PENDING_CONFIRMATION"] },
-              { label: "Đang chuẩn bị", icon: "inventory_2", statuses: ["CONFIRMED", "PROCESSING", "PACKING"] },
-              { label: "Đang giao", icon: "local_shipping", statuses: ["SHIPPING", "IN_TRANSIT", "OUT_FOR_DELIVERY"] },
-              { label: "Đã giao", icon: "verified", statuses: ["DELIVERED", "COMPLETED"] },
-            ].map((x) => (
-              (() => {
-                const n = x.statuses.reduce((sum, s) => sum + (statusCounts[s] ?? 0), 0);
-                return (
-              <div
-                key={x.label}
-                className="rounded-2xl border p-3 text-center"
-                style={{
-                  background:
-                    "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
-                  borderColor:
-                    "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
-                }}
-              >
-                <div
-                  className="relative mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl"
-                  style={{
-                    background:
-                      "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 20%, transparent)",
-                    color: "var(--stitch-color-primary)",
-                  }}
-                >
-                  <span className="material-symbols-outlined text-[22px]" aria-hidden>
-                    {x.icon}
-                  </span>
-                  {n > 0 ? (
-                    <span
-                      className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black text-white"
-                      style={{ background: "var(--stitch-color-secondary)" }}
-                      aria-label={`${n} đơn ${x.label}`}
-                    >
-                      {n > 99 ? "99+" : n}
-                    </span>
-                  ) : null}
-                </div>
-                <div className="text-[11px] font-black leading-tight" style={{ color: "var(--stitch-color-on-surface)" }}>
-                  {x.label}
-                </div>
-              </div>
-                );
-              })()
-            ))}
-          </div>
-
-          {/* Section 3: Purchased / Suggested */}
-          <div className="mt-8">
+          <div>
             <h3 className="text-lg font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
               Sản phẩm đã mua
             </h3>
