@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/data/products";
 import { PRODUCTS } from "@/data/products";
-import { ProductCardActions } from "@/components/features/shop/shared/ProductCardActions";
 import { StarRow } from "@/components/ui/StarRow";
 
 type CategoryChip = {
@@ -50,18 +49,6 @@ export default async function CategoryPage({
   return (
     <div className="min-h-screen">
       <main className="mx-auto max-w-screen-2xl px-5 pb-20 pt-28 md:px-12">
-        <section className="mb-8 rounded-3xl p-5" style={{ background: "var(--stitch-color-surface-container-low)" }}>
-          <div className="mb-3 text-sm font-bold uppercase tracking-widest" style={{ color: "var(--stitch-color-primary)" }}>
-            GRAPHICS VAULT | CYBERPULSE
-          </div>
-          <h1 className="mb-1 text-3xl font-black italic leading-tight" style={{ fontFamily: "var(--stitch-font-headline)" }}>
-            GRAPHICS VAULT
-          </h1>
-          <p style={{ color: "var(--stitch-color-on-surface-variant)" }} className="text-sm">
-            High Performance
-          </p>
-        </section>
-
         {/* Chips */}
         <section className="mb-8">
           <div className="mb-4 flex items-center justify-between gap-4">
@@ -139,7 +126,7 @@ export default async function CategoryPage({
                   className="rounded-3xl p-4"
                   style={{ background: "var(--stitch-color-surface-container)", border: "0" }}
                 >
-                  <div className="flex gap-4">
+                  <div className="flex flex-col gap-3 md:flex-row md:gap-4">
                     <div
                       className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl"
                       style={{ background: "var(--stitch-color-surface-container-low)" }}
@@ -164,7 +151,11 @@ export default async function CategoryPage({
                       ) : null}
 
                       <StarRow filled={p.stars} reviews={p.reviews} />
-                      <Link href={`/product/${p.id}`} className="block line-clamp-1 text-base font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                      <Link
+                        href={`/product/${p.id}`}
+                        className="block line-clamp-2 text-base font-bold leading-snug text-white"
+                        style={{ fontFamily: "var(--stitch-font-headline)" }}
+                      >
                         {p.title}
                       </Link>
                       <p className="mt-1 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -178,8 +169,17 @@ export default async function CategoryPage({
                       </div>
                     </div>
 
-                    <div className="w-[150px] shrink-0">
-                      <ProductCardActions product={p} />
+                    <div className="md:w-[150px] md:shrink-0">
+                      <Link
+                        href={`/product/${p.id}`}
+                        className="flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-white transition-all hover:bg-[var(--stitch-color-primary)] hover:text-[var(--stitch-color-on-primary)] active:scale-95"
+                        style={{
+                          background:
+                            "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                        }}
+                      >
+                        Xem chi tiết
+                      </Link>
                     </div>
                   </div>
                 </div>

@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ProductCardActions } from "@/components/features/shop/shared/ProductCardActions";
 import { PRODUCTS } from "@/data/products";
 import { HERO_IMG } from "@/components/features/home/shared/homeImages";
 import { StarRow } from "@/components/ui/StarRow";
@@ -183,42 +182,51 @@ export function HomeMobile() {
                   </div>
                 ) : null}
 
-                <div className="flex gap-4 pt-10">
-                  <Link
-                    href={`/product/${p.id}`}
-                    className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl"
-                    style={{
-                      background:
-                        "var(--stitch-color-surface-container-low, var(--stitch-color-surface))",
-                    }}
-                  >
-                    <Image
-                      src={p.img}
-                      alt={p.title}
-                      fill
-                      className="object-cover"
-                      sizes="80px"
-                      unoptimized
-                    />
-                  </Link>
-
-                  <div className="min-w-0 flex-1">
-                    <StarRow filled={p.stars} reviews={p.reviews} />
+                <div className="flex flex-col gap-3 pt-10">
+                  <div className="flex gap-4">
                     <Link
                       href={`/product/${p.id}`}
-                      className="mt-1 block line-clamp-1 text-base font-bold text-white"
-                      style={{ fontFamily: "var(--stitch-font-headline)" }}
+                      className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl"
+                      style={{
+                        background:
+                          "var(--stitch-color-surface-container-low, var(--stitch-color-surface))",
+                      }}
                     >
-                      {p.title}
+                      <Image
+                        src={p.img}
+                        alt={p.title}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                        unoptimized
+                      />
                     </Link>
-                    <p className="mt-2 text-lg font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                      {p.price} <span className="text-xs font-normal">VND</span>
-                    </p>
+
+                    <div className="min-w-0 flex-1">
+                      <StarRow filled={p.stars} reviews={p.reviews} />
+                      <Link
+                        href={`/product/${p.id}`}
+                        className="mt-1 block line-clamp-2 text-base font-bold leading-snug text-white"
+                        style={{ fontFamily: "var(--stitch-font-headline)" }}
+                      >
+                        {p.title}
+                      </Link>
+                      <p className="mt-2 text-lg font-black" style={{ color: "var(--stitch-color-primary)" }}>
+                        {p.price} <span className="text-xs font-normal">VND</span>
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="w-[140px] shrink-0">
-                    <ProductCardActions product={p} />
-                  </div>
+                  <Link
+                    href={`/product/${p.id}`}
+                    className="flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-white transition-all hover:bg-[var(--stitch-color-primary)] hover:text-[var(--stitch-color-on-primary)] active:scale-95"
+                    style={{
+                      background:
+                        "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                    }}
+                  >
+                    Xem chi tiết
+                  </Link>
                 </div>
               </div>
             ))}

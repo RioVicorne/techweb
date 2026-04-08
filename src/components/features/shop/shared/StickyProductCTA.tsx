@@ -44,8 +44,7 @@ export function StickyProductCTA({ product }: { product: Product }) {
               "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 25%, transparent)",
           }}
           onClick={() => {
-            addItem(product);
-            router.push("/checkout");
+            router.push(`/checkout?buyNow=${encodeURIComponent(product.id)}`);
           }}
         >
           <span className="material-symbols-outlined" aria-hidden>

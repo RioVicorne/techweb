@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, type CSSProperties } from "react";
 import { useCart } from "@/context/cart-context";
-import { formatVndDisplay } from "@/data/products";
+import type { CartLine } from "@/context/cart-context";
+import { formatVndDisplay, getProductById, parseDisplayPriceToVnd } from "@/data/products";
 import { createOrderId, saveOrder, type OrderCustomer } from "@/lib/orders";
 
 const inputClass =
@@ -20,7 +21,22 @@ const inputStyle: CSSProperties = {
 
 export function CheckoutClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { lines, subtotalVnd, setQty, removeLine, clearCart } = useCart();
+  const buyNowId = searchParams.get("buyNow");
+  const [buyNowLine, setBuyNowLine] = useState<CartLine | null>(() => {
+    if (!buyNowId) return null;
+    const p = getProductById(buyNowId);
+    if (!p) return null;
+    return {
+      productId: p.id,
+      title: p.title,
+      priceDisplay: p.price,
+      priceVnd: parseDisplayPriceToVnd(p.price),
+      image: p.img,
+      qty: 1,
+    };
+  });
   const [placing, setPlacing] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -31,14 +47,38 @@ export function CheckoutClient() {
     note: "",
   });
 
+  const cartLines = lines.length > 0 ? lines : buyNowLine ? [buyNowLine] : [];
+  const cartSubtotalVnd =
+    lines.length > 0 ? subtotalVnd : buyNowLine ? buyNowLine.priceVnd * buyNowLine.qty : 0;
+
+  const setCartQty = (productId: string, qty: number) => {
+    if (lines.length > 0) return setQty(productId, qty);
+    setBuyNowLine((prev) => {
+      if (!prev || prev.productId !== productId) return prev;
+      const q = Math.floor(qty);
+      if (q <= 0) return null;
+      return { ...prev, qty: Math.min(99, q) };
+    });
+  };
+
+  const removeCartLine = (productId: string) => {
+    if (lines.length > 0) return removeLine(productId);
+    setBuyNowLine((prev) => (prev?.productId === productId ? null : prev));
+  };
+
+  const clearAll = () => {
+    setBuyNowLine(null);
+    clearCart();
+  };
+
   const [deliveryMethod, setDeliveryMethod] = useState<"STANDARD" | "HYPERSONIC">("STANDARD");
   const shippingVnd = useMemo(() => {
     if (deliveryMethod === "HYPERSONIC") return 45_000;
-    return subtotalVnd >= 2_000_000 ? 0 : 30_000;
-  }, [deliveryMethod, subtotalVnd]);
-  const totalVnd = subtotalVnd + shippingVnd;
+    return cartSubtotalVnd >= 2_000_000 ? 0 : 30_000;
+  }, [deliveryMethod, cartSubtotalVnd]);
+  const totalVnd = cartSubtotalVnd + shippingVnd;
 
-  if (lines.length === 0) {
+  if (cartLines.length === 0) {
     return (
       <main className="mx-auto max-w-screen-lg px-6 pb-20 pt-28 md:px-12">
         <div
@@ -144,7 +184,7 @@ export function CheckoutClient() {
                 if (!customer.name || !customer.phone || !customer.email || !customer.address) {
                   throw new Error("Vui lòng điền đầy đủ thông tin giao hàng.");
                 }
-                if (lines.length === 0) {
+                if (cartLines.length === 0) {
                   throw new Error("Giỏ hàng trống.");
                 }
 
@@ -156,8 +196,8 @@ export function CheckoutClient() {
                     headers: { "content-type": "application/json" },
                     body: JSON.stringify({
                       customer,
-                      lines,
-                      subtotalVnd,
+                      lines: cartLines,
+                      subtotalVnd: cartSubtotalVnd,
                       shippingVnd,
                       totalVnd,
                     }),
@@ -174,8 +214,8 @@ export function CheckoutClient() {
                   id: orderId,
                   createdAt: new Date().toISOString(),
                   customer,
-                  lines,
-                  subtotalVnd,
+                  lines: cartLines,
+                  subtotalVnd: cartSubtotalVnd,
                   shippingVnd,
                   totalVnd,
                 });
@@ -189,7 +229,7 @@ export function CheckoutClient() {
                   });
                   const json = (await res.json()) as { url?: string; error?: string };
                   if (res.ok && json.url) {
-                    clearCart();
+                    clearAll();
                     window.location.href = json.url;
                     return;
                   }
@@ -197,7 +237,7 @@ export function CheckoutClient() {
                   // ignore stripe failure and continue to success page
                 }
 
-                clearCart();
+                clearAll();
                 router.push(`/checkout/success?orderId=${encodeURIComponent(orderId)}`);
               } catch (err) {
                 setSubmitError(err instanceof Error ? err.message : "Đặt hàng thất bại. Vui lòng thử lại.");
@@ -342,7 +382,7 @@ export function CheckoutClient() {
                     </span>
                   </div>
                   <p className="mt-2 text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                    {subtotalVnd >= 2_000_000 ? "3-5 cycles deployment (free)." : "3-5 cycles deployment (+30,000 VND if needed)."}
+                    {cartSubtotalVnd >= 2_000_000 ? "3-5 cycles deployment (free)." : "3-5 cycles deployment (+30,000 VND if needed)."}
                   </p>
                 </button>
               </div>
@@ -397,7 +437,7 @@ export function CheckoutClient() {
                   Order Summary
                 </h2>
                 <p className="mt-1 text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                  {lines.length} items
+                  {cartLines.length} items
                 </p>
               </div>
               <div className="text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
@@ -418,7 +458,7 @@ export function CheckoutClient() {
               </summary>
 
               <ul className="mt-4 space-y-3">
-                {lines.map((line) => (
+                {cartLines.map((line) => (
                   <li key={line.productId} className="flex gap-4">
                     <div
                       className="relative h-16 w-16 overflow-hidden rounded-2xl"
@@ -444,7 +484,7 @@ export function CheckoutClient() {
               <div className="mt-4 space-y-2 rounded-2xl p-3" style={{ background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))" }}>
                 <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <span>Tạm tính</span>
-                  <span className="tabular-nums text-white">{formatVndDisplay(subtotalVnd)} VND</span>
+                  <span className="tabular-nums text-white">{formatVndDisplay(cartSubtotalVnd)} VND</span>
                 </div>
                 <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <span>Phí vận chuyển</span>
@@ -481,7 +521,7 @@ export function CheckoutClient() {
               Đơn hàng
             </h2>
             <ul className="space-y-5">
-              {lines.map((line) => (
+              {cartLines.map((line) => (
                 <li key={line.productId} className="flex gap-4">
                   <div
                     className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl"
@@ -521,7 +561,7 @@ export function CheckoutClient() {
                           type="button"
                           className="px-2.5 py-1 text-sm font-bold transition hover:opacity-80"
                           style={{ color: "var(--stitch-color-on-surface)" }}
-                          onClick={() => setQty(line.productId, line.qty - 1)}
+                          onClick={() => setCartQty(line.productId, line.qty - 1)}
                           aria-label="Giảm số lượng"
                         >
                           −
@@ -531,7 +571,7 @@ export function CheckoutClient() {
                           type="button"
                           className="px-2.5 py-1 text-sm font-bold transition hover:opacity-80"
                           style={{ color: "var(--stitch-color-on-surface)" }}
-                          onClick={() => setQty(line.productId, line.qty + 1)}
+                          onClick={() => setCartQty(line.productId, line.qty + 1)}
                           aria-label="Tăng số lượng"
                         >
                           +
@@ -541,7 +581,7 @@ export function CheckoutClient() {
                         type="button"
                         className="text-xs font-medium underline-offset-2 transition hover:underline"
                         style={{ color: "var(--stitch-color-on-surface-variant)" }}
-                        onClick={() => removeLine(line.productId)}
+                        onClick={() => removeCartLine(line.productId)}
                       >
                         Xóa
                       </button>
@@ -563,7 +603,7 @@ export function CheckoutClient() {
             >
               <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 <span>Tạm tính</span>
-                <span className="tabular-nums text-white">{formatVndDisplay(subtotalVnd)} VND</span>
+                <span className="tabular-nums text-white">{formatVndDisplay(cartSubtotalVnd)} VND</span>
               </div>
               <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 <span>Phí vận chuyển</span>

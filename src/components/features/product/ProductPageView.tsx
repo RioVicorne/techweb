@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/data/products";
+import { ProductCardActions } from "@/components/features/shop/shared/ProductCardActions";
 import { StickyProductCTA } from "@/components/features/shop/shared/StickyProductCTA";
 import { StarRow } from "@/components/ui/StarRow";
 import { MetricCard } from "@/components/features/product/shared/MetricCard";
@@ -63,6 +64,10 @@ export function ProductPageView({ product }: { product: Product }) {
               <p className="mt-3 text-sm font-medium" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 Engineered for elite competitive play. Pure kinetic energy, tuned for dominance.
               </p>
+
+              <div className="mt-5 hidden max-w-md md:block">
+                <ProductCardActions product={product} />
+              </div>
             </div>
           </div>
         </section>

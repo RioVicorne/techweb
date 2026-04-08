@@ -33,8 +33,7 @@ export function ProductCardActions({ product }: { product: Product }) {
             "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
         }}
         onClick={() => {
-          addItem(product);
-          router.push("/checkout");
+          router.push(`/checkout?buyNow=${encodeURIComponent(product.id)}`);
         }}
       >
         Mua Ngay

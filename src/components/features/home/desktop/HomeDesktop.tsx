@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ProductCardActions } from "@/components/features/shop/shared/ProductCardActions";
+import Link from "next/link";
 import { PRODUCTS } from "@/data/products";
 import { HERO_IMG, SIDE_CONSOLE, SIDE_PC } from "@/components/features/home/shared/homeImages";
 import { StarRow } from "@/components/ui/StarRow";
@@ -230,7 +230,16 @@ export function HomeDesktop() {
                 <p className="mb-6 text-2xl font-black" style={{ color: "var(--stitch-color-primary)" }}>
                   {p.price} <span className="text-xs font-normal">VND</span>
                 </p>
-                <ProductCardActions product={p} />
+                <Link
+                  href={`/product/${p.id}`}
+                  className="flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-white transition-all hover:bg-[var(--stitch-color-primary)] hover:text-[var(--stitch-color-on-primary)] active:scale-95"
+                  style={{
+                    background:
+                      "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                  }}
+                >
+                  Xem chi tiết
+                </Link>
               </div>
             ))}
           </div>

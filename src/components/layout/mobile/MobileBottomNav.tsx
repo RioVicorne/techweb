@@ -20,7 +20,7 @@ const ITEMS: NavItem[] = [
 ];
 
 function isHiddenOn(pathname: string) {
-  return pathname.startsWith("/checkout");
+  return pathname.startsWith("/checkout") || pathname.startsWith("/product");
 }
 
 export function MobileBottomNav() {
