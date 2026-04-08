@@ -31,7 +31,11 @@ export function CheckoutClient() {
     note: "",
   });
 
-  const shippingVnd = useMemo(() => (subtotalVnd >= 2_000_000 ? 0 : 30_000), [subtotalVnd]);
+  const [deliveryMethod, setDeliveryMethod] = useState<"STANDARD" | "HYPERSONIC">("STANDARD");
+  const shippingVnd = useMemo(() => {
+    if (deliveryMethod === "HYPERSONIC") return 45_000;
+    return subtotalVnd >= 2_000_000 ? 0 : 30_000;
+  }, [deliveryMethod, subtotalVnd]);
   const totalVnd = subtotalVnd + shippingVnd;
 
   if (lines.length === 0) {
@@ -75,8 +79,8 @@ export function CheckoutClient() {
   }
 
   return (
-    <main className="mx-auto max-w-screen-2xl px-6 pb-20 pt-28 md:px-12">
-      <nav className="mb-8 flex flex-wrap items-center gap-2 text-sm" aria-label="Breadcrumb">
+    <main className="mx-auto max-w-screen-2xl px-6 pb-32 pt-28 md:px-12">
+      <nav className="mb-8 hidden flex-wrap items-center gap-2 text-sm md:flex" aria-label="Breadcrumb">
         <Link href="/" className="font-medium transition hover:underline" style={{ color: "var(--stitch-color-primary)" }}>
           Trang chủ
         </Link>
@@ -84,7 +88,7 @@ export function CheckoutClient() {
         <span style={{ color: "var(--stitch-color-on-surface-variant)" }}>Thanh toán</span>
       </nav>
 
-      <div className="mb-10">
+      <div className="mb-8 hidden md:block">
         <h1
           className="flex items-center gap-3 text-2xl font-black uppercase italic tracking-tighter text-white md:text-3xl"
           style={{ fontFamily: "var(--stitch-font-headline)" }}
@@ -97,9 +101,18 @@ export function CheckoutClient() {
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-12 lg:items-start">
+      <div className="mb-8 md:hidden">
+        <h1 className="text-2xl font-black italic tracking-tighter text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          CYBERPULSE <span style={{ color: "var(--stitch-color-primary)" }}>|</span> Secure Checkout
+        </h1>
+        <p className="mt-2 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+          Order Summary + Shipping Logistics — powered by MoMo-ready design tokens.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-8 lg:grid lg:grid-cols-12 lg:items-start">
         <section
-          className="rounded-3xl border p-6 sm:p-8 lg:col-span-7"
+          className="order-2 rounded-3xl border p-6 sm:p-8 lg:order-1 lg:col-span-7"
           style={{
             background: "var(--stitch-color-surface-container)",
             borderColor:
@@ -113,6 +126,7 @@ export function CheckoutClient() {
             Thông tin giao hàng
           </h2>
           <form
+            id="checkout-form"
             className="space-y-4"
             onSubmit={async (e) => {
               e.preventDefault();
@@ -259,10 +273,97 @@ export function CheckoutClient() {
                 onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
               />
             </div>
+
+            {/* Mobile delivery protocol (Stitch: Delivery Protocol + trust badges) */}
+            <div className="rounded-3xl p-4 md:hidden" style={{ background: "var(--stitch-color-surface-container)" }}>
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-black uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                <span className="material-symbols-outlined" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>
+                  local_shipping
+                </span>
+                Delivery Protocol
+              </h3>
+
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setDeliveryMethod("HYPERSONIC")}
+                  className="w-full rounded-2xl p-3 text-left transition active:scale-[0.99]"
+                  style={{
+                    background:
+                      deliveryMethod === "HYPERSONIC"
+                        ? "color-mix(in srgb, var(--stitch-color-secondary-container) 35%, transparent)"
+                        : "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                    border:
+                      deliveryMethod === "HYPERSONIC"
+                        ? "1px solid color-mix(in srgb, var(--stitch-color-secondary) 25%, transparent)"
+                        : "1px solid transparent",
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-sm font-black text-white">Hyper-Sonic Courier</p>
+                      <p className="mt-1 text-xs font-bold" style={{ color: "var(--stitch-color-secondary)" }}>
+                        +{formatVndDisplay(45_000)} VND
+                      </p>
+                    </div>
+                    <span className="material-symbols-outlined" style={{ color: deliveryMethod === "HYPERSONIC" ? "var(--stitch-color-secondary)" : "var(--stitch-color-on-surface-variant)" }} aria-hidden>
+                      {deliveryMethod === "HYPERSONIC" ? "radio_button_checked" : "radio_button_unchecked"}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                    Next cycle delivery before 06:00.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDeliveryMethod("STANDARD")}
+                  className="w-full rounded-2xl p-3 text-left transition active:scale-[0.99]"
+                  style={{
+                    background:
+                      deliveryMethod === "STANDARD"
+                        ? "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 25%, transparent)"
+                        : "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                    border:
+                      deliveryMethod === "STANDARD"
+                        ? "1px solid color-mix(in srgb, var(--stitch-color-primary) 25%, transparent)"
+                        : "1px solid transparent",
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-sm font-black text-white">Standard Orbital</p>
+                      <p className="mt-1 text-xs font-bold" style={{ color: "var(--stitch-color-secondary)" }}>
+                        FREE
+                      </p>
+                    </div>
+                    <span className="material-symbols-outlined" style={{ color: deliveryMethod === "STANDARD" ? "var(--stitch-color-secondary)" : "var(--stitch-color-on-surface-variant)" }} aria-hidden>
+                      {deliveryMethod === "STANDARD" ? "radio_button_checked" : "radio_button_unchecked"}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                    {subtotalVnd >= 2_000_000 ? "3-5 cycles deployment (free)." : "3-5 cycles deployment (+30,000 VND if needed)."}
+                  </p>
+                </button>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <span className="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest" style={{ background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))", color: "var(--stitch-color-on-surface-variant)" }}>
+                  256-BIT SSL
+                </span>
+                <span className="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest" style={{ background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))", color: "var(--stitch-color-on-surface-variant)" }}>
+                  ENCRYPTED
+                </span>
+                <span className="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest" style={{ background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))", color: "var(--stitch-color-on-surface-variant)" }}>
+                  PCI-DSS
+                </span>
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={placing}
-              className="mt-2 w-full rounded-xl py-3.5 text-sm font-bold text-white shadow-lg transition disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98] sm:w-auto sm:px-12"
+              className="mt-2 hidden w-full rounded-xl py-3.5 text-sm font-bold text-white shadow-lg transition disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98] sm:w-auto sm:px-12 md:block"
               style={{
                 background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
               }}
@@ -277,8 +378,93 @@ export function CheckoutClient() {
           </form>
         </section>
 
+        {/* Mobile order summary card (Stitch: Order Summary + expand) */}
+        <div className="order-1 mb-8 md:hidden">
+          <div
+            className="rounded-3xl border p-5"
+            style={{
+              background: "var(--stitch-color-surface-container)",
+              borderColor:
+                "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+            }}
+          >
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h2 className="flex items-center gap-3 text-lg font-black" style={{ fontFamily: "var(--stitch-font-headline)", color: "var(--stitch-color-on-surface)" }}>
+                  <span className="material-symbols-outlined" style={{ color: "var(--stitch-color-primary)" }} aria-hidden>
+                    shopping_cart
+                  </span>
+                  Order Summary
+                </h2>
+                <p className="mt-1 text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                  {lines.length} items
+                </p>
+              </div>
+              <div className="text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
+                {formatVndDisplay(totalVnd)} <span className="text-[11px] font-normal">VND</span>
+              </div>
+            </div>
+
+            <details>
+              <summary className="cursor-pointer list-none">
+                <div className="flex items-center justify-between gap-4 rounded-2xl p-3" style={{ background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))" }}>
+                  <span className="text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                    View items
+                  </span>
+                  <span className="material-symbols-outlined" style={{ color: "var(--stitch-color-on-surface-variant)" }} aria-hidden>
+                    expand_more
+                  </span>
+                </div>
+              </summary>
+
+              <ul className="mt-4 space-y-3">
+                {lines.map((line) => (
+                  <li key={line.productId} className="flex gap-4">
+                    <div
+                      className="relative h-16 w-16 overflow-hidden rounded-2xl"
+                      style={{ background: "var(--stitch-color-surface-container-low, var(--stitch-color-surface))" }}
+                    >
+                      <Image src={line.image} alt="" fill className="object-cover" sizes="64px" unoptimized />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-2 font-semibold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                        {line.title}
+                      </p>
+                      <p className="mt-1 text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
+                        {line.qty} × {formatVndDisplay(line.priceVnd)} <span className="text-xs font-normal">VND</span>
+                      </p>
+                    </div>
+                    <p className="shrink-0 text-sm font-black tabular-nums text-white">
+                      {formatVndDisplay(line.priceVnd * line.qty)} <span className="text-[10px] font-normal">VND</span>
+                    </p>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-4 space-y-2 rounded-2xl p-3" style={{ background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))" }}>
+                <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                  <span>Tạm tính</span>
+                  <span className="tabular-nums text-white">{formatVndDisplay(subtotalVnd)} VND</span>
+                </div>
+                <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                  <span>Phí vận chuyển</span>
+                  <span className="tabular-nums text-white">
+                    {shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(shippingVnd)} VND`}
+                  </span>
+                </div>
+                <div className="flex justify-between text-base font-black">
+                  <span style={{ color: "var(--stitch-color-on-surface)" }}>Tổng cộng</span>
+                  <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
+                    {formatVndDisplay(totalVnd)} VND
+                  </span>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
         <aside
-          className="lg:sticky lg:top-28 lg:col-span-5"
+          className="hidden lg:block lg:sticky lg:top-28 lg:col-span-5"
         >
           <div
             className="rounded-3xl border p-6 sm:p-8"
@@ -394,10 +580,38 @@ export function CheckoutClient() {
             </div>
 
             <p className="mt-4 text-xs leading-relaxed" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-              Đơn từ 2.000.000 VND được miễn phí giao hàng tiêu chuẩn.
+              {deliveryMethod === "STANDARD"
+                ? "Đơn từ 2.000.000 VND được miễn phí giao hàng tiêu chuẩn."
+                : "Hyper-Sonic Courier ưu tiên xử lý nhanh để giảm độ trễ."}
             </p>
           </div>
         </aside>
+      </div>
+
+      {/* Mobile sticky CTA (Stitch-like bottom action bar) */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
+        style={{
+          background:
+            "color-mix(in srgb, var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container)) 85%, transparent)",
+          borderColor:
+            "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
+      >
+        <div className="flex items-center gap-3 px-4 py-3">
+          <button
+            type="submit"
+            form="checkout-form"
+            disabled={placing}
+            className="flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-extrabold text-white transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+            style={{
+              background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
+            }}
+          >
+            {placing ? "Đang đặt hàng..." : "Đặt hàng"}
+          </button>
+        </div>
       </div>
     </main>
   );
