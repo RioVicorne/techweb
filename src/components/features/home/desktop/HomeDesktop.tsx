@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { PRODUCTS } from "@/data/products";
 import { HERO_IMG, SIDE_CONSOLE, SIDE_PC } from "@/components/features/home/shared/homeImages";
 import { StarRow } from "@/components/ui/StarRow";
+import type { CatalogProduct } from "@/lib/catalog";
 
-export function HomeDesktop() {
+export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
   return (
     <div className="hidden md:block">
       <aside className="pointer-events-none fixed left-6 top-1/2 z-40 hidden -translate-y-1/2 xl:pointer-events-auto xl:flex xl:flex-col xl:gap-4">
@@ -180,7 +180,7 @@ export function HomeDesktop() {
           </div>
 
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {PRODUCTS.map((p) => (
+            {products.map((p) => (
               <div
                 key={p.id}
                 className="group/card relative rounded-3xl border p-5 transition-all duration-300 hover:bg-[var(--stitch-color-surface-bright,var(--stitch-color-surface-container))]"

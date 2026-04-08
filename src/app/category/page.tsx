@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Product } from "@/data/products";
-import { PRODUCTS } from "@/data/products";
+import { getCatalogCategories, getCatalogProductsByCategorySlug } from "@/lib/catalog";
 import { StarRow } from "@/components/ui/StarRow";
 
 type CategoryChip = {
@@ -10,31 +9,15 @@ type CategoryChip = {
   icon: string;
 };
 
-const CHIPS: CategoryChip[] = [
-  { key: "memory", label: "memory", icon: "memory" },
-  { key: "hardware", label: "Hardware", icon: "storage" },
-  { key: "mouse", label: "mouse", icon: "mouse" },
-  { key: "peripherals", label: "Peripherals", icon: "keyboard" },
-  { key: "streaming", label: "Streaming", icon: "videocam" },
-  { key: "headset", label: "headset", icon: "headphones" },
-  { key: "audio", label: "Audio", icon: "headphones" },
-];
-
-const CATEGORY_TO_PRODUCT_IDS: Record<string, string[]> = {
-  mouse: ["apex-pro-optical-mouse"],
-  headset: ["sonic-blast-v2-headset"],
-  hardware: ["apex-pro-optical-mouse", "steam-wallet-gift-card"],
-  peripherals: ["apex-pro-optical-mouse", "elite-fusion-controller"],
-  streaming: ["steam-wallet-gift-card"],
-  memory: ["steam-wallet-gift-card"],
-  audio: ["sonic-blast-v2-headset"],
-};
-
-function pickProductsForCategory(categoryKey?: string | null): Product[] {
-  const key = (categoryKey ?? "").toLowerCase();
-  if (!key || !CATEGORY_TO_PRODUCT_IDS[key]) return [...PRODUCTS];
-  const ids = new Set(CATEGORY_TO_PRODUCT_IDS[key]);
-  return PRODUCTS.filter((p) => ids.has(p.id));
+function iconForCategorySlug(slug: string): string {
+  const s = slug.toLowerCase();
+  if (s.includes("mouse")) return "mouse";
+  if (s.includes("audio") || s.includes("head")) return "headphones";
+  if (s.includes("stream")) return "videocam";
+  if (s.includes("periph") || s.includes("keyboard")) return "keyboard";
+  if (s.includes("hardware") || s.includes("storage")) return "storage";
+  if (s.includes("memory")) return "memory";
+  return "category";
 }
 
 export default async function CategoryPage({
@@ -43,8 +26,14 @@ export default async function CategoryPage({
   searchParams: Promise<{ category?: string }>;
 }) {
   const sp = await searchParams;
-  const selected = sp.category ?? "";
-  const products = pickProductsForCategory(selected);
+  const selected = (sp.category ?? "").toLowerCase();
+  const categories = await getCatalogCategories();
+  const chips: CategoryChip[] = categories.map((c) => ({
+    key: c.slug,
+    label: c.name,
+    icon: iconForCategorySlug(c.slug),
+  }));
+  const products = await getCatalogProductsByCategorySlug(selected);
 
   return (
     <div className="min-h-screen">
@@ -66,7 +55,7 @@ export default async function CategoryPage({
           </div>
 
           <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-2">
-            {CHIPS.map((c) => {
+            {chips.map((c) => {
               const active = c.key === selected.toLowerCase();
               return (
                 <Link

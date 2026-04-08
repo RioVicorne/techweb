@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { PRODUCTS } from "@/data/products";
 import { HERO_IMG } from "@/components/features/home/shared/homeImages";
 import { StarRow } from "@/components/ui/StarRow";
+import type { CatalogProduct } from "@/lib/catalog";
 
-export function HomeMobile() {
+export function HomeMobile({ products }: { products: CatalogProduct[] }) {
   return (
     <div className="md:hidden">
       <main className="mx-auto max-w-screen-2xl px-5 pb-20 pt-24">
@@ -159,7 +159,7 @@ export function HomeMobile() {
           </div>
 
           <div className="space-y-4">
-            {PRODUCTS.slice(0, 2).map((p) => (
+            {products.slice(0, 2).map((p) => (
               <div
                 key={p.id}
                 className="group relative overflow-hidden rounded-3xl p-4"
@@ -241,7 +241,7 @@ export function HomeMobile() {
             New Drops
           </h2>
           <div className="grid grid-cols-2 gap-4">
-            {PRODUCTS.slice(2).map((p) => (
+            {products.slice(2).map((p) => (
               <Link
                 key={p.id}
                 href={`/product/${p.id}`}

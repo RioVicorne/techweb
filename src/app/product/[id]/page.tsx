@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { ShopHeader } from "@/components/features/shop/shared/ShopHeader";
-import { getProductById } from "@/data/products";
 import { ProductPageView } from "@/components/features/product/ProductPageView";
+import { getCatalogProductBySlug } from "@/lib/catalog";
 
 export default async function ProductPage({
   params,
@@ -9,7 +9,7 @@ export default async function ProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const product = getProductById(id);
+  const product = await getCatalogProductBySlug(id);
   if (!product) return notFound();
 
   return (

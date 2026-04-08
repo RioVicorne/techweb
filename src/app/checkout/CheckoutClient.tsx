@@ -3,10 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useCart } from "@/context/cart-context";
 import type { CartLine } from "@/context/cart-context";
-import { formatVndDisplay, getProductById, parseDisplayPriceToVnd } from "@/data/products";
+import { formatVndDisplay, parseDisplayPriceToVnd } from "@/data/products";
 import { createOrderId, saveOrder, type OrderCustomer } from "@/lib/orders";
 
 const inputClass =
@@ -25,19 +25,7 @@ export function CheckoutClient() {
   const { lines, subtotalVnd, setQty, removeLine, clearCart } = useCart();
   const buyNowId = searchParams.get("buyNow");
   const paymentMethodId = searchParams.get("pm") || "COD";
-  const [buyNowLine, setBuyNowLine] = useState<CartLine | null>(() => {
-    if (!buyNowId) return null;
-    const p = getProductById(buyNowId);
-    if (!p) return null;
-    return {
-      productId: p.id,
-      title: p.title,
-      priceDisplay: p.price,
-      priceVnd: parseDisplayPriceToVnd(p.price),
-      image: p.img,
-      qty: 1,
-    };
-  });
+  const [buyNowLine, setBuyNowLine] = useState<CartLine | null>(null);
   const [placing, setPlacing] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -51,6 +39,41 @@ export function CheckoutClient() {
   const cartLines = lines.length > 0 ? lines : buyNowLine ? [buyNowLine] : [];
   const cartSubtotalVnd =
     lines.length > 0 ? subtotalVnd : buyNowLine ? buyNowLine.priceVnd * buyNowLine.qty : 0;
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadBuyNow() {
+      if (!buyNowId || lines.length > 0) return;
+      try {
+        const res = await fetch(`/api/catalog/products/${encodeURIComponent(buyNowId)}`);
+        if (!res.ok) {
+          if (!cancelled) setBuyNowLine(null);
+          return;
+        }
+        const json = (await res.json()) as { product?: { id: string; title: string; price: string; img: string } };
+        const p = json.product;
+        if (!p || !p.id) {
+          if (!cancelled) setBuyNowLine(null);
+          return;
+        }
+        if (cancelled) return;
+        setBuyNowLine({
+          productId: p.id,
+          title: p.title,
+          priceDisplay: p.price,
+          priceVnd: parseDisplayPriceToVnd(p.price),
+          image: p.img,
+          qty: 1,
+        });
+      } catch {
+        if (!cancelled) setBuyNowLine(null);
+      }
+    }
+    loadBuyNow();
+    return () => {
+      cancelled = true;
+    };
+  }, [buyNowId, lines.length]);
 
   const setCartQty = (productId: string, qty: number) => {
     if (lines.length > 0) return setQty(productId, qty);
