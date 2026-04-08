@@ -28,15 +28,16 @@ export function CheckoutClient() {
   const paymentMethodId = searchParams.get("pm") || "COD";
   const supabase = useMemo(() => getSupabaseBrowser(), []);
   const [buyNowLine, setBuyNowLine] = useState<CartLine | null>(null);
+  const [buyNowLoading, setBuyNowLoading] = useState(false);
+  const [buyNowResolved, setBuyNowResolved] = useState(false);
   const [placing, setPlacing] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    address: "",
-    note: "",
-  });
+  const [profileCustomer, setProfileCustomer] = useState<OrderCustomer | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   const cartLines = lines.length > 0 ? lines : buyNowLine ? [buyNowLine] : [];
   const cartSubtotalVnd =
@@ -81,8 +82,16 @@ export function CheckoutClient() {
     []
   );
 
-  const [appliedVoucher, setAppliedVoucher] = useState<VoucherDef | null>(null);
+  const shippingOffers = useMemo(() => availableVouchers.filter((v) => v.kind === "FREESHIP"), [availableVouchers]);
+  const discountVouchers = useMemo(
+    () => availableVouchers.filter((v) => v.kind === "PERCENT" || v.kind === "AMOUNT"),
+    [availableVouchers]
+  );
+
+  const [appliedShippingOffer, setAppliedShippingOffer] = useState<VoucherDef | null>(null);
+  const [appliedDiscountVoucher, setAppliedDiscountVoucher] = useState<VoucherDef | null>(null);
   const [voucherError, setVoucherError] = useState<string | null>(null);
+  const [voucherOpen, setVoucherOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,6 +102,32 @@ export function CheckoutClient() {
         const qs = new URLSearchParams();
         qs.set("returnTo", `/checkout?${searchParams.toString()}`);
         router.replace(`/login?${qs.toString()}`);
+        return;
+      }
+
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        const user = userData.user;
+        const meta = (user?.user_metadata ?? {}) as Record<string, unknown>;
+        const fullName = String(meta.full_name ?? meta.name ?? "").trim();
+        const phone = String(meta.phone ?? "").trim();
+        const email = String(user?.email ?? "").trim();
+        const addr = (meta.shipping_address ?? {}) as Record<string, unknown>;
+        const street = String(addr.street ?? "").trim();
+        const ward = String(addr.ward ?? "").trim();
+        const district = String(addr.district ?? "").trim();
+        const province = String(addr.province ?? "").trim();
+        const address = [street, ward, district, province].filter(Boolean).join(", ");
+        if (!cancelled) {
+          setProfileCustomer({
+            name: fullName,
+            phone,
+            email,
+            address,
+          });
+        }
+      } catch {
+        // ignore; we'll validate on submit
       }
     }
     guard();
@@ -105,6 +140,10 @@ export function CheckoutClient() {
     let cancelled = false;
     async function loadBuyNow() {
       if (!buyNowId || lines.length > 0) return;
+      if (!cancelled) {
+        setBuyNowLoading(true);
+        setBuyNowResolved(false);
+      }
       try {
         const res = await fetch(`/api/catalog/products/${encodeURIComponent(buyNowId)}`);
         if (!res.ok) {
@@ -128,6 +167,11 @@ export function CheckoutClient() {
         });
       } catch {
         if (!cancelled) setBuyNowLine(null);
+      } finally {
+        if (!cancelled) {
+          setBuyNowLoading(false);
+          setBuyNowResolved(true);
+        }
       }
     }
     loadBuyNow();
@@ -162,29 +206,34 @@ export function CheckoutClient() {
     return cartSubtotalVnd >= 2_000_000 ? 0 : 30_000;
   }, [deliveryMethod, cartSubtotalVnd]);
 
-  const voucherDiscountVnd = useMemo(() => {
-    if (!appliedVoucher) return 0;
-    if (typeof appliedVoucher.minSubtotalVnd === "number" && cartSubtotalVnd < appliedVoucher.minSubtotalVnd) {
-      return 0;
-    }
-    if (appliedVoucher.kind === "FREESHIP") return Math.min(shippingVnd, 45_000);
-    if (appliedVoucher.kind === "AMOUNT") return Math.min(appliedVoucher.value, cartSubtotalVnd);
-    const raw = Math.floor((cartSubtotalVnd * appliedVoucher.value) / 100);
-    const capped = typeof appliedVoucher.maxDiscountVnd === "number" ? Math.min(raw, appliedVoucher.maxDiscountVnd) : raw;
+  const discountVoucherVnd = useMemo(() => {
+    const v = appliedDiscountVoucher;
+    if (!v) return 0;
+    if (typeof v.minSubtotalVnd === "number" && cartSubtotalVnd < v.minSubtotalVnd) return 0;
+    if (v.kind === "AMOUNT") return Math.min(v.value, cartSubtotalVnd);
+    const raw = Math.floor((cartSubtotalVnd * v.value) / 100);
+    const capped = typeof v.maxDiscountVnd === "number" ? Math.min(raw, v.maxDiscountVnd) : raw;
     return Math.max(0, Math.min(capped, cartSubtotalVnd));
-  }, [appliedVoucher, cartSubtotalVnd, shippingVnd]);
+  }, [appliedDiscountVoucher, cartSubtotalVnd]);
 
-  const totalVnd = Math.max(0, cartSubtotalVnd + shippingVnd - voucherDiscountVnd);
+  const shippingDiscountVnd = useMemo(() => {
+    const v = appliedShippingOffer;
+    if (!v) return 0;
+    // default: cap freeship at 45K (matches current HYPERSONIC fee)
+    return Math.max(0, Math.min(shippingVnd, 45_000));
+  }, [appliedShippingOffer, shippingVnd]);
+
+  const totalVnd = Math.max(0, cartSubtotalVnd + shippingVnd - discountVoucherVnd - shippingDiscountVnd);
 
   useEffect(() => {
     // If cart changes and voucher no longer qualifies, keep it applied but show error.
-    if (!appliedVoucher) return;
-    if (typeof appliedVoucher.minSubtotalVnd === "number" && cartSubtotalVnd < appliedVoucher.minSubtotalVnd) {
-      setVoucherError(`Voucher ${appliedVoucher.code} áp dụng cho đơn từ ${formatVndDisplay(appliedVoucher.minSubtotalVnd)} VND.`);
+    if (!appliedDiscountVoucher) return;
+    if (typeof appliedDiscountVoucher.minSubtotalVnd === "number" && cartSubtotalVnd < appliedDiscountVoucher.minSubtotalVnd) {
+      setVoucherError(`Voucher ${appliedDiscountVoucher.code} áp dụng cho đơn từ ${formatVndDisplay(appliedDiscountVoucher.minSubtotalVnd)} VND.`);
       return;
     }
     setVoucherError(null);
-  }, [appliedVoucher, cartSubtotalVnd]);
+  }, [appliedDiscountVoucher, cartSubtotalVnd]);
 
   const paymentLabel =
     paymentMethodId === "MOMO"
@@ -229,6 +278,37 @@ export function CheckoutClient() {
   }
 
   if (cartLines.length === 0) {
+    const shouldWaitForHydration = !hydrated;
+    const shouldWaitForBuyNow = Boolean(buyNowId) && lines.length === 0 && (buyNowLoading || !buyNowResolved);
+    if (shouldWaitForHydration || shouldWaitForBuyNow) {
+      return (
+        <main className="mx-auto max-w-screen-lg px-6 pb-20 pt-28 md:px-12">
+          <div
+            className="rounded-3xl border p-10 text-center"
+            style={{
+              background: "var(--stitch-color-surface-container)",
+              borderColor:
+                "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+            }}
+          >
+            <span
+              className="material-symbols-outlined mb-4 text-5xl"
+              style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              aria-hidden
+            >
+              hourglass_top
+            </span>
+            <h1 className="mb-2 text-xl font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+              Đang tải giỏ hàng...
+            </h1>
+            <p className="text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+              Vui lòng chờ trong giây lát.
+            </p>
+          </div>
+        </main>
+      );
+    }
+
     return (
       <main className="mx-auto max-w-screen-lg px-6 pb-20 pt-28 md:px-12">
         <div
@@ -313,7 +393,7 @@ export function CheckoutClient() {
             className="mb-6 text-lg font-bold text-white"
             style={{ fontFamily: "var(--stitch-font-headline)" }}
           >
-            Thông tin giao hàng
+            Thiết lập thanh toán
           </h2>
           <form
             id="checkout-form"
@@ -324,20 +404,29 @@ export function CheckoutClient() {
               setSubmitError(null);
               setPlacing(true);
               try {
-                const trimmedPhone = form.phone.trim();
-                const trimmedEmail = form.email.trim();
-                const customer: OrderCustomer = {
-                  name: form.name.trim(),
-                  phone: trimmedPhone,
-                  email: trimmedEmail,
-                  address: form.address.trim(),
-                  note: form.note.trim() || undefined,
-                };
-                if (!customer.name || !customer.address) {
-                  throw new Error("Vui lòng điền họ tên và địa chỉ.");
+                // Load customer info from Account profile (user_metadata).
+                let customer = profileCustomer;
+                if (!customer) {
+                  const { data: userData } = await supabase.auth.getUser();
+                  const user = userData.user;
+                  const meta = (user?.user_metadata ?? {}) as Record<string, unknown>;
+                  const fullName = String(meta.full_name ?? meta.name ?? "").trim();
+                  const phone = String(meta.phone ?? "").trim();
+                  const email = String(user?.email ?? "").trim();
+                  const addr = (meta.shipping_address ?? {}) as Record<string, unknown>;
+                  const street = String(addr.street ?? "").trim();
+                  const ward = String(addr.ward ?? "").trim();
+                  const district = String(addr.district ?? "").trim();
+                  const province = String(addr.province ?? "").trim();
+                  const address = [street, ward, district, province].filter(Boolean).join(", ");
+                  customer = { name: fullName, phone, email, address };
                 }
-                if (!trimmedPhone && !trimmedEmail) {
-                  throw new Error("Vui lòng nhập SĐT hoặc Email (ít nhất 1).");
+
+                if (!customer?.name || !customer.address) {
+                  throw new Error("Bạn chưa thiết lập họ tên / địa chỉ giao hàng. Vui lòng cập nhật ở trang Tài khoản.");
+                }
+                if (!customer.phone && !customer.email) {
+                  throw new Error("Bạn chưa có SĐT hoặc Email trong tài khoản. Vui lòng cập nhật ở trang Tài khoản.");
                 }
                 if (cartLines.length === 0) {
                   throw new Error("Giỏ hàng trống.");
@@ -411,20 +500,6 @@ export function CheckoutClient() {
           >
             <div>
               <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                Họ và tên
-              </label>
-              <input
-                required
-                className={inputClass}
-                style={inputStyle}
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                autoComplete="name"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 Phương thức thanh toán
               </label>
               <Link
@@ -445,130 +520,316 @@ export function CheckoutClient() {
                 </span>
               </Link>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                  Số điện thoại
-                </label>
-                <input
-                  type="tel"
-                  className={inputClass}
-                  style={inputStyle}
-                  value={form.phone}
-                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                  autoComplete="tel"
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                  Email
-                </label>
-                <input
-                  type="email"
-                  className={inputClass}
-                  style={inputStyle}
-                  value={form.email}
-                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                  autoComplete="email"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                Địa chỉ
-              </label>
-              <input
-                required
-                className={inputClass}
-                style={inputStyle}
-                value={form.address}
-                onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-                autoComplete="street-address"
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                Ghi chú (tuỳ chọn)
-              </label>
-              <textarea
-                className={`${inputClass} min-h-[100px] resize-y`}
-                style={inputStyle}
-                value={form.note}
-                onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
-              />
-            </div>
 
             {/* Voucher */}
-            <div className="rounded-2xl border p-4" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 15%, transparent)" }}>
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-xs font-black uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                    Voucher
-                  </div>
-                  <div className="mt-1 text-sm font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
-                    Chọn / nhập mã giảm giá
-                  </div>
-                </div>
-              </div>
+            <div>
+              <label
+                className="mb-1.5 block text-xs font-medium uppercase tracking-wide"
+                style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              >
+                Voucher
+              </label>
 
-              <div className="mt-3 flex flex-wrap gap-2">
-                {availableVouchers.map((v) => {
-                  const active = appliedVoucher?.code === v.code;
-                  const disabled =
-                    typeof v.minSubtotalVnd === "number" ? cartSubtotalVnd < v.minSubtotalVnd : false;
-                  return (
+              <button
+                type="button"
+                className="flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm font-bold transition active:scale-[0.99]"
+                style={{
+                  ...inputStyle,
+                  borderColor:
+                    "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 30%, transparent)",
+                }}
+                aria-expanded={voucherOpen}
+                aria-controls="voucher-panel"
+                onClick={() => setVoucherOpen((v) => !v)}
+              >
+                <span className="min-w-0 truncate text-white">
+                  {(() => {
+                    const parts = [
+                      appliedDiscountVoucher ? `${appliedDiscountVoucher.title} — ${appliedDiscountVoucher.subtitle}` : null,
+                      appliedShippingOffer ? `${appliedShippingOffer.title} — ${appliedShippingOffer.subtitle}` : null,
+                    ].filter(Boolean) as string[];
+                    return parts.length ? parts.join(" + ") : "Chọn voucher / freeship";
+                  })()}
+                </span>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ color: "var(--stitch-color-on-surface-variant)" }}
+                  aria-hidden
+                >
+                  {voucherOpen ? "expand_less" : "expand_more"}
+                </span>
+              </button>
+
+              {voucherOpen ? (
+                <div
+                  id="voucher-panel"
+                  className="mt-3 rounded-2xl border p-4"
+                  style={{
+                    background:
+                      "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                    borderColor:
+                      "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 15%, transparent)",
+                  }}
+                >
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="text-xs font-black uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                      Chọn voucher / freeship
+                    </div>
                     <button
-                      key={v.code}
                       type="button"
-                      className="rounded-full border px-3 py-2 text-left transition active:scale-[0.99] disabled:opacity-50"
+                      className="rounded-full px-3 py-1 text-xs font-black transition active:scale-[0.99]"
                       style={{
-                        background: active
-                          ? "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 22%, transparent)"
-                          : "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
-                        borderColor: active
-                          ? "color-mix(in srgb, var(--stitch-color-primary) 25%, transparent)"
-                          : "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 12%, transparent)",
+                        background:
+                          "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+                        color: "var(--stitch-color-on-surface-variant)",
+                        border:
+                          "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 18%, transparent)",
                       }}
-                      disabled={disabled}
-                      onClick={() => {
-                        if (active) {
-                          setAppliedVoucher(null);
-                          setVoucherError(null);
-                          return;
-                        }
-
-                        setAppliedVoucher(v);
-                        if (typeof v.minSubtotalVnd === "number" && cartSubtotalVnd < v.minSubtotalVnd) {
-                          setVoucherError(`Voucher ${v.code} áp dụng cho đơn từ ${formatVndDisplay(v.minSubtotalVnd)} VND.`);
-                        } else {
-                          setVoucherError(null);
-                        }
-                      }}
-                      title={disabled && typeof v.minSubtotalVnd === "number" ? `Đơn tối thiểu ${formatVndDisplay(v.minSubtotalVnd)} VND` : v.subtitle}
+                      onClick={() => setVoucherOpen(false)}
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-black tracking-wider" style={{ color: "var(--stitch-color-primary)" }}>
-                          {v.title}
-                        </span>
-                        <span className="text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                          {v.subtitle}
-                        </span>
-                      </div>
+                      Xong
                     </button>
-                  );
-                })}
-              </div>
+                  </div>
 
-              {voucherError ? (
-                <div className="mt-3 text-sm font-medium" style={{ color: "var(--stitch-color-secondary)" }}>
-                  {voucherError}
-                </div>
-              ) : appliedVoucher ? (
-                <div className="mt-3 text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                  Đã áp dụng <span className="text-white">{appliedVoucher.code}</span> — giảm{" "}
-                  <span style={{ color: "var(--stitch-color-primary)" }}>{formatVndDisplay(voucherDiscountVnd)} VND</span>
+                  <div className="grid gap-2">
+                    {discountVouchers.map((v) => {
+                      const active = appliedDiscountVoucher?.code === v.code;
+                      const disabled = typeof v.minSubtotalVnd === "number" ? cartSubtotalVnd < v.minSubtotalVnd : false;
+                      return (
+                        <button
+                          key={v.code}
+                          type="button"
+                          className="flex items-center justify-between gap-4 rounded-xl border px-4 py-3 text-left transition active:scale-[0.99] disabled:opacity-50"
+                          style={{
+                            background: active
+                              ? "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 22%, transparent)"
+                              : "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+                            borderColor: active
+                              ? "color-mix(in srgb, var(--stitch-color-primary) 25%, transparent)"
+                              : "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 12%, transparent)",
+                          }}
+                          disabled={disabled}
+                          onClick={() => {
+                            if (active) {
+                              setAppliedDiscountVoucher(null);
+                              setVoucherError(null);
+                              return;
+                            }
+
+                            setAppliedDiscountVoucher(v);
+                            if (typeof v.minSubtotalVnd === "number" && cartSubtotalVnd < v.minSubtotalVnd) {
+                              setVoucherError(`Voucher ${v.code} áp dụng cho đơn từ ${formatVndDisplay(v.minSubtotalVnd)} VND.`);
+                            } else {
+                              setVoucherError(null);
+                            }
+                          }}
+                          title={
+                            disabled && typeof v.minSubtotalVnd === "number"
+                              ? `Đơn tối thiểu ${formatVndDisplay(v.minSubtotalVnd)} VND`
+                              : v.subtitle
+                          }
+                        >
+                          <div className="min-w-0">
+                            <div className="text-sm font-black text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                              {v.title}
+                            </div>
+                            <div className="mt-0.5 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                              {v.subtitle}
+                            </div>
+                          </div>
+                          <span
+                            className="material-symbols-outlined shrink-0"
+                            style={{
+                              color: active ? "var(--stitch-color-primary)" : "var(--stitch-color-on-surface-variant)",
+                            }}
+                            aria-hidden
+                          >
+                            {active ? "radio_button_checked" : "radio_button_unchecked"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div
+                    className="my-4 h-px"
+                    style={{
+                      background:
+                        "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 12%, transparent)",
+                    }}
+                  />
+
+                  <div className="grid gap-2">
+                    {shippingOffers.map((v) => {
+                      const active = appliedShippingOffer?.code === v.code;
+                      return (
+                        <button
+                          key={v.code}
+                          type="button"
+                          className="flex items-center justify-between gap-4 rounded-xl border px-4 py-3 text-left transition active:scale-[0.99]"
+                          style={{
+                            background: active
+                              ? "color-mix(in srgb, var(--stitch-color-secondary-container, var(--stitch-color-secondary)) 18%, transparent)"
+                              : "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+                            borderColor: active
+                              ? "color-mix(in srgb, var(--stitch-color-secondary) 22%, transparent)"
+                              : "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 12%, transparent)",
+                          }}
+                          onClick={() => {
+                            if (active) {
+                              setAppliedShippingOffer(null);
+                              return;
+                            }
+                            setAppliedShippingOffer(v);
+                          }}
+                        >
+                          <div className="min-w-0">
+                            <div className="text-sm font-black text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                              {v.title}
+                            </div>
+                            <div className="mt-0.5 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                              {v.subtitle}
+                            </div>
+                          </div>
+                          <span
+                            className="material-symbols-outlined shrink-0"
+                            style={{
+                              color: active ? "var(--stitch-color-secondary)" : "var(--stitch-color-on-surface-variant)",
+                            }}
+                            aria-hidden
+                          >
+                            {active ? "radio_button_checked" : "radio_button_unchecked"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {voucherError ? (
+                    <div className="mt-3 text-sm font-medium" style={{ color: "var(--stitch-color-secondary)" }}>
+                      {voucherError}
+                    </div>
+                  ) : appliedDiscountVoucher || appliedShippingOffer ? (
+                    <div className="mt-3 text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                      Đã áp dụng{" "}
+                      <span className="text-white">
+                        {[appliedDiscountVoucher?.code, appliedShippingOffer?.code].filter(Boolean).join(" + ")}
+                      </span>
+                      {" — "}
+                      {(discountVoucherVnd + shippingDiscountVnd) > 0 ? (
+                        <>
+                          giảm{" "}
+                          <span style={{ color: "var(--stitch-color-primary)" }}>
+                            {formatVndDisplay(discountVoucherVnd + shippingDiscountVnd)} VND
+                          </span>
+                        </>
+                      ) : (
+                        <>đã áp dụng</>
+                      )}
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
+            </div>
+
+            {/* Desktop delivery protocol (same state as mobile) */}
+            <div
+              className="hidden rounded-3xl p-4 md:block"
+              style={{ background: "var(--stitch-color-surface-container)" }}
+            >
+              <h3
+                className="mb-3 flex items-center gap-2 text-sm font-black uppercase tracking-wide"
+                style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              >
+                <span className="material-symbols-outlined" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>
+                  local_shipping
+                </span>
+                Delivery Protocol
+              </h3>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setDeliveryMethod("HYPERSONIC")}
+                  className="w-full rounded-2xl p-3 text-left transition active:scale-[0.99]"
+                  style={{
+                    background:
+                      deliveryMethod === "HYPERSONIC"
+                        ? "color-mix(in srgb, var(--stitch-color-secondary-container) 35%, transparent)"
+                        : "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                    border:
+                      deliveryMethod === "HYPERSONIC"
+                        ? "1px solid color-mix(in srgb, var(--stitch-color-secondary) 25%, transparent)"
+                        : "1px solid transparent",
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-sm font-black text-white">Hyper-Sonic Courier</p>
+                      <p className="mt-1 text-xs font-bold" style={{ color: "var(--stitch-color-secondary)" }}>
+                        +{formatVndDisplay(45_000)} VND
+                      </p>
+                    </div>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{
+                        color:
+                          deliveryMethod === "HYPERSONIC"
+                            ? "var(--stitch-color-secondary)"
+                            : "var(--stitch-color-on-surface-variant)",
+                      }}
+                      aria-hidden
+                    >
+                      {deliveryMethod === "HYPERSONIC" ? "radio_button_checked" : "radio_button_unchecked"}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                    Next cycle delivery before 06:00.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDeliveryMethod("STANDARD")}
+                  className="w-full rounded-2xl p-3 text-left transition active:scale-[0.99]"
+                  style={{
+                    background:
+                      deliveryMethod === "STANDARD"
+                        ? "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 25%, transparent)"
+                        : "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                    border:
+                      deliveryMethod === "STANDARD"
+                        ? "1px solid color-mix(in srgb, var(--stitch-color-primary) 25%, transparent)"
+                        : "1px solid transparent",
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-sm font-black text-white">Standard Orbital</p>
+                      <p className="mt-1 text-xs font-bold" style={{ color: "var(--stitch-color-secondary)" }}>
+                        FREE
+                      </p>
+                    </div>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{
+                        color:
+                          deliveryMethod === "STANDARD"
+                            ? "var(--stitch-color-secondary)"
+                            : "var(--stitch-color-on-surface-variant)",
+                      }}
+                      aria-hidden
+                    >
+                      {deliveryMethod === "STANDARD" ? "radio_button_checked" : "radio_button_unchecked"}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                    {cartSubtotalVnd >= 2_000_000
+                      ? "3-5 cycles deployment (free)."
+                      : "3-5 cycles deployment (+30,000 VND if needed)."}
+                  </p>
+                </button>
+              </div>
             </div>
 
             {/* Mobile delivery protocol (Stitch: Delivery Protocol + trust badges) */}
@@ -786,11 +1047,19 @@ export function CheckoutClient() {
                     {shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(shippingVnd)} VND`}
                   </span>
                 </div>
-                {voucherDiscountVnd > 0 ? (
+                {discountVoucherVnd > 0 ? (
                   <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                     <span>Giảm giá</span>
                     <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
-                      -{formatVndDisplay(voucherDiscountVnd)} VND
+                      -{formatVndDisplay(discountVoucherVnd)} VND
+                    </span>
+                  </div>
+                ) : null}
+                {shippingDiscountVnd > 0 ? (
+                  <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                    <span>Freeship</span>
+                    <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
+                      -{formatVndDisplay(shippingDiscountVnd)} VND
                     </span>
                   </div>
                 ) : null}
@@ -913,11 +1182,19 @@ export function CheckoutClient() {
                   {shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(shippingVnd)} VND`}
                 </span>
               </div>
-              {voucherDiscountVnd > 0 ? (
+              {discountVoucherVnd > 0 ? (
                 <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <span>Giảm giá</span>
                   <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
-                    -{formatVndDisplay(voucherDiscountVnd)} VND
+                    -{formatVndDisplay(discountVoucherVnd)} VND
+                  </span>
+                </div>
+              ) : null}
+              {shippingDiscountVnd > 0 ? (
+                <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                  <span>Freeship</span>
+                  <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
+                    -{formatVndDisplay(shippingDiscountVnd)} VND
                   </span>
                 </div>
               ) : null}

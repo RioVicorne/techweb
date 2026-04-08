@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
 import { formatVndDisplay } from "@/data/products";
+import * as pcVN from "pc-vn";
 
 type OrderRow = {
   order_code: string;
@@ -31,15 +32,31 @@ type SuggestedProduct = {
   img: string;
 };
 
+type ShippingAddress = {
+  provinceCode: string;
+  districtCode: string;
+  wardCode: string;
+  street: string;
+};
+
 export function AccountClient() {
   const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowser(), []);
   const [email, setEmail] = useState<string>("");
   const [fullName, setFullName] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
+    provinceCode: "",
+    districtCode: "",
+    wardCode: "",
+    street: "",
+  });
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [editingAddress, setEditingAddress] = useState(false);
+  const [savingAddress, setSavingAddress] = useState(false);
+  const [addressError, setAddressError] = useState<string | null>(null);
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [purchases, setPurchases] = useState<PurchaseRow[]>([]);
   const [suggested, setSuggested] = useState<SuggestedProduct[]>([]);
@@ -79,6 +96,85 @@ export function AccountClient() {
       if (!cancelled) {
         setFullName(String(meta.full_name ?? meta.name ?? ""));
         setPhone(String(meta.phone ?? ""));
+
+        const normalize = (s: string) =>
+          s
+            .trim()
+            .toLowerCase()
+            .replaceAll("thành phố", "")
+            .replaceAll("tỉnh", "")
+            .replaceAll("quận", "")
+            .replaceAll("huyện", "")
+            .replaceAll("thị xã", "")
+            .replaceAll("phường", "")
+            .replaceAll("xã", "")
+            .replaceAll("thị trấn", "")
+            .replaceAll(/\s+/g, " ")
+            .trim();
+
+        const provinces = pcVN.getProvinces() as Array<{ code: string; name: string }>;
+        const addr = meta.shipping_address as
+          | Partial<{
+              province_code: string;
+              district_code: string;
+              ward_code: string;
+              province: string;
+              district: string;
+              ward: string;
+              street: string;
+            }>
+          | undefined;
+
+        const provinceCode =
+          String(addr?.province_code ?? "") ||
+          (() => {
+            const byName = String(addr?.province ?? "");
+            if (!byName) return "";
+            const n = normalize(byName);
+            const hit =
+              provinces.find((p) => normalize(p.name) === n) ??
+              provinces.find((p) => normalize(p.name).includes(n) || n.includes(normalize(p.name)));
+            return hit?.code ?? "";
+          })();
+
+        const districts = provinceCode
+          ? ((pcVN.getDistrictsByProvinceCode(provinceCode) as Array<{ code: string; name: string }>) ?? [])
+          : [];
+
+        const districtCode =
+          String(addr?.district_code ?? "") ||
+          (() => {
+            const byName = String(addr?.district ?? "");
+            if (!byName || !districts.length) return "";
+            const n = normalize(byName);
+            const hit =
+              districts.find((d) => normalize(d.name) === n) ??
+              districts.find((d) => normalize(d.name).includes(n) || n.includes(normalize(d.name)));
+            return hit?.code ?? "";
+          })();
+
+        const wards = districtCode
+          ? ((pcVN.getWardsByDistrictCode(districtCode) as Array<{ code: string; name: string }>) ?? [])
+          : [];
+
+        const wardCode =
+          String(addr?.ward_code ?? "") ||
+          (() => {
+            const byName = String(addr?.ward ?? "");
+            if (!byName || !wards.length) return "";
+            const n = normalize(byName);
+            const hit =
+              wards.find((w) => normalize(w.name) === n) ??
+              wards.find((w) => normalize(w.name).includes(n) || n.includes(normalize(w.name)));
+            return hit?.code ?? "";
+          })();
+
+        setShippingAddress({
+          provinceCode,
+          districtCode,
+          wardCode,
+          street: String(addr?.street ?? ""),
+        });
       }
       try {
         const [ordersRes, purchasesRes, suggestedRes, countsRes] = await Promise.all([
@@ -108,6 +204,48 @@ export function AccountClient() {
       cancelled = true;
     };
   }, [router, supabase]);
+
+  const provinces = useMemo(() => pcVN.getProvinces() as Array<{ code: string; name: string }>, []);
+
+  const selectedProvince = useMemo(
+    () => provinces.find((p) => p.code === shippingAddress.provinceCode) ?? null,
+    [provinces, shippingAddress.provinceCode]
+  );
+
+  const districts = useMemo(() => {
+    if (!shippingAddress.provinceCode) return [];
+    return pcVN.getDistrictsByProvinceCode(shippingAddress.provinceCode) as Array<{ code: string; name: string }>;
+  }, [shippingAddress.provinceCode]);
+
+  const selectedDistrict = useMemo(
+    () => districts.find((d) => d.code === shippingAddress.districtCode) ?? null,
+    [districts, shippingAddress.districtCode]
+  );
+
+  const wards = useMemo(() => {
+    if (!shippingAddress.districtCode) return [];
+    return pcVN.getWardsByDistrictCode(shippingAddress.districtCode) as Array<{ code: string; name: string }>;
+  }, [shippingAddress.districtCode]);
+
+  const selectedWard = useMemo(
+    () => wards.find((w) => w.code === shippingAddress.wardCode) ?? null,
+    [wards, shippingAddress.wardCode]
+  );
+
+  const shippingAddressDisplay = useMemo(() => {
+    const parts = [
+      shippingAddress.street.trim(),
+      selectedWard?.name?.trim() ?? "",
+      selectedDistrict?.name?.trim() ?? "",
+      selectedProvince?.name?.trim() ?? "",
+    ].filter(Boolean);
+    return parts.length ? parts.join(", ") : "";
+  }, [
+    shippingAddress.street,
+    selectedWard?.name,
+    selectedDistrict?.name,
+    selectedProvince?.name,
+  ]);
 
   return (
     <main className="mx-auto max-w-screen-2xl px-6 pb-20 pt-28 md:px-12">
@@ -322,7 +460,10 @@ export function AccountClient() {
                       setSaveError(null);
                       try {
                         const { error } = await supabase.auth.updateUser({
-                          data: { full_name: fullName.trim(), phone: phone.trim() },
+                          data: {
+                            full_name: fullName.trim(),
+                            phone: phone.trim(),
+                          },
                         });
                         if (error) throw error;
                         setEditing(false);
@@ -433,6 +574,253 @@ export function AccountClient() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Address (icon summary -> expand editor) */}
+            <div
+              className="mt-6 rounded-2xl border p-4"
+              style={{
+                background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+                borderColor:
+                  "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+              }}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <div
+                    className="text-[11px] font-bold uppercase tracking-widest"
+                    style={{ color: "var(--stitch-color-on-surface-variant)" }}
+                  >
+                    Địa chỉ giao hàng
+                  </div>
+                  <div className="mt-1 text-sm font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                    {shippingAddressDisplay || "Chưa thiết lập"}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl transition active:scale-[0.99]"
+                  style={{
+                    background:
+                      "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 20%, transparent)",
+                    color: "var(--stitch-color-primary)",
+                    border:
+                      "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 18%, transparent)",
+                  }}
+                  aria-label={editingAddress ? "Close address editor" : "Edit shipping address"}
+                  title={editingAddress ? "Đóng" : "Chỉnh sửa"}
+                  onClick={() => {
+                    setEditingAddress((v) => !v);
+                    setAddressError(null);
+                  }}
+                >
+                  <span className="material-symbols-outlined text-[22px] leading-none" aria-hidden>
+                    edit
+                  </span>
+                </button>
+              </div>
+
+              {editingAddress ? (
+                <div className="mt-4 grid gap-3">
+                  <div className="grid gap-2">
+                    <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                      Tỉnh / Thành phố
+                    </div>
+                    <div className="relative">
+                      <select
+                        className="w-full appearance-none rounded-xl px-4 py-3 pr-10 text-sm font-bold text-white outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)] disabled:opacity-60"
+                        value={shippingAddress.provinceCode}
+                        onChange={(e) =>
+                          setShippingAddress((a) => ({
+                            ...a,
+                            provinceCode: e.target.value,
+                            districtCode: "",
+                            wardCode: "",
+                          }))
+                        }
+                        style={{
+                          background:
+                            "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                          border:
+                            "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 18%, transparent)",
+                        }}
+                      >
+                        <option value="">
+                          Chọn Tỉnh / Thành phố
+                        </option>
+                        {provinces.map((p) => (
+                          <option key={p.code} value={p.code}>
+                            {p.name}
+                          </option>
+                        ))}
+                      </select>
+                      <span
+                        className="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[20px]"
+                        style={{ color: "var(--stitch-color-on-surface-variant)" }}
+                        aria-hidden
+                      >
+                        expand_more
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                      Quận / Huyện
+                    </div>
+                    <div className="relative">
+                      <select
+                        className="w-full appearance-none rounded-xl px-4 py-3 pr-10 text-sm font-bold text-white outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)] disabled:opacity-60"
+                        value={shippingAddress.districtCode}
+                        onChange={(e) =>
+                          setShippingAddress((a) => ({ ...a, districtCode: e.target.value, wardCode: "" }))
+                        }
+                        disabled={!shippingAddress.provinceCode}
+                        style={{
+                          background:
+                            "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                          border:
+                            "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 18%, transparent)",
+                        }}
+                      >
+                        <option value="">
+                          {shippingAddress.provinceCode ? "Chọn Quận / Huyện" : "Chọn Tỉnh/TP trước"}
+                        </option>
+                        {districts.map((d) => (
+                          <option key={d.code} value={d.code}>
+                            {d.name}
+                          </option>
+                        ))}
+                      </select>
+                      <span
+                        className="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[20px]"
+                        style={{ color: "var(--stitch-color-on-surface-variant)" }}
+                        aria-hidden
+                      >
+                        expand_more
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                      Phường / Xã
+                    </div>
+                    <div className="relative">
+                      <select
+                        className="w-full appearance-none rounded-xl px-4 py-3 pr-10 text-sm font-bold text-white outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)] disabled:opacity-60"
+                        value={shippingAddress.wardCode}
+                        onChange={(e) => setShippingAddress((a) => ({ ...a, wardCode: e.target.value }))}
+                        disabled={!shippingAddress.districtCode}
+                        style={{
+                          background:
+                            "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                          border:
+                            "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 18%, transparent)",
+                        }}
+                      >
+                        <option value="">
+                          {shippingAddress.districtCode ? "Chọn Phường / Xã" : "Chọn Quận/Huyện trước"}
+                        </option>
+                        {wards.map((w) => (
+                          <option key={w.code} value={w.code}>
+                            {w.name}
+                          </option>
+                        ))}
+                      </select>
+                      <span
+                        className="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[20px]"
+                        style={{ color: "var(--stitch-color-on-surface-variant)" }}
+                        aria-hidden
+                      >
+                        expand_more
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                      Số nhà + Tên đường
+                    </div>
+                    <input
+                      className="w-full rounded-xl bg-transparent px-3 py-2 text-sm font-bold text-white outline-none"
+                      placeholder="VD: 12 Nguyễn Huệ"
+                      value={shippingAddress.street}
+                      onChange={(e) => setShippingAddress((a) => ({ ...a, street: e.target.value }))}
+                      style={{
+                        border:
+                          "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 12%, transparent)",
+                      }}
+                    />
+                  </div>
+
+                  {addressError ? (
+                    <div className="rounded-2xl border px-4 py-3 text-sm" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-error) 35%, transparent)", color: "var(--stitch-color-on-surface)" }}>
+                      {addressError}
+                    </div>
+                  ) : null}
+
+                  <div className="flex gap-3 pt-1">
+                    <button
+                      type="button"
+                      className="flex flex-1 items-center justify-center rounded-xl py-3 text-sm font-bold text-white transition active:scale-[0.99] disabled:opacity-60"
+                      style={{
+                        background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
+                        color: "var(--stitch-color-on-primary-fixed, black)",
+                      }}
+                      disabled={savingAddress}
+                      onClick={async () => {
+                        setSavingAddress(true);
+                        setAddressError(null);
+                        try {
+                          if (!shippingAddress.provinceCode || !shippingAddress.districtCode || !shippingAddress.wardCode || !shippingAddress.street.trim()) {
+                            throw new Error("Vui lòng chọn đủ Tỉnh/TP, Quận/Huyện, Phường/Xã và nhập số nhà + tên đường.");
+                          }
+                          const { error } = await supabase.auth.updateUser({
+                            data: {
+                              shipping_address: {
+                                province_code: shippingAddress.provinceCode,
+                                province: selectedProvince?.name ?? "",
+                                district_code: shippingAddress.districtCode,
+                                district: selectedDistrict?.name ?? "",
+                                ward_code: shippingAddress.wardCode,
+                                ward: selectedWard?.name ?? "",
+                                street: shippingAddress.street.trim(),
+                              },
+                            },
+                          });
+                          if (error) throw error;
+                          setEditingAddress(false);
+                        } catch (e) {
+                          setAddressError(e instanceof Error ? e.message : "Không thể lưu địa chỉ.");
+                        } finally {
+                          setSavingAddress(false);
+                        }
+                      }}
+                    >
+                      Lưu địa chỉ
+                    </button>
+                    <button
+                      type="button"
+                      className="flex flex-1 items-center justify-center rounded-xl py-3 text-sm font-bold transition active:scale-[0.99]"
+                      style={{
+                        background:
+                          "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                        color: "var(--stitch-color-on-surface-variant)",
+                        border:
+                          "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 20%, transparent)",
+                      }}
+                      onClick={() => {
+                        setEditingAddress(false);
+                        setAddressError(null);
+                      }}
+                    >
+                      Huỷ
+                    </button>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </section>
 
