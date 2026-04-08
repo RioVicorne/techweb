@@ -126,7 +126,7 @@ export default async function CategoryPage({
                   className="rounded-3xl p-4"
                   style={{ background: "var(--stitch-color-surface-container)", border: "0" }}
                 >
-                  <div className="flex flex-col gap-3 md:flex-row md:gap-4">
+                  <div className="flex flex-row gap-4">
                     <div
                       className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl"
                       style={{ background: "var(--stitch-color-surface-container-low)" }}
@@ -150,7 +150,9 @@ export default async function CategoryPage({
                         </div>
                       ) : null}
 
-                      <StarRow filled={p.stars} reviews={p.reviews} />
+                      <div className="hidden md:block">
+                        <StarRow filled={p.stars} reviews={p.reviews} />
+                      </div>
                       <Link
                         href={`/product/${p.id}`}
                         className="block line-clamp-2 text-base font-bold leading-snug text-white"

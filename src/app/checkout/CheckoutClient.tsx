@@ -88,6 +88,39 @@ export function CheckoutClient() {
           ? "Thẻ (Stripe)"
           : "COD";
 
+  // Prevent a brief "empty cart" flash when we clear cart state during a successful submit.
+  if (placing) {
+    return (
+      <main className="mx-auto max-w-screen-lg px-6 pb-20 pt-28 md:px-12">
+        <div
+          className="rounded-3xl border p-10 text-center"
+          style={{
+            background: "var(--stitch-color-surface-container)",
+            borderColor:
+              "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+          }}
+        >
+          <span
+            className="material-symbols-outlined mb-4 text-5xl"
+            style={{ color: "var(--stitch-color-on-surface-variant)" }}
+            aria-hidden
+          >
+            hourglass_top
+          </span>
+          <h1
+            className="mb-2 text-xl font-bold text-white"
+            style={{ fontFamily: "var(--stitch-font-headline)" }}
+          >
+            Đang xử lý đơn hàng...
+          </h1>
+          <p className="text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+            Vui lòng chờ trong giây lát.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   if (cartLines.length === 0) {
     return (
       <main className="mx-auto max-w-screen-lg px-6 pb-20 pt-28 md:px-12">
@@ -252,8 +285,9 @@ export function CheckoutClient() {
                   // ignore stripe failure and continue to success page
                 }
 
-                clearAll();
                 router.push(`/checkout/success?orderId=${encodeURIComponent(orderId)}`);
+                // Clear cart after navigation is initiated to avoid a UI flash on this page.
+                clearAll();
               } catch (err) {
                 setSubmitError(err instanceof Error ? err.message : "Đặt hàng thất bại. Vui lòng thử lại.");
               } finally {

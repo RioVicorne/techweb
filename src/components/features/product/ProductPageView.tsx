@@ -1,10 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/data/products";
 import { ProductCardActions } from "@/components/features/shop/shared/ProductCardActions";
 import { StickyProductCTA } from "@/components/features/shop/shared/StickyProductCTA";
 import { StarRow } from "@/components/ui/StarRow";
 import { MetricCard } from "@/components/features/product/shared/MetricCard";
+import { ProductHeroCarousel } from "@/components/features/product/shared/ProductHeroCarousel";
 
 export function ProductPageView({ product }: { product: Product }) {
   const metricLatency = "0.1ms";
@@ -15,13 +15,21 @@ export function ProductPageView({ product }: { product: Product }) {
   return (
     <>
       <main className="mx-auto max-w-screen-2xl px-5 pb-28 pt-24 md:px-12">
+        <div className="mb-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition active:scale-95"
+            style={{ background: "var(--stitch-color-surface-container)", color: "var(--stitch-color-primary)" }}
+          >
+            <span className="material-symbols-outlined" aria-hidden>
+              arrow_back
+            </span>
+            Back
+          </Link>
+        </div>
+
         <section className="relative mb-6 overflow-hidden rounded-3xl">
-          <div className="relative h-[240px] sm:h-[320px]">
-            <Image src={product.img} alt={product.title} fill className="object-cover" sizes="100vw" priority unoptimized />
-            <div
-              className="absolute inset-0 opacity-90"
-              style={{ background: "linear-gradient(to top, var(--stitch-color-surface) 0%, transparent 60%)" }}
-            />
+          <ProductHeroCarousel images={[product.img]} alt={product.title} />
             <div className="absolute left-5 top-5 flex items-center gap-2">
               <span
                 className="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest"
@@ -33,19 +41,6 @@ export function ProductPageView({ product }: { product: Product }) {
                 {product.id === "apex-pro-optical-mouse" ? "bolt NEW TECH" : "Performance Series"}
               </span>
             </div>
-            <div className="absolute bottom-5 left-5 right-5">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition active:scale-95"
-                style={{ background: "var(--stitch-color-surface-container)", color: "var(--stitch-color-primary)" }}
-              >
-                <span className="material-symbols-outlined" aria-hidden>
-                  arrow_back
-                </span>
-                Back
-              </Link>
-            </div>
-          </div>
         </section>
 
         <section className="mb-6">
@@ -73,7 +68,7 @@ export function ProductPageView({ product }: { product: Product }) {
         </section>
 
         <section className="mb-8">
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
             <MetricCard icon="speed" label="Latency" value={metricLatency} />
             <MetricCard icon="precision_manufacturing" label="Sensor" value={metricSensor} />
             <MetricCard icon="battery_charging_full" label="Battery Life" value={metricBattery} sub={metricBatteryPct} />

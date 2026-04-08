@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/context/cart-context";
 
 type NavItem = {
@@ -19,6 +20,15 @@ const ITEMS: NavItem[] = [
   { href: "/#account", label: "Tài khoản", icon: "account_circle" },
 ];
 
+const CATEGORY_MENU: Array<{ key: string; label: string; icon: string }> = [
+  { key: "headset", label: "Tai nghe", icon: "headphones" },
+  { key: "mouse", label: "Chuột", icon: "mouse" },
+  { key: "peripherals", label: "Bàn phím", icon: "keyboard" },
+  { key: "hardware", label: "Phần cứng", icon: "storage" },
+  { key: "streaming", label: "Streaming", icon: "videocam" },
+  { key: "memory", label: "Bộ nhớ", icon: "memory" },
+];
+
 function isHiddenOn(pathname: string) {
   return pathname.startsWith("/checkout") || pathname.startsWith("/product");
 }
@@ -26,6 +36,33 @@ function isHiddenOn(pathname: string) {
 export function MobileBottomNav() {
   const pathname = usePathname() || "/";
   const { itemCount } = useCart();
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const categoryWrapRef = useRef<HTMLDivElement | null>(null);
+
+  const categoryActive = useMemo(() => pathname.startsWith("/category"), [pathname]);
+
+  useEffect(() => {
+    setCategoryOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    function onPointerDown(e: MouseEvent | TouchEvent) {
+      const el = categoryWrapRef.current;
+      if (!el) return;
+      if (e.target instanceof Node && !el.contains(e.target)) setCategoryOpen(false);
+    }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setCategoryOpen(false);
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown, { passive: true });
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
 
   if (isHiddenOn(pathname)) return null;
 
@@ -47,6 +84,97 @@ export function MobileBottomNav() {
         {ITEMS.map((it) => {
           const active = it.match ? it.match(pathname) : false;
           const showBadge = it.badge === "cart" && itemCount > 0;
+
+          if (it.href === "/category") {
+            return (
+              <div key={it.label} className="relative" ref={categoryWrapRef}>
+                <button
+                  type="button"
+                  className="relative flex w-full flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition active:scale-[0.98]"
+                  style={{
+                    color: categoryActive ? "var(--stitch-color-primary)" : "var(--stitch-color-on-surface-variant)",
+                    background: categoryActive
+                      ? "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 22%, transparent)"
+                      : "transparent",
+                  }}
+                  aria-current={categoryActive ? "page" : undefined}
+                  aria-haspopup="menu"
+                  aria-expanded={categoryOpen}
+                  onClick={() => setCategoryOpen((v) => !v)}
+                >
+                  <span className="relative">
+                    <span className="material-symbols-outlined text-[22px] leading-none" aria-hidden>
+                      {it.icon}
+                    </span>
+                  </span>
+                  <span className="text-[11px] font-bold leading-none">{it.label}</span>
+                </button>
+
+                {categoryOpen ? (
+                  <div
+                    role="menu"
+                    aria-label="Danh mục"
+                    className="absolute bottom-full left-1/2 mb-2 w-[220px] -translate-x-1/2 overflow-hidden rounded-3xl border p-2 shadow-xl"
+                    style={{
+                      background:
+                        "color-mix(in srgb, var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container)) 92%, transparent)",
+                      borderColor:
+                        "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 12%, transparent)",
+                      backdropFilter: "blur(14px)",
+                    }}
+                  >
+                    <Link
+                      role="menuitem"
+                      href="/category"
+                      className="flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-bold transition active:scale-[0.99]"
+                      style={{
+                        color: "var(--stitch-color-on-surface)",
+                        background: "transparent",
+                      }}
+                      onClick={() => setCategoryOpen(false)}
+                    >
+                      <span className="material-symbols-outlined text-[20px]" aria-hidden>
+                        grid_view
+                      </span>
+                      Tất cả sản phẩm
+                    </Link>
+                    <div
+                      className="my-2 h-px"
+                      style={{
+                        background:
+                          "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 12%, transparent)",
+                      }}
+                    />
+                    <div className="grid gap-1">
+                      {CATEGORY_MENU.map((c) => (
+                        <Link
+                          key={c.key}
+                          role="menuitem"
+                          href={`/category?category=${encodeURIComponent(c.key)}`}
+                          className="flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-bold transition active:scale-[0.99]"
+                          style={{
+                            color: "var(--stitch-color-on-surface)",
+                            background:
+                              "color-mix(in srgb, var(--stitch-color-surface-container-high, var(--stitch-color-surface-container)) 85%, transparent)",
+                          }}
+                          onClick={() => setCategoryOpen(false)}
+                        >
+                          <span
+                            className="material-symbols-outlined text-[20px]"
+                            style={{ color: "var(--stitch-color-primary)" }}
+                            aria-hidden
+                          >
+                            {c.icon}
+                          </span>
+                          {c.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            );
+          }
 
           return (
             <Link
