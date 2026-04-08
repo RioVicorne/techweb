@@ -24,6 +24,7 @@ export function CheckoutClient() {
   const searchParams = useSearchParams();
   const { lines, subtotalVnd, setQty, removeLine, clearCart } = useCart();
   const buyNowId = searchParams.get("buyNow");
+  const paymentMethodId = searchParams.get("pm") || "COD";
   const [buyNowLine, setBuyNowLine] = useState<CartLine | null>(() => {
     if (!buyNowId) return null;
     const p = getProductById(buyNowId);
@@ -77,6 +78,15 @@ export function CheckoutClient() {
     return cartSubtotalVnd >= 2_000_000 ? 0 : 30_000;
   }, [deliveryMethod, cartSubtotalVnd]);
   const totalVnd = cartSubtotalVnd + shippingVnd;
+
+  const paymentLabel =
+    paymentMethodId === "MOMO"
+      ? "Ví MoMo"
+      : paymentMethodId === "BANK"
+        ? "Chuyển khoản"
+        : paymentMethodId === "CARD"
+          ? "Thẻ (Stripe)"
+          : "COD";
 
   if (cartLines.length === 0) {
     return (
@@ -174,15 +184,20 @@ export function CheckoutClient() {
               setSubmitError(null);
               setPlacing(true);
               try {
+                const trimmedPhone = form.phone.trim();
+                const trimmedEmail = form.email.trim();
                 const customer: OrderCustomer = {
                   name: form.name.trim(),
-                  phone: form.phone.trim(),
-                  email: form.email.trim(),
+                  phone: trimmedPhone,
+                  email: trimmedEmail,
                   address: form.address.trim(),
                   note: form.note.trim() || undefined,
                 };
-                if (!customer.name || !customer.phone || !customer.email || !customer.address) {
-                  throw new Error("Vui lòng điền đầy đủ thông tin giao hàng.");
+                if (!customer.name || !customer.address) {
+                  throw new Error("Vui lòng điền họ tên và địa chỉ.");
+                }
+                if (!trimmedPhone && !trimmedEmail) {
+                  throw new Error("Vui lòng nhập SĐT hoặc Email (ít nhất 1).");
                 }
                 if (cartLines.length === 0) {
                   throw new Error("Giỏ hàng trống.");
@@ -259,13 +274,35 @@ export function CheckoutClient() {
                 autoComplete="name"
               />
             </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                Phương thức thanh toán
+              </label>
+              <Link
+                href={`/checkout/payment?${new URLSearchParams({
+                  ...(buyNowId ? { buyNow: buyNowId } : {}),
+                  pm: paymentMethodId,
+                }).toString()}`}
+                className="flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm font-bold transition active:scale-[0.99]"
+                style={{
+                  ...inputStyle,
+                  borderColor:
+                    "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 30%, transparent)",
+                }}
+              >
+                <span className="min-w-0 truncate text-white">{paymentLabel}</span>
+                <span className="material-symbols-outlined" style={{ color: "var(--stitch-color-on-surface-variant)" }} aria-hidden>
+                  chevron_right
+                </span>
+              </Link>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                  Số điện thoại
+                  Số điện thoại (hoặc Email)
                 </label>
                 <input
-                  required
                   type="tel"
                   className={inputClass}
                   style={inputStyle}
@@ -276,10 +313,9 @@ export function CheckoutClient() {
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                  Email
+                  Email (hoặc Số điện thoại)
                 </label>
                 <input
-                  required
                   type="email"
                   className={inputClass}
                   style={inputStyle}
@@ -471,7 +507,7 @@ export function CheckoutClient() {
                         {line.title}
                       </p>
                       <p className="mt-1 text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                        {line.qty} × {formatVndDisplay(line.priceVnd)} <span className="text-xs font-normal">VND</span>
+                        {formatVndDisplay(line.priceVnd)} <span className="text-xs font-normal">VND</span>
                       </p>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <div
