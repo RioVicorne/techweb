@@ -22,7 +22,8 @@ export async function POST(req: Request) {
     const { data: order, error } = await supabase
       .from("orders")
       .select("*")
-      .eq("id", orderId)
+      // `orderId` passed around the app is the public `order_code` (e.g. "RS...").
+      .eq("order_code", orderId)
       .maybeSingle();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
           quantity: 1,
           price_data: {
             currency: "vnd",
-            unit_amount: Number(order.total_vnd),
+            unit_amount: Number(order.total),
             product_data: { name: `RioShop Order ${orderId}` },
           },
         },
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
         payment_provider: "stripe",
         stripe_session_id: session.id,
       })
-      .eq("id", orderId);
+      .eq("order_code", orderId);
 
     return NextResponse.json({ url: session.url }, { status: 200 });
   } catch (e) {

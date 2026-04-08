@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { formatVndDisplay } from "@/data/products";
 import { getOrder, type Order } from "@/lib/orders";
@@ -16,21 +15,15 @@ type ServerOrderRow = {
   total_vnd: number;
 };
 
-export function SuccessClient() {
-  const params = useSearchParams();
-  const orderId = params.get("orderId") || "";
-
+export function OrderDetailClient({ orderId }: { orderId: string }) {
   const localOrder = useMemo(() => (orderId ? getOrder(orderId) : null), [orderId]);
   const [serverOrder, setServerOrder] = useState<Order | null>(null);
-  // Avoid a 1-frame "not found" flash before the first effect runs.
   const [loading, setLoading] = useState<boolean>(() => Boolean(orderId) && !localOrder);
 
   useEffect(() => {
     let cancelled = false;
     async function run() {
       if (!orderId) return;
-      // If we already have a local order, don't block UI with a fetch.
-      // We'll still try to fetch in the background to replace with canonical server data.
       setLoading(true);
       try {
         const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, { method: "GET" });
@@ -80,15 +73,8 @@ export function SuccessClient() {
             "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
         }}
       >
-        <span
-          className="material-symbols-outlined mb-4 text-5xl"
-          style={{ color: "var(--stitch-color-tertiary, var(--stitch-color-secondary))" }}
-        >
-          check_circle
-        </span>
-
         <h1 className="mb-2 text-xl font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
-          Đặt hàng thành công
+          Thông tin đơn hàng
         </h1>
 
         {!order && loading ? (
@@ -98,11 +84,10 @@ export function SuccessClient() {
         ) : order ? (
           <>
             <p className="mb-6 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-              Cảm ơn bạn, <span className="font-semibold text-white">{order.customer.name}</span>. Mã đơn hàng của bạn là{" "}
+              Khách hàng: <span className="font-semibold text-white">{order.customer.name}</span> • Mã đơn:{" "}
               <span className="font-black" style={{ color: "var(--stitch-color-primary)" }}>
                 {order.id}
               </span>
-              .
             </p>
 
             <div
@@ -149,14 +134,14 @@ export function SuccessClient() {
             Tiếp tục mua sắm
           </Link>
           <Link
-            href={orderId ? `/orders?orderId=${encodeURIComponent(orderId)}` : "/orders"}
+            href="/account#recent-orders"
             className="inline-flex items-center justify-center rounded-xl px-8 py-3 text-sm font-bold transition active:scale-95"
             style={{
               background: "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
               color: "var(--stitch-color-primary)",
             }}
           >
-            Xem đơn hàng
+            Về tài khoản
           </Link>
         </div>
       </div>

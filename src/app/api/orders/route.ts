@@ -35,7 +35,8 @@ export async function POST(req: Request) {
 
     const body = (await req.json()) as Partial<CreateOrderBody>;
     const c = body.customer;
-    if (!c || !c.name || !c.phone || !c.email || !c.address) {
+    // UI requires: name + address + (phone OR email). Keep API aligned to avoid false 400s.
+    if (!c || !c.name || !c.address || (!c.phone && !c.email)) {
       return NextResponse.json({ error: "Missing customer fields" }, { status: 400 });
     }
     if (!Array.isArray(body.lines) || body.lines.length === 0) {
@@ -63,11 +64,12 @@ export async function POST(req: Request) {
         discount: 0,
         total: Math.round(totalVnd),
         full_name: c.name,
-        phone: c.phone,
+        // DB column is non-null in schema; store empty string if user only has email.
+        phone: c.phone || "",
         address_line: c.address,
         city: "",
         // Persist email in a nullable text field (no dedicated email column in this schema).
-        grid_code: c.email,
+        grid_code: c.email || null,
         note: c.note || null,
         delivery_method: "STANDARD",
       })

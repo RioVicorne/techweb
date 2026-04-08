@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
 import { formatVndDisplay } from "@/data/products";
@@ -39,8 +39,31 @@ type ShippingAddress = {
   street: string;
 };
 
+type ServerOrderRow = {
+  id: string;
+  created_at: string;
+  customer: { name: string; phone: string; email: string; address: string; note?: string };
+  lines: unknown[];
+  subtotal_vnd: number;
+  shipping_vnd: number;
+  total_vnd: number;
+};
+
+type OrderDetail = {
+  orderId: string;
+  createdAt: string;
+  customerName: string;
+  phone: string;
+  email: string;
+  address: string;
+  subtotalVnd: number;
+  shippingVnd: number;
+  totalVnd: number;
+};
+
 export function AccountClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = useMemo(() => getSupabaseBrowser(), []);
   const [email, setEmail] = useState<string>("");
   const [fullName, setFullName] = useState<string>("");
@@ -62,6 +85,10 @@ export function AccountClient() {
   const [suggested, setSuggested] = useState<SuggestedProduct[]>([]);
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+
+  const selectedOrderId = (searchParams.get("orderId") || "").trim();
+  const [selectedOrder, setSelectedOrder] = useState<OrderDetail | null>(null);
+  const [selectedOrderLoading, setSelectedOrderLoading] = useState(false);
 
   const loyaltyPoints = useMemo(() => {
     // Heuristic points: 10 points per purchased item quantity
@@ -205,6 +232,56 @@ export function AccountClient() {
     };
   }, [router, supabase]);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function run() {
+      if (!selectedOrderId) {
+        setSelectedOrder(null);
+        return;
+      }
+      setSelectedOrderLoading(true);
+      try {
+        const res = await fetch(`/api/orders/${encodeURIComponent(selectedOrderId)}`, { method: "GET" });
+        const json = (await res.json()) as { order?: unknown };
+        if (!res.ok || !json.order) {
+          if (!cancelled) setSelectedOrder(null);
+          return;
+        }
+        const o = json.order as Partial<ServerOrderRow>;
+        if (
+          !o.id ||
+          !o.created_at ||
+          !o.customer ||
+          typeof o.subtotal_vnd !== "number" ||
+          typeof o.shipping_vnd !== "number" ||
+          typeof o.total_vnd !== "number"
+        ) {
+          if (!cancelled) setSelectedOrder(null);
+          return;
+        }
+
+        const mapped: OrderDetail = {
+          orderId: String(o.id),
+          createdAt: String(o.created_at),
+          customerName: String(o.customer.name ?? ""),
+          phone: String(o.customer.phone ?? ""),
+          email: String(o.customer.email ?? ""),
+          address: String(o.customer.address ?? ""),
+          subtotalVnd: Number(o.subtotal_vnd),
+          shippingVnd: Number(o.shipping_vnd),
+          totalVnd: Number(o.total_vnd),
+        };
+        if (!cancelled) setSelectedOrder(mapped);
+      } finally {
+        if (!cancelled) setSelectedOrderLoading(false);
+      }
+    }
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedOrderId]);
+
   const provinces = useMemo(() => pcVN.getProvinces() as Array<{ code: string; name: string }>, []);
 
   const selectedProvince = useMemo(
@@ -246,6 +323,8 @@ export function AccountClient() {
     selectedDistrict?.name,
     selectedProvince?.name,
   ]);
+
+  const filteredOrders = orders;
 
   return (
     <main className="mx-auto max-w-screen-2xl px-6 pb-20 pt-28 md:px-12">
@@ -520,6 +599,119 @@ export function AccountClient() {
               </Link>
             </div>
 
+            <div id="order-detail" className="mt-5">
+              {selectedOrderLoading ? (
+                <div
+                  className="rounded-2xl border p-4 text-sm"
+                  style={{
+                    background:
+                      "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+                    borderColor:
+                      "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+                    color: "var(--stitch-color-on-surface-variant)",
+                  }}
+                >
+                  Đang tải thông tin đơn hàng...
+                </div>
+              ) : selectedOrder ? (
+                <div
+                  className="rounded-2xl border p-4"
+                  style={{
+                    background:
+                      "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+                    borderColor:
+                      "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div
+                        className="text-[11px] font-bold uppercase tracking-widest"
+                        style={{ color: "var(--stitch-color-on-surface-variant)" }}
+                      >
+                        Đơn hàng bạn vừa xem
+                      </div>
+                      <div className="mt-1 truncate text-sm font-black text-white">
+                        {selectedOrder.orderId}
+                      </div>
+                      <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                        {new Date(selectedOrder.createdAt).toLocaleString()}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl transition active:scale-95"
+                      style={{
+                        background:
+                          "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                        color: "var(--stitch-color-primary)",
+                        border:
+                          "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 20%, transparent)",
+                      }}
+                      aria-label="Đóng"
+                      title="Đóng"
+                      onClick={() => {
+                        router.replace("/account#recent-orders");
+                      }}
+                    >
+                      <span className="material-symbols-outlined text-[20px]" aria-hidden>
+                        close
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="mt-4 grid gap-2 text-sm">
+                    <div className="flex justify-between" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                      <span>Tạm tính</span>
+                      <span className="tabular-nums text-white">{formatVndDisplay(selectedOrder.subtotalVnd)} VND</span>
+                    </div>
+                    <div className="flex justify-between" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                      <span>Vận chuyển</span>
+                      <span className="tabular-nums text-white">
+                        {selectedOrder.shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(selectedOrder.shippingVnd)} VND`}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-base font-black">
+                      <span style={{ color: "var(--stitch-color-on-surface)" }}>Tổng cộng</span>
+                      <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
+                        {formatVndDisplay(selectedOrder.totalVnd)} VND
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-2xl border p-3 text-left"
+                       style={{
+                         borderColor:
+                           "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+                       }}>
+                    <div className="text-xs font-black text-white">{selectedOrder.customerName || "—"}</div>
+                    <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                      {selectedOrder.phone ? `SĐT: ${selectedOrder.phone}` : null}
+                      {selectedOrder.phone && selectedOrder.email ? " • " : null}
+                      {selectedOrder.email ? `Email: ${selectedOrder.email}` : null}
+                    </div>
+                    <div className="mt-2 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                      Địa chỉ: <span className="text-white">{selectedOrder.address || "—"}</span>
+                    </div>
+                  </div>
+                </div>
+              ) : selectedOrderId ? (
+                <div
+                  className="rounded-2xl border p-4 text-sm"
+                  style={{
+                    background:
+                      "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+                    borderColor:
+                      "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+                    color: "var(--stitch-color-on-surface-variant)",
+                  }}
+                >
+                  Không tìm thấy đơn hàng <span className="font-black text-white">{selectedOrderId}</span>.
+                </div>
+              ) : null}
+            </div>
+
             <div className="mt-5 grid grid-cols-4 gap-3">
               {[
                 {
@@ -536,16 +728,32 @@ export function AccountClient() {
                 { label: "Đã giao", icon: "verified", statuses: ["DELIVERED", "COMPLETED"] },
               ].map((x) => {
                 const n = x.statuses.reduce((sum, s) => sum + (statusCounts[s] ?? 0), 0);
+                const active = false;
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={x.label}
-                    className="rounded-2xl border p-3 text-center"
+                    className="rounded-2xl border p-3 text-center transition active:scale-[0.99]"
                     style={{
                       background:
                         "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
                       borderColor:
-                        "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+                        active
+                          ? "color-mix(in srgb, var(--stitch-color-primary) 45%, transparent)"
+                          : "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
                     }}
+                    onClick={() => {
+                      const tab =
+                        x.label === "Chờ xác nhận"
+                          ? "pending"
+                          : x.label === "Đang chuẩn bị"
+                            ? "preparing"
+                            : x.label === "Đang giao"
+                              ? "shipping"
+                              : "delivered";
+                      router.push(`/orders?tab=${encodeURIComponent(tab)}`);
+                    }}
+                    aria-label={`Xem đơn hàng: ${x.label}`}
                   >
                     <div
                       className="relative mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl"
@@ -571,7 +779,7 @@ export function AccountClient() {
                     <div className="text-[11px] font-black leading-tight" style={{ color: "var(--stitch-color-on-surface)" }}>
                       {x.label}
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -1014,23 +1222,27 @@ export function AccountClient() {
           </div>
 
           <div className="mt-8">
-            <h3 className="text-lg font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+            <h3
+              id="recent-orders"
+              className="text-lg font-bold text-white"
+              style={{ fontFamily: "var(--stitch-font-headline)" }}
+            >
               Recent orders
             </h3>
             {loading ? (
               <p className="mt-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 Loading...
               </p>
-            ) : orders.length === 0 ? (
+            ) : filteredOrders.length === 0 ? (
               <p className="mt-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 No orders yet.
               </p>
             ) : (
               <div className="mt-4 space-y-3">
-                {orders.slice(0, 6).map((o) => (
+                {filteredOrders.slice(0, 6).map((o) => (
                   <Link
                     key={o.order_code}
-                    href={`/checkout/success?orderId=${encodeURIComponent(o.order_code)}`}
+                    href={`/orders/${encodeURIComponent(o.order_code)}`}
                     className="block rounded-2xl border p-4 transition hover:opacity-95 active:scale-[0.99]"
                     style={{
                       background:
