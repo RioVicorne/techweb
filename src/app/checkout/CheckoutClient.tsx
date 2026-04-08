@@ -300,7 +300,7 @@ export function CheckoutClient() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                  Số điện thoại (hoặc Email)
+                  Số điện thoại
                 </label>
                 <input
                   type="tel"
@@ -313,7 +313,7 @@ export function CheckoutClient() {
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                  Email (hoặc Số điện thoại)
+                  Email
                 </label>
                 <input
                   type="email"
