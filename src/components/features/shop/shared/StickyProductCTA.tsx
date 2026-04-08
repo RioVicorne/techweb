@@ -12,7 +12,8 @@ export function StickyProductCTA({ product }: { product: Product }) {
     <div
       className="fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-xl"
       style={{
-        background: "color-mix(in srgb, var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container)) 85%, transparent)",
+        background:
+          "color-mix(in srgb, var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container)) 85%, transparent)",
         borderColor:
           "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
         paddingBottom: "env(safe-area-inset-bottom)",
@@ -39,7 +40,8 @@ export function StickyProductCTA({ product }: { product: Product }) {
           style={{
             background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
             color: "var(--stitch-color-primary)",
-            border: "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 25%, transparent)",
+            border:
+              "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 25%, transparent)",
           }}
           onClick={() => {
             addItem(product);

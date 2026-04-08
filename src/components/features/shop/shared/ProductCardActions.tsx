@@ -42,3 +42,4 @@ export function ProductCardActions({ product }: { product: Product }) {
     </div>
   );
 }
+

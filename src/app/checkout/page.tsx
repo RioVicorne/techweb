@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ShopHeader } from "@/components/shop/ShopHeader";
+import { ShopHeader } from "@/components/features/shop/shared/ShopHeader";
 import { CheckoutClient } from "./CheckoutClient";
 
 export const metadata: Metadata = {

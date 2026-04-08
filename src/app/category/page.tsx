@@ -2,32 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/data/products";
 import { PRODUCTS } from "@/data/products";
-import { ProductCardActions } from "@/components/shop/ProductCardActions";
-
-function StarRow({ filled, reviews }: { filled: number; reviews: string }) {
-  return (
-    <div className="mb-2 flex flex-wrap items-center gap-1">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <span
-          key={i}
-          className="material-symbols-outlined text-sm"
-          style={{
-            fontVariationSettings: `'FILL' ${i <= filled ? 1 : 0}`,
-            color:
-              i <= filled
-                ? "var(--stitch-color-tertiary, var(--stitch-color-secondary))"
-                : "var(--stitch-color-on-surface-variant)",
-          }}
-        >
-          star
-        </span>
-      ))}
-      <span className="text-[10px]" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-        {reviews}
-      </span>
-    </div>
-  );
-}
+import { ProductCardActions } from "@/components/features/shop/shared/ProductCardActions";
+import { StarRow } from "@/components/ui/StarRow";
 
 type CategoryChip = {
   key: string;

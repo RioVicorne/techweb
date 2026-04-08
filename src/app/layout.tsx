@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Manrope, Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/cart-context";
+import { MobileBottomNav } from "@/components/layout/mobile/MobileBottomNav";
 import {
   getAppStitchThemeStyle,
   getStitchProjectTitle,
@@ -71,7 +72,10 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${plusJakarta.variable} ${spaceGrotesk.variable} ${manrope.variable} antialiased`}
         style={themeStyle}
       >
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          <div className="min-h-dvh pb-24 md:pb-0">{children}</div>
+          <MobileBottomNav />
+        </CartProvider>
       </body>
     </html>
   );
