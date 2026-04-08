@@ -473,6 +473,43 @@ export function CheckoutClient() {
                       <p className="mt-1 text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
                         {line.qty} × {formatVndDisplay(line.priceVnd)} <span className="text-xs font-normal">VND</span>
                       </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <div
+                          className="inline-flex items-center rounded-lg border"
+                          style={{
+                            borderColor:
+                              "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 25%, transparent)",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            className="px-2.5 py-1 text-sm font-bold transition hover:opacity-80"
+                            style={{ color: "var(--stitch-color-on-surface)" }}
+                            onClick={() => setCartQty(line.productId, line.qty - 1)}
+                            aria-label="Giảm số lượng"
+                          >
+                            −
+                          </button>
+                          <span className="min-w-[2rem] text-center text-sm font-bold text-white">{line.qty}</span>
+                          <button
+                            type="button"
+                            className="px-2.5 py-1 text-sm font-bold transition hover:opacity-80"
+                            style={{ color: "var(--stitch-color-on-surface)" }}
+                            onClick={() => setCartQty(line.productId, line.qty + 1)}
+                            aria-label="Tăng số lượng"
+                          >
+                            +
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          className="text-xs font-medium underline-offset-2 transition hover:underline"
+                          style={{ color: "var(--stitch-color-on-surface-variant)" }}
+                          onClick={() => removeCartLine(line.productId)}
+                        >
+                          Xóa
+                        </button>
+                      </div>
                     </div>
                     <p className="shrink-0 text-sm font-black tabular-nums text-white">
                       {formatVndDisplay(line.priceVnd * line.qty)} <span className="text-[10px] font-normal">VND</span>
