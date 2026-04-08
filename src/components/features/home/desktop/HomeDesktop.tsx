@@ -178,11 +178,11 @@ export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
             {products.map((p) => (
               <div
                 key={p.id}
-                className="group/card relative rounded-3xl border p-5 transition-all duration-300 hover:bg-[var(--stitch-color-surface-bright,var(--stitch-color-surface-container))]"
+                className="group/card relative rounded-3xl border p-4 transition-all duration-300 hover:bg-[var(--stitch-color-surface-bright,var(--stitch-color-surface-container))]"
                 style={{
                   background: "var(--stitch-color-surface-container)",
                   borderColor:
@@ -207,7 +207,7 @@ export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
                   </div>
                 ) : null}
                 <div
-                  className="relative mb-6 h-56 overflow-hidden rounded-2xl"
+                  className="relative mb-4 h-44 overflow-hidden rounded-2xl"
                   style={{
                     background:
                       "var(--stitch-color-surface-container-low, var(--stitch-color-surface))",
@@ -223,15 +223,18 @@ export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
                   />
                 </div>
                 {/* Hide rating on list cards; show on product detail only. */}
-                <h3 className="mb-2 line-clamp-1 text-lg font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                <h3 className="mb-2 line-clamp-2 text-sm font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
                   {p.title}
                 </h3>
-                <p className="mb-6 text-2xl font-black" style={{ color: "var(--stitch-color-primary)" }}>
+                <p className="mb-3 line-clamp-2 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                  Hiệu năng gaming • Bảo hành chính hãng • Giao nhanh
+                </p>
+                <p className="mb-4 text-lg font-black" style={{ color: "var(--stitch-color-primary)" }}>
                   {p.price} <span className="text-xs font-normal">VND</span>
                 </p>
                 <Link
                   href={`/product/${p.id}`}
-                  className="flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-white transition-all hover:bg-[var(--stitch-color-primary)] hover:text-[var(--stitch-color-on-primary)] active:scale-95"
+                  className="flex w-full items-center justify-center rounded-xl py-2.5 text-sm font-bold text-white transition-all hover:bg-[var(--stitch-color-primary)] hover:text-[var(--stitch-color-on-primary)] active:scale-95"
                   style={{
                     background:
                       "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",

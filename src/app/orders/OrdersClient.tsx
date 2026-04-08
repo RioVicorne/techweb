@@ -50,6 +50,22 @@ function statusLabel(s: string) {
   return map[s] ?? s;
 }
 
+function tabColor(tabKey: string) {
+  // Keep vibrant, distinct colors for the timeline icons (mobile).
+  switch (tabKey) {
+    case "pending":
+      return { fg: "var(--stitch-color-secondary, #f59e0b)", bg: "color-mix(in srgb, var(--stitch-color-secondary, #f59e0b) 18%, transparent)" };
+    case "preparing":
+      return { fg: "var(--stitch-color-tertiary, #8b5cf6)", bg: "color-mix(in srgb, var(--stitch-color-tertiary, #8b5cf6) 18%, transparent)" };
+    case "shipping":
+      return { fg: "var(--stitch-color-primary, #22c55e)", bg: "color-mix(in srgb, var(--stitch-color-primary, #22c55e) 18%, transparent)" };
+    case "delivered":
+      return { fg: "var(--stitch-color-success, #10b981)", bg: "color-mix(in srgb, var(--stitch-color-success, #10b981) 18%, transparent)" };
+    default:
+      return { fg: "var(--stitch-color-primary)", bg: "color-mix(in srgb, var(--stitch-color-primary) 18%, transparent)" };
+  }
+}
+
 export function OrdersClient() {
   const router = useRouter();
   const params = useSearchParams();
@@ -168,6 +184,7 @@ export function OrdersClient() {
             {STATUS_TABS.map((t) => {
               const n = t.statuses.reduce((sum, s) => sum + (counts[s] ?? 0), 0);
               const active = t.key === activeTab.key;
+              const c = tabColor(t.key);
               return (
                 <button
                   key={t.key}
@@ -192,12 +209,10 @@ export function OrdersClient() {
                     <div
                       className="mx-auto flex h-10 w-10 items-center justify-center rounded-full"
                       style={{
-                        background: active
-                          ? "color-mix(in srgb, var(--stitch-color-primary) 18%, transparent)"
-                          : "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
-                        color: "var(--stitch-color-primary)",
+                        background: active ? c.bg : "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                        color: c.fg,
                         border: active
-                          ? "1px solid color-mix(in srgb, var(--stitch-color-primary) 45%, transparent)"
+                          ? `1px solid color-mix(in srgb, ${c.fg} 45%, transparent)`
                           : "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 18%, transparent)",
                       }}
                       aria-hidden

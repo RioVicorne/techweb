@@ -6,11 +6,52 @@ import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/context/cart-context";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
+type CatalogProduct = { id: string; title: string; img: string; price: string };
+
+function norm(s: string) {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
 export function ShopHeader() {
   const { itemCount } = useCart();
   const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowser(), []);
   const [authed, setAuthed] = useState(false);
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const [products, setProducts] = useState<CatalogProduct[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
+  const hits = useMemo(() => {
+    const qn = norm(q);
+    if (!qn) return [];
+    return products
+      .filter((p) => norm(p.title || "").includes(qn))
+      .slice(0, 8);
+  }, [products, q]);
+
+  async function ensureProducts() {
+    if (products.length > 0 || loadingProducts) return;
+    setLoadingProducts(true);
+    try {
+      const res = await fetch("/api/catalog/products", { method: "GET" });
+      const json = (await res.json()) as { products?: CatalogProduct[] };
+      setProducts(Array.isArray(json.products) ? json.products : []);
+    } finally {
+      setLoadingProducts(false);
+    }
+  }
+
+  function submitSearch() {
+    const qq = q.trim();
+    if (!qq) return;
+    setOpen(false);
+    router.push(`/search?q=${encodeURIComponent(qq)}`);
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -82,12 +123,25 @@ export function ShopHeader() {
           <div className="relative md:hidden">
             <input
               type="search"
-              placeholder="Search tech..."
+              placeholder="Tìm sản phẩm..."
               className="w-44 rounded-full border-none py-2 pl-9 pr-3 text-sm outline-none transition-all focus:ring-2 focus:ring-[var(--stitch-color-secondary)]"
               style={{
                 background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
                 color: "var(--stitch-color-on-surface)",
                 caretColor: "var(--stitch-color-secondary)",
+              }}
+              value={q}
+              onFocus={async () => {
+                setOpen(true);
+                await ensureProducts();
+              }}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setOpen(true);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") submitSearch();
+                if (e.key === "Escape") setOpen(false);
               }}
             />
             <span
@@ -97,25 +151,135 @@ export function ShopHeader() {
             >
               search
             </span>
+
+            {open && q.trim() ? (
+              <div
+                className="absolute left-0 right-0 top-[calc(100%+10px)] z-50 overflow-hidden rounded-2xl border"
+                style={{
+                  background: "var(--stitch-color-surface-container)",
+                  borderColor:
+                    "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+                }}
+              >
+                {hits.length === 0 ? (
+                  <div className="px-4 py-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                    Không tìm thấy sản phẩm.
+                  </div>
+                ) : (
+                  <div className="divide-y" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-outline) 8%, transparent)" }}>
+                    {hits.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        className="flex w-full items-center gap-3 px-3 py-2 text-left transition hover:opacity-95"
+                        onClick={() => {
+                          setOpen(false);
+                          router.push(`/product/${encodeURIComponent(p.id)}`);
+                        }}
+                      >
+                        <div className="h-10 w-10 overflow-hidden rounded-xl" style={{ background: "var(--stitch-color-surface-container-low)" }}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={p.img} alt="" className="h-full w-full object-cover" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-black text-white">{p.title}</div>
+                          <div className="mt-0.5 text-xs font-black" style={{ color: "var(--stitch-color-primary)" }}>
+                            {p.price} VND
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : null}
           </div>
 
           <div className="relative hidden md:block">
-            <input
-              type="search"
-              placeholder="Search tech..."
-              className="w-52 rounded-full border-none py-2 pl-4 pr-10 text-sm outline-none transition-all focus:ring-2 focus:ring-[var(--stitch-color-secondary)]"
-              style={{
-                background: "var(--stitch-color-surface-container)",
-                color: "var(--stitch-color-on-surface)",
-                caretColor: "var(--stitch-color-secondary)",
-              }}
-            />
-            <span
-              className="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-lg"
-              style={{ color: "var(--stitch-color-on-surface-variant)" }}
-            >
-              search
-            </span>
+            <div className="relative">
+              <input
+                type="search"
+                placeholder="Tìm sản phẩm..."
+                className="w-52 rounded-full border-none py-2 pl-4 pr-12 text-sm outline-none transition-all focus:ring-2 focus:ring-[var(--stitch-color-secondary)]"
+                style={{
+                  background: "var(--stitch-color-surface-container)",
+                  color: "var(--stitch-color-on-surface)",
+                  caretColor: "var(--stitch-color-secondary)",
+                }}
+                value={q}
+                onFocus={async () => {
+                  setOpen(true);
+                  await ensureProducts();
+                }}
+                onChange={(e) => {
+                  setQ(e.target.value);
+                  setOpen(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") submitSearch();
+                  if (e.key === "Escape") setOpen(false);
+                }}
+              />
+
+              <button
+                type="button"
+                className="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full transition active:scale-95"
+                style={{
+                  background:
+                    "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 22%, transparent)",
+                  color: "var(--stitch-color-primary)",
+                }}
+                aria-label="Tìm kiếm"
+                title="Tìm kiếm"
+                onClick={submitSearch}
+              >
+                <span className="material-symbols-outlined text-[20px]" aria-hidden>
+                  search
+                </span>
+              </button>
+
+              {open && q.trim() ? (
+                <div
+                  className="absolute left-0 right-0 top-[calc(100%+10px)] z-50 overflow-hidden rounded-2xl border"
+                  style={{
+                    background: "var(--stitch-color-surface-container)",
+                    borderColor:
+                      "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+                  }}
+                >
+                  {hits.length === 0 ? (
+                    <div className="px-4 py-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                      Không tìm thấy sản phẩm.
+                    </div>
+                  ) : (
+                    <div className="divide-y" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-outline) 8%, transparent)" }}>
+                      {hits.map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          className="flex w-full items-center gap-3 px-3 py-2 text-left transition hover:opacity-95"
+                          onClick={() => {
+                            setOpen(false);
+                            router.push(`/product/${encodeURIComponent(p.id)}`);
+                          }}
+                        >
+                          <div className="h-10 w-10 overflow-hidden rounded-xl" style={{ background: "var(--stitch-color-surface-container-low)" }}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={p.img} alt="" className="h-full w-full object-cover" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-black text-white">{p.title}</div>
+                            <div className="mt-0.5 text-xs font-black" style={{ color: "var(--stitch-color-primary)" }}>
+                              {p.price} VND
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : null}
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <Link
