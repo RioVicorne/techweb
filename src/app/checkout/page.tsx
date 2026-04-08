@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+  import type { Metadata } from "next";
 import { ShopHeader } from "@/components/features/shop/shared/ShopHeader";
 import { CheckoutClient } from "./CheckoutClient";
 

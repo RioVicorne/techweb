@@ -56,21 +56,26 @@ export function ShopHeader() {
           </nav>
         </div>
         <div className="flex items-center gap-4 md:gap-6">
-          {/* Mobile quick actions */}
-          <button
-            type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 md:hidden"
-            style={{
-              background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
-              color: "var(--stitch-color-on-surface-variant)",
-            }}
-            aria-label="Tìm kiếm"
-            title="Tìm kiếm"
-          >
-            <span className="material-symbols-outlined" aria-hidden>
+          {/* Mobile search */}
+          <div className="relative md:hidden">
+            <input
+              type="search"
+              placeholder="Search tech..."
+              className="w-44 rounded-full border-none py-2 pl-9 pr-3 text-sm outline-none transition-all focus:ring-2 focus:ring-[var(--stitch-color-secondary)]"
+              style={{
+                background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+                color: "var(--stitch-color-on-surface)",
+                caretColor: "var(--stitch-color-secondary)",
+              }}
+            />
+            <span
+              className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg"
+              style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              aria-hidden
+            >
               search
             </span>
-          </button>
+          </div>
 
           <div className="relative hidden md:block">
             <input
@@ -126,20 +131,6 @@ export function ShopHeader() {
               }}
             >
               Sign Up
-            </button>
-            <button
-              type="button"
-              className="flex h-10 w-10 items-center justify-center rounded-full transition-all active:scale-95 md:hidden"
-              style={{
-                background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
-                color: "var(--stitch-color-on-surface-variant)",
-              }}
-              aria-label="Tài khoản"
-              title="Tài khoản"
-            >
-              <span className="material-symbols-outlined" aria-hidden>
-                account_circle
-              </span>
             </button>
           </div>
         </div>

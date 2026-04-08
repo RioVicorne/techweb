@@ -15,7 +15,7 @@ type NavItem = {
 const ITEMS: NavItem[] = [
   { href: "/", label: "Home", icon: "home", match: (p) => p === "/" },
   { href: "/category", label: "Danh mục", icon: "grid_view", match: (p) => p.startsWith("/category") },
-  { href: "/checkout", label: "Cart", icon: "shopping_cart", match: (p) => p.startsWith("/checkout"), badge: "cart" },
+  { href: "/#contact", label: "Liên hệ", icon: "call" },
   { href: "/#account", label: "Tài khoản", icon: "account_circle" },
 ];
 
