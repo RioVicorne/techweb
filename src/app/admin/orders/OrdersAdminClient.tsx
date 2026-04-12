@@ -41,7 +41,9 @@ export function OrdersAdminClient() {
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const q = filter ? `?status=${encodeURIComponent(filter)}&limit=100` : "?limit=100";
+    const q = filter
+      ? `?status=${encodeURIComponent(filter)}&limit=100`
+      : "?limit=100";
     const res = await fetch(`/api/admin/orders${q}`, {
       credentials: "include",
     });
@@ -114,27 +116,47 @@ export function OrdersAdminClient() {
               background: "rgba(255,255,255,0.03)",
             }}
           >
-            <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] opacity-40">Đơn hàng & Sản phẩm</th>
-            <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] opacity-40">Khách hàng & Địa chỉ</th>
-            <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] opacity-40">Thanh toán</th>
-            <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] opacity-40">Trạng thái</th>
+            <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] opacity-40">
+              Đơn hàng & Sản phẩm
+            </th>
+            <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] opacity-40">
+              Khách hàng & Địa chỉ
+            </th>
+            <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] opacity-40">
+              Thanh toán
+            </th>
+            <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] opacity-40">
+              Trạng thái
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/[0.05]">
           {orderList.length === 0 ? (
             <tr>
-              <td colSpan={4} className="px-6 py-12 text-center" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+              <td
+                colSpan={4}
+                className="px-6 py-12 text-center"
+                style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              >
                 Không có đơn hàng nào trong mục này.
               </td>
             </tr>
           ) : (
             orderList.map((o) => {
-              const currentIndex = (ADMIN_ORDER_STATUSES as readonly string[]).indexOf(o.status);
-              const statusOptions = (ADMIN_ORDER_STATUSES as readonly string[]).filter((s, idx) => {
-                if (s === "CANCELLED") return o.status !== "COMPLETED" && o.status !== "CANCELLED";
+              const currentIndex = (
+                ADMIN_ORDER_STATUSES as readonly string[]
+              ).indexOf(o.status);
+              const statusOptions = (
+                ADMIN_ORDER_STATUSES as readonly string[]
+              ).filter((s, idx) => {
+                if (s === "CANCELLED")
+                  return o.status !== "COMPLETED" && o.status !== "CANCELLED";
                 return idx >= currentIndex;
               });
-              const isLocked = updatingId === o.id || o.status === "COMPLETED" || o.status === "CANCELLED";
+              const isLocked =
+                updatingId === o.id ||
+                o.status === "COMPLETED" ||
+                o.status === "CANCELLED";
               const nextStatuses = statusOptions.filter((s) => s !== o.status);
               const isOpen = openStatusMenuId === o.id && !isLocked;
 
@@ -147,14 +169,20 @@ export function OrdersAdminClient() {
                   <td className="px-6 py-6 align-top">
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center gap-2">
-                        <span className="font-black text-lg tracking-tighter text-white">#{o.order_code}</span>
+                        <span className="font-black text-lg tracking-tighter text-white">
+                          #{o.order_code}
+                        </span>
                       </div>
 
                       {o.first_item?.title ? (
                         <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-2 pr-4 ring-1 ring-white/10">
                           {o.first_item.image && (
                             <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-black/20">
-                              <img src={o.first_item.image} alt="" className="h-full w-full object-cover" />
+                              <img
+                                src={o.first_item.image}
+                                alt=""
+                                className="h-full w-full object-cover"
+                              />
                             </div>
                           )}
                           <div className="min-w-0">
@@ -167,7 +195,9 @@ export function OrdersAdminClient() {
                           </div>
                         </div>
                       ) : (
-                        <div className="text-[10px] font-bold italic opacity-30">Không có thông tin sản phẩm</div>
+                        <div className="text-[10px] font-bold italic opacity-30">
+                          Không có thông tin sản phẩm
+                        </div>
                       )}
                     </div>
                   </td>
@@ -176,24 +206,35 @@ export function OrdersAdminClient() {
                   <td className="px-6 py-6 align-top">
                     <div className="flex flex-col gap-3">
                       <div>
-                        <div className="text-sm font-black text-white">{o.full_name}</div>
+                        <div className="text-sm font-black text-white">
+                          {o.full_name}
+                        </div>
                         <div className="mt-1 flex items-center gap-1.5 text-xs font-bold text-[var(--stitch-color-primary)]">
-                          <span className="material-symbols-outlined text-[14px]">phone</span>
+                          <span className="material-symbols-outlined text-[14px]">
+                            phone
+                          </span>
                           {o.phone}
                         </div>
                       </div>
 
                       <div className="space-y-1.5 border-l-2 border-white/10 pl-3">
                         <div className="flex items-start gap-1.5 text-xs leading-relaxed opacity-70">
-                          <span className="material-symbols-outlined text-[14px] mt-0.5 shrink-0">location_on</span>
+                          <span className="material-symbols-outlined text-[14px] mt-0.5 shrink-0">
+                            location_on
+                          </span>
                           <span className="line-clamp-2">
-                            {o.address_line}{o.city ? `, ${o.city}` : ""}
+                            {o.address_line}
+                            {o.city ? `, ${o.city}` : ""}
                           </span>
                         </div>
                         {o.note && (
                           <div className="flex items-start gap-1.5 text-[10px] leading-relaxed opacity-50 italic">
-                            <span className="material-symbols-outlined text-[12px] mt-0.5 shrink-0">comment</span>
-                            <span className="line-clamp-2">Lưu ý: {o.note}</span>
+                            <span className="material-symbols-outlined text-[12px] mt-0.5 shrink-0">
+                              comment
+                            </span>
+                            <span className="line-clamp-2">
+                              Lưu ý: {o.note}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -210,7 +251,11 @@ export function OrdersAdminClient() {
                         {o.currency || "VND"} • Trả trước
                       </div>
                       <div className="text-[10px] font-bold uppercase tracking-widest text-white/45">
-                        {new Date(o.created_at).toLocaleDateString("vi-VN")} {new Date(o.created_at).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
+                        {new Date(o.created_at).toLocaleDateString("vi-VN")}{" "}
+                        {new Date(o.created_at).toLocaleTimeString("vi-VN", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </div>
                     </div>
                   </td>
@@ -219,12 +264,16 @@ export function OrdersAdminClient() {
                   <td className="px-6 py-6 align-top">
                     <div className="flex flex-col gap-4">
                       <StatusBadge status={o.status} />
-                      
+
                       <div className="relative" data-status-menu-root="true">
                         <button
                           type="button"
                           disabled={isLocked}
-                          onClick={() => setOpenStatusMenuId((prev) => (prev === o.id ? null : o.id))}
+                          onClick={() =>
+                            setOpenStatusMenuId((prev) =>
+                              prev === o.id ? null : o.id,
+                            )
+                          }
                           className="group/menu flex w-full items-center justify-between gap-2 rounded-2xl border bg-white/5 py-2 pl-3 pr-3 text-left text-[10px] font-black uppercase tracking-wide outline-none transition-all hover:bg-white/10 hover:border-white/20 disabled:cursor-not-allowed disabled:opacity-35"
                           style={{
                             borderColor: "rgba(255,255,255,0.1)",
@@ -299,32 +348,51 @@ export function OrdersAdminClient() {
       <header>
         <h1
           className="text-2xl font-semibold tracking-tight md:text-3xl"
-          style={{ fontFamily: "var(--stitch-font-headline, var(--stitch-font-body))" }}
+          style={{
+            fontFamily: "var(--stitch-font-headline, var(--stitch-font-body))",
+          }}
         >
           Xử lý đơn hàng
         </h1>
-        <p className="mt-1 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+        <p
+          className="mt-1 text-sm"
+          style={{ color: "var(--stitch-color-on-surface-variant)" }}
+        >
           Lọc theo trạng thái và cập nhật tiến độ xử lý.
         </p>
       </header>
 
       <div className="flex flex-wrap items-center gap-4 rounded-3xl bg-white/5 p-4">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[20px] opacity-60">filter_list</span>
-          <label className="text-xs font-black uppercase tracking-widest opacity-60">Trạng thái</label>
+          <span className="material-symbols-outlined text-[20px] opacity-60">
+            filter_list
+          </span>
+          <label className="text-xs font-black uppercase tracking-widest opacity-60">
+            Trạng thái
+          </label>
         </div>
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="rounded-xl border bg-transparent px-4 py-2 text-sm font-bold outline-none transition-all focus:ring-2 focus:ring-[var(--stitch-color-primary)]/50"
           style={{
-            borderColor: "color-mix(in srgb, var(--stitch-color-outline-variant) 40%, transparent)",
+            borderColor:
+              "color-mix(in srgb, var(--stitch-color-outline-variant) 40%, transparent)",
             color: "var(--stitch-color-on-surface)",
           }}
         >
-          <option value="" className="bg-[var(--stitch-color-surface-container-high)]">Tất cả đơn hàng</option>
+          <option
+            value=""
+            className="bg-[var(--stitch-color-surface-container-high)]"
+          >
+            Tất cả đơn hàng
+          </option>
           {ADMIN_ORDER_STATUSES.map((s) => (
-            <option key={s} value={s} className="bg-[var(--stitch-color-surface-container-high)]">
+            <option
+              key={s}
+              value={s}
+              className="bg-[var(--stitch-color-surface-container-high)]"
+            >
               {statusLabelVi(s)}
             </option>
           ))}
@@ -340,13 +408,19 @@ export function OrdersAdminClient() {
       {error ? <p className="text-sm text-red-500">{error}</p> : null}
 
       {loading ? (
-        <p className="text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+        <p
+          className="text-sm"
+          style={{ color: "var(--stitch-color-on-surface-variant)" }}
+        >
           Đang tải...
         </p>
       ) : (
         <div className="space-y-8">
           {orders.length === 0 ? (
-            <div className="text-center text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+            <div
+              className="text-center text-sm"
+              style={{ color: "var(--stitch-color-on-surface-variant)" }}
+            >
               Không có đơn hàng nào.
             </div>
           ) : (
@@ -356,7 +430,13 @@ export function OrdersAdminClient() {
 
               return (
                 <div key={status} className="space-y-4">
-                  <h2 className="text-xl font-bold tracking-tight text-white" style={{ fontFamily: "var(--stitch-font-headline, var(--stitch-font-body))" }}>
+                  <h2
+                    className="text-xl font-bold tracking-tight text-white"
+                    style={{
+                      fontFamily:
+                        "var(--stitch-font-headline, var(--stitch-font-body))",
+                    }}
+                  >
                     {statusLabelVi(status)}
                   </h2>
                   {renderOrderTable(ordersForStatus)}
@@ -373,12 +453,12 @@ export function OrdersAdminClient() {
 function StatusBadge({ status }: { status: string }) {
   const color = getStatusColor(status);
   return (
-    <div 
+    <div
       className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider shadow-sm"
-      style={{ 
+      style={{
         background: `color-mix(in srgb, ${color} 15%, transparent)`,
         color: color,
-        border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`
+        border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`,
       }}
     >
       <div className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
@@ -389,11 +469,17 @@ function StatusBadge({ status }: { status: string }) {
 
 function getStatusColor(status: string) {
   switch (status) {
-    case "PENDING_CONFIRMATION": return "#f59e0b"; // amber
-    case "CONFIRMED": return "var(--stitch-color-primary)";
-    case "SHIPPING": return "#3b82f6"; // blue
-    case "COMPLETED": return "#10b981"; // emerald
-    case "CANCELLED": return "var(--stitch-color-error)";
-    default: return "#94a3b8";
+    case "PENDING_CONFIRMATION":
+      return "#f59e0b"; // amber
+    case "CONFIRMED":
+      return "var(--stitch-color-primary)";
+    case "SHIPPING":
+      return "#3b82f6"; // blue
+    case "COMPLETED":
+      return "#10b981"; // emerald
+    case "CANCELLED":
+      return "var(--stitch-color-error)";
+    default:
+      return "#94a3b8";
   }
 }
