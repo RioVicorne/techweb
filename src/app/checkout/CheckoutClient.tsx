@@ -10,9 +10,6 @@ import { formatVndDisplay, parseDisplayPriceToVnd } from "@/data/products";
 import { createOrderId, saveOrder, type OrderCustomer } from "@/lib/orders";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
-const inputClass =
-  "w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)]";
-
 const inputStyle: CSSProperties = {
   background: "var(--stitch-color-surface-container)",
   borderColor:

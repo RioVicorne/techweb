@@ -55,7 +55,9 @@ export function LoginClient() {
         password,
       });
       if (signUpErr) throw signUpErr;
-      setNotice("Tạo tài khoản thành công. Nếu bật email confirm, hãy kiểm tra inbox rồi đăng nhập.");
+      setNotice(
+        "Tạo tài khoản thành công. Nếu bật email confirm, hãy kiểm tra inbox rồi đăng nhập.",
+      );
       setMode("login");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Đăng nhập thất bại");
@@ -83,7 +85,8 @@ export function LoginClient() {
             <div
               className="h-full w-full opacity-10"
               style={{
-                backgroundImage: "radial-gradient(circle, #85adff 1px, transparent 1px)",
+                backgroundImage:
+                  "radial-gradient(circle, #85adff 1px, transparent 1px)",
                 backgroundSize: "30px 30px",
               }}
             />
@@ -95,23 +98,44 @@ export function LoginClient() {
                 className="flex h-10 w-10 items-center justify-center rounded-lg shadow-[0_0_15px_rgba(133,173,255,0.4)]"
                 style={{ background: "var(--stitch-color-primary)" }}
               >
-                <span className="material-symbols-outlined font-bold" style={{ color: "var(--stitch-color-on-primary-container)" }}>
+                <span
+                  className="material-symbols-outlined font-bold"
+                  style={{ color: "var(--stitch-color-on-primary-container)" }}
+                >
                   bolt
                 </span>
               </div>
-              <span className="text-2xl font-bold tracking-tighter" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+              <span
+                className="text-2xl font-bold tracking-tighter"
+                style={{ fontFamily: "var(--stitch-font-headline)" }}
+              >
                 CYBERPULSE
               </span>
             </Link>
           </div>
 
           <div className="relative z-10">
-            <h1 className="mb-6 text-5xl font-bold leading-tight" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+            <h1
+              className="mb-6 text-5xl font-bold leading-tight"
+              style={{ fontFamily: "var(--stitch-font-headline)" }}
+            >
               ENGINEERED FOR{" "}
-              <span style={{ color: "var(--stitch-color-primary)", fontStyle: "italic" }}>VELOCITY</span>.
+              <span
+                style={{
+                  color: "var(--stitch-color-primary)",
+                  fontStyle: "italic",
+                }}
+              >
+                VELOCITY
+              </span>
+              .
             </h1>
-            <p className="max-w-md text-lg font-medium" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-              Access the next generation of high-performance tech ecosystem. Your kinetic journey starts here.
+            <p
+              className="max-w-md text-lg font-medium"
+              style={{ color: "var(--stitch-color-on-surface-variant)" }}
+            >
+              Access the next generation of high-performance tech ecosystem.
+              Your kinetic journey starts here.
             </p>
           </div>
 
@@ -125,17 +149,25 @@ export function LoginClient() {
                 <div
                   key={src}
                   className="h-10 w-10 overflow-hidden rounded-full border-2"
-                  style={{ borderColor: "var(--stitch-color-surface-container-low)" }}
+                  style={{
+                    borderColor: "var(--stitch-color-surface-container-low)",
+                  }}
                   aria-label={`Member ${i + 1}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img alt="" src={src} className="h-full w-full object-cover" />
+                  <img
+                    alt=""
+                    src={src}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
               ))}
             </div>
             <div className="text-sm font-medium">
               <p className="text-white">50k+ Members</p>
-              <p style={{ color: "var(--stitch-color-on-surface-variant)" }}>Live in the pulse</p>
+              <p style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                Live in the pulse
+              </p>
             </div>
           </div>
         </div>
@@ -143,29 +175,50 @@ export function LoginClient() {
         {/* Right */}
         <div
           className="flex flex-col justify-center p-8 md:p-16"
-          style={{ background: "rgba(24, 24, 43, 0.7)", backdropFilter: "blur(20px)" }}
+          style={{
+            background: "rgba(24, 24, 43, 0.7)",
+            backdropFilter: "blur(20px)",
+          }}
         >
           <div className="mb-10">
-            <h2 className="mb-2 text-3xl font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+            <h2
+              className="mb-2 text-3xl font-bold text-white"
+              style={{ fontFamily: "var(--stitch-font-headline)" }}
+            >
               {mode === "login" ? "Welcome Back" : "Create Account"}
             </h2>
-            <p className="font-medium" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-              {mode === "login" ? "Enter your credentials to synchronize." : "Create an account to continue checkout."}
+            <p
+              className="font-medium"
+              style={{ color: "var(--stitch-color-on-surface-variant)" }}
+            >
+              {mode === "login"
+                ? "Enter your credentials to synchronize."
+                : "Create an account to continue checkout."}
             </p>
           </div>
 
           <form className="space-y-6" onSubmit={onSubmit}>
             <div>
-              <label className="mb-2 ml-1 block text-xs font-bold uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+              <label
+                className="mb-2 ml-1 block text-xs font-bold uppercase tracking-widest"
+                style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              >
                 Identity
               </label>
               <div className="group relative">
-                <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center transition-colors" style={{ color: "var(--stitch-color-outline)" }}>
-                  <span className="material-symbols-outlined">alternate_email</span>
+                <div
+                  className="pointer-events-none absolute inset-y-0 left-4 flex items-center transition-colors"
+                  style={{ color: "var(--stitch-color-outline)" }}
+                >
+                  <span className="material-symbols-outlined">
+                    alternate_email
+                  </span>
                 </div>
                 <input
                   className="w-full rounded-xl border-none py-4 pl-12 pr-4 text-white placeholder:text-[color:var(--stitch-color-outline-variant)] outline-none transition-all focus:ring-2 focus:ring-[color:var(--stitch-color-primary)]/50"
-                  style={{ background: "var(--stitch-color-surface-container-high)" }}
+                  style={{
+                    background: "var(--stitch-color-surface-container-high)",
+                  }}
                   placeholder="Email"
                   type="email"
                   autoComplete="email"
@@ -177,23 +230,36 @@ export function LoginClient() {
 
             <div>
               <div className="mb-2 ml-1 flex items-center justify-between">
-                <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                <label
+                  className="block text-xs font-bold uppercase tracking-widest"
+                  style={{ color: "var(--stitch-color-on-surface-variant)" }}
+                >
                   Access Key
                 </label>
-                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--stitch-color-secondary-dim)" }}>
+                <span
+                  className="text-xs font-bold uppercase tracking-widest"
+                  style={{ color: "var(--stitch-color-secondary-dim)" }}
+                >
                   {/* placeholder */}
                 </span>
               </div>
               <div className="group relative">
-                <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center transition-colors" style={{ color: "var(--stitch-color-outline)" }}>
+                <div
+                  className="pointer-events-none absolute inset-y-0 left-4 flex items-center transition-colors"
+                  style={{ color: "var(--stitch-color-outline)" }}
+                >
                   <span className="material-symbols-outlined">lock_open</span>
                 </div>
                 <input
                   className="w-full rounded-xl border-none py-4 pl-12 pr-12 text-white placeholder:text-[color:var(--stitch-color-outline-variant)] outline-none transition-all focus:ring-2 focus:ring-[color:var(--stitch-color-primary)]/50"
-                  style={{ background: "var(--stitch-color-surface-container-high)" }}
+                  style={{
+                    background: "var(--stitch-color-surface-container-high)",
+                  }}
                   placeholder="••••••••"
                   type={showPw ? "text" : "password"}
-                  autoComplete={mode === "login" ? "current-password" : "new-password"}
+                  autoComplete={
+                    mode === "login" ? "current-password" : "new-password"
+                  }
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -204,7 +270,9 @@ export function LoginClient() {
                   style={{ color: "var(--stitch-color-outline)" }}
                   aria-label={showPw ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                 >
-                  <span className="material-symbols-outlined">{showPw ? "visibility" : "visibility_off"}</span>
+                  <span className="material-symbols-outlined">
+                    {showPw ? "visibility" : "visibility_off"}
+                  </span>
                 </button>
               </div>
             </div>
@@ -217,18 +285,36 @@ export function LoginClient() {
                 onChange={(e) => setRemember(e.target.checked)}
                 className="h-5 w-5 rounded"
               />
-              <label htmlFor="remember" className="cursor-pointer select-none text-sm font-medium" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+              <label
+                htmlFor="remember"
+                className="cursor-pointer select-none text-sm font-medium"
+                style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              >
                 Maintain Active Session
               </label>
             </div>
 
             {error ? (
-              <div className="rounded-xl border px-4 py-3 text-sm" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-error) 35%, transparent)", color: "var(--stitch-color-on-surface)" }}>
+              <div
+                className="rounded-xl border px-4 py-3 text-sm"
+                style={{
+                  borderColor:
+                    "color-mix(in srgb, var(--stitch-color-error) 35%, transparent)",
+                  color: "var(--stitch-color-on-surface)",
+                }}
+              >
                 {error}
               </div>
             ) : null}
             {notice ? (
-              <div className="rounded-xl border px-4 py-3 text-sm" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-primary) 35%, transparent)", color: "var(--stitch-color-on-surface)" }}>
+              <div
+                className="rounded-xl border px-4 py-3 text-sm"
+                style={{
+                  borderColor:
+                    "color-mix(in srgb, var(--stitch-color-primary) 35%, transparent)",
+                  color: "var(--stitch-color-on-surface)",
+                }}
+              >
                 {notice}
               </div>
             ) : null}
@@ -236,21 +322,29 @@ export function LoginClient() {
             <button
               className="flex w-full items-center justify-center gap-2 rounded-xl py-4 text-lg font-bold transition-all active:scale-[0.98] disabled:opacity-60"
               style={{
-                background: "linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)",
+                background:
+                  "linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)",
                 color: "var(--stitch-color-on-primary-fixed, black)",
                 boxShadow: "0 0 25px rgba(133,173,255,0.3)",
               }}
               type="submit"
               disabled={busy}
             >
-              <span>{mode === "login" ? "INITIALIZE LOGIN" : "CREATE ACCOUNT"}</span>
-              <span className="material-symbols-outlined">{mode === "login" ? "login" : "person_add"}</span>
+              <span>
+                {mode === "login" ? "INITIALIZE LOGIN" : "CREATE ACCOUNT"}
+              </span>
+              <span className="material-symbols-outlined">
+                {mode === "login" ? "login" : "person_add"}
+              </span>
             </button>
           </form>
 
           <div className="mt-12 text-center">
             {mode === "login" ? (
-              <p className="font-medium" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+              <p
+                className="font-medium"
+                style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              >
                 New to the network?{" "}
                 <button
                   type="button"
@@ -262,7 +356,10 @@ export function LoginClient() {
                 </button>
               </p>
             ) : (
-              <p className="font-medium" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+              <p
+                className="font-medium"
+                style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              >
                 Already have an account?{" "}
                 <button
                   type="button"
@@ -276,7 +373,10 @@ export function LoginClient() {
             )}
           </div>
 
-          <div className="mt-6 text-center text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+          <div
+            className="mt-6 text-center text-xs"
+            style={{ color: "var(--stitch-color-on-surface-variant)" }}
+          >
             <Link href="/" className="font-bold hover:underline">
               Back to store
             </Link>
@@ -286,4 +386,3 @@ export function LoginClient() {
     </div>
   );
 }
-

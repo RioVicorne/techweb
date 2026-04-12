@@ -18,15 +18,9 @@ type OrderRow = {
 
 function statusLabelVi(s: string) {
   const map: Record<string, string> = {
-    PENDING_PAYMENT: "Chờ thanh toán",
     PENDING_CONFIRMATION: "Chờ xác nhận",
     CONFIRMED: "Đã xác nhận",
-    PROCESSING: "Đang xử lý",
-    PACKING: "Đang đóng gói",
     SHIPPING: "Đang giao",
-    IN_TRANSIT: "Đang vận chuyển",
-    OUT_FOR_DELIVERY: "Sắp giao",
-    DELIVERED: "Đã giao",
     COMPLETED: "Hoàn tất",
     CANCELLED: "Đã hủy",
   };
@@ -93,28 +87,33 @@ export function OrdersAdminClient() {
         </p>
       </header>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-          Trạng thái
-        </label>
+      <div className="flex flex-wrap items-center gap-4 rounded-3xl bg-white/5 p-4">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-[20px] opacity-60">filter_list</span>
+          <label className="text-xs font-black uppercase tracking-widest opacity-60">Trạng thái</label>
+        </div>
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="rounded-xl border px-3 py-2 text-sm outline-none"
+          className="rounded-xl border bg-transparent px-4 py-2 text-sm font-bold outline-none transition-all focus:ring-2 focus:ring-[var(--stitch-color-primary)]/50"
           style={{
-            background: "var(--stitch-color-surface-container)",
-            borderColor:
-              "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 40%, transparent)",
+            borderColor: "color-mix(in srgb, var(--stitch-color-outline-variant) 40%, transparent)",
             color: "var(--stitch-color-on-surface)",
           }}
         >
-          <option value="">Tất cả</option>
+          <option value="" className="bg-[var(--stitch-color-surface-container-high)]">Tất cả đơn hàng</option>
           {ADMIN_ORDER_STATUSES.map((s) => (
-            <option key={s} value={s}>
+            <option key={s} value={s} className="bg-[var(--stitch-color-surface-container-high)]">
               {statusLabelVi(s)}
             </option>
           ))}
         </select>
+        {loading && (
+          <div className="ml-auto flex items-center gap-2 text-xs font-bold opacity-60">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--stitch-color-primary)] border-t-transparent" />
+            Đang cập nhật...
+          </div>
+        )}
       </div>
 
       {error ? <p className="text-sm text-red-500">{error}</p> : null}
@@ -153,57 +152,90 @@ export function OrdersAdminClient() {
                 </tr>
               ) : (
                 orders.map((o) => {
-                  const statusOptions = (ADMIN_ORDER_STATUSES as readonly string[]).includes(o.status)
-                    ? ADMIN_ORDER_STATUSES
-                    : [...ADMIN_ORDER_STATUSES, o.status];
+                  const currentIndex = (ADMIN_ORDER_STATUSES as readonly string[]).indexOf(o.status);
+                  const statusOptions = (ADMIN_ORDER_STATUSES as readonly string[]).filter((s, idx) => {
+                    // Always show CANCELLED as an option unless already completed/cancelled
+                    if (s === "CANCELLED") return o.status !== "COMPLETED" && o.status !== "CANCELLED";
+                    // Only show current and future statuses
+                    return idx >= currentIndex;
+                  });
+
                   return (
                   <tr
                     key={o.id}
-                    className="border-t"
+                    className="group border-t transition-colors hover:bg-white/[0.02]"
                     style={{
                       borderColor:
                         "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 15%, transparent)",
                     }}
                   >
-                    <td className="px-4 py-3 align-top">
-                      <div className="font-medium">{o.order_code}</div>
-                      <div className="text-xs tabular-nums" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                        {new Date(o.created_at).toLocaleString("vi-VN")}
+                    <td className="px-4 py-5 align-top">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-black tracking-tight text-white">{o.order_code}</span>
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest opacity-60">
+                          <span className="material-symbols-outlined text-[14px]">event</span>
+                          {new Date(o.created_at).toLocaleDateString("vi-VN")}
+                          <span className="opacity-40">|</span>
+                          {new Date(o.created_at).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })}
+                        </div>
                       </div>
                       {o.first_item?.title ? (
-                        <div className="mt-1 line-clamp-2 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                          {o.first_item.title}
-                          {o.first_item.qty > 1 ? ` ×${o.first_item.qty}` : ""}
+                        <div className="mt-3 flex items-start gap-2">
+                          {o.first_item.image && (
+                            <div className="h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-white/5">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={o.first_item.image} alt="" className="h-full w-full object-cover opacity-80" />
+                            </div>
+                          )}
+                          <div className="line-clamp-2 text-xs opacity-70 leading-relaxed">
+                            {o.first_item.title}
+                            {o.first_item.qty > 1 ? <span className="ml-1 font-bold text-[var(--stitch-color-primary)]">×{o.first_item.qty}</span> : ""}
+                          </div>
                         </div>
                       ) : null}
                     </td>
-                    <td className="px-4 py-3 align-top">
-                      <div>{o.full_name}</div>
-                      <div className="text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                        {o.phone}
+                    <td className="px-4 py-5 align-top">
+                      <div className="flex flex-col gap-1">
+                        <div className="font-bold text-white">{o.full_name}</div>
+                        <div className="flex items-center gap-1.5 text-xs opacity-60">
+                          <span className="material-symbols-outlined text-[14px]">phone</span>
+                          {o.phone}
+                        </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 align-top tabular-nums">
-                      {formatVndDisplay(Number(o.total ?? 0))} {o.currency || "VND"}
+                    <td className="px-4 py-5 align-top">
+                      <div className="flex flex-col gap-1">
+                        <div className="text-base font-black tabular-nums tracking-tight" style={{ color: "var(--stitch-color-primary)" }}>
+                          {formatVndDisplay(Number(o.total ?? 0))}
+                        </div>
+                        <div className="text-[10px] font-bold uppercase tracking-widest opacity-40">{o.currency || "VND"}</div>
+                      </div>
                     </td>
-                    <td className="px-4 py-3 align-top">
-                      <select
-                        disabled={updatingId === o.id}
-                        value={o.status}
-                        onChange={(e) => void patchStatus(o.id, e.target.value)}
-                        className="max-w-[200px] rounded-lg border px-2 py-1.5 text-xs md:text-sm"
-                        style={{
-                          background: "var(--stitch-color-surface-container)",
-                          borderColor:
-                            "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 40%, transparent)",
-                        }}
-                      >
-                        {statusOptions.map((s) => (
-                          <option key={s} value={s}>
-                            {statusLabelVi(s)}
-                          </option>
-                        ))}
-                      </select>
+                    <td className="px-4 py-5 align-top">
+                      <div className="flex flex-col gap-3">
+                        <StatusBadge status={o.status} />
+                        <div className="relative">
+                          <select
+                            disabled={updatingId === o.id || o.status === "COMPLETED" || o.status === "CANCELLED"}
+                            value={o.status}
+                            onChange={(e) => void patchStatus(o.id, e.target.value)}
+                            className="w-full appearance-none rounded-xl border bg-white/5 py-2 pl-3 pr-8 text-xs font-bold outline-none transition-all hover:bg-white/10 disabled:opacity-50"
+                            style={{
+                              borderColor: "color-mix(in srgb, var(--stitch-color-outline-variant) 30%, transparent)",
+                            }}
+                          >
+                            <option value={o.status} disabled>{statusLabelVi(o.status)}</option>
+                            {statusOptions.filter(s => s !== o.status).map((s) => (
+                              <option key={s} value={s} className="bg-[var(--stitch-color-surface-container-high)] text-sm">
+                                → {statusLabelVi(s)}
+                              </option>
+                            ))}
+                          </select>
+                          <span className="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[16px] opacity-40">
+                            unfold_more
+                          </span>
+                        </div>
+                      </div>
                     </td>
                   </tr>
                   );
@@ -215,4 +247,32 @@ export function OrdersAdminClient() {
       )}
     </div>
   );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const color = getStatusColor(status);
+  return (
+    <div 
+      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider shadow-sm"
+      style={{ 
+        background: `color-mix(in srgb, ${color} 15%, transparent)`,
+        color: color,
+        border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`
+      }}
+    >
+      <div className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
+      {statusLabelVi(status)}
+    </div>
+  );
+}
+
+function getStatusColor(status: string) {
+  switch (status) {
+    case "PENDING_CONFIRMATION": return "#f59e0b"; // amber
+    case "CONFIRMED": return "var(--stitch-color-primary)";
+    case "SHIPPING": return "#3b82f6"; // blue
+    case "COMPLETED": return "#10b981"; // emerald
+    case "CANCELLED": return "var(--stitch-color-error)";
+    default: return "#94a3b8";
+  }
 }

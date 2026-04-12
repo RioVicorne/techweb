@@ -5,14 +5,6 @@ export type NavCategoryItem = { slug: string; name: string };
 /** Tối đa số danh mục hiển thị trong menu (header dropdown + mobile sheet). */
 export const NAV_CATEGORY_MENU_MAX = 8;
 
-export const STATIC_NAV_CATEGORIES: NavCategoryItem[] = [
-  { slug: "headset", name: "Tai nghe" },
-  { slug: "mouse", name: "Chuột" },
-  { slug: "peripherals", name: "Bàn phím" },
-  { slug: "hardware", name: "Phần cứng" },
-  { slug: "streaming", name: "Streaming" },
-  { slug: "memory", name: "Bộ nhớ" },
-];
 
 export function iconForCategorySlug(slug: string): string {
   const s = slug.toLowerCase();
@@ -22,6 +14,8 @@ export function iconForCategorySlug(slug: string): string {
   if (s.includes("periph") || s.includes("keyboard")) return "keyboard";
   if (s.includes("hardware") || s.includes("storage")) return "storage";
   if (s.includes("memory")) return "memory";
+  if (s.includes("controller") || s.includes("tay")) return "sports_esports";
+  if (s.includes("gift") || s.includes("card") || s.includes("nap")) return "redeem";
   return "grid_view";
 }
 

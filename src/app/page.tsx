@@ -4,14 +4,11 @@ import { HomeMobile } from "@/components/features/home/mobile/HomeMobile";
 import { ShopHeader } from "@/components/features/shop/shared/ShopHeader";
 import { splitHomeProductSections } from "@/components/features/home/shared/homeSections";
 import { getCatalogCategories, getCatalogProducts } from "@/lib/catalog";
-import { NAV_CATEGORY_MENU_MAX, STATIC_NAV_CATEGORIES } from "@/lib/nav-category-fallback";
+import { NAV_CATEGORY_MENU_MAX } from "@/lib/nav-category-fallback";
 
 export default async function Home() {
   const [products, categoriesRaw] = await Promise.all([getCatalogProducts(), getCatalogCategories()]);
-  const homeCategories =
-    categoriesRaw.length > 0
-      ? categoriesRaw.slice(0, NAV_CATEGORY_MENU_MAX).map((c) => ({ slug: c.slug, name: c.name }))
-      : STATIC_NAV_CATEGORIES;
+  const homeCategories = categoriesRaw.slice(0, NAV_CATEGORY_MENU_MAX).map((c) => ({ slug: c.slug, name: c.name }));
   const { hotProducts, newProducts } = splitHomeProductSections(products);
 
   return (

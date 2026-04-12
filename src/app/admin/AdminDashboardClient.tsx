@@ -15,15 +15,9 @@ type Stats = {
 
 function statusLabelVi(s: string) {
   const map: Record<string, string> = {
-    PENDING_PAYMENT: "Chờ thanh toán",
     PENDING_CONFIRMATION: "Chờ xác nhận",
     CONFIRMED: "Đã xác nhận",
-    PROCESSING: "Đang xử lý",
-    PACKING: "Đang đóng gói",
     SHIPPING: "Đang giao",
-    IN_TRANSIT: "Đang vận chuyển",
-    OUT_FOR_DELIVERY: "Sắp giao",
-    DELIVERED: "Đã giao",
     COMPLETED: "Hoàn tất",
     CANCELLED: "Đã hủy",
   };
@@ -118,24 +112,36 @@ export function AdminDashboardClient() {
       </section>
 
       <section
-        className="rounded-2xl border p-5 md:p-6"
+        className="rounded-3xl border p-6 md:p-8"
         style={{
           background: "var(--stitch-color-surface-container)",
           borderColor:
             "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 25%, transparent)",
         }}
       >
-        <h2 className="text-sm font-semibold">Đơn theo trạng thái</h2>
-        <ul className="mt-4 space-y-2">
+        <h2 className="flex items-center gap-2 text-sm font-black uppercase tracking-wider opacity-80">
+          <span className="material-symbols-outlined text-[20px]">analytics</span>
+          Đơn theo trạng thái
+        </h2>
+        <ul className="mt-6 flex flex-col gap-3">
           {statusEntries.length === 0 ? (
-            <li className="text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+            <li className="text-sm opacity-60">
               Chưa có đơn.
             </li>
           ) : (
             statusEntries.map(([st, n]) => (
-              <li key={st} className="flex items-center justify-between gap-3 text-sm">
-                <span>{statusLabelVi(st)}</span>
-                <span className="tabular-nums font-medium">{n}</span>
+              <li 
+                key={st} 
+                className="flex items-center justify-between gap-4 rounded-2xl bg-white/5 px-4 py-3 text-sm font-bold transition-transform hover:scale-[1.01]"
+              >
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="h-2 w-2 rounded-full" 
+                    style={{ background: getStatusColor(st) }}
+                  />
+                  <span>{statusLabelVi(st)}</span>
+                </div>
+                <span className="tabular-nums opacity-80">{n}</span>
               </li>
             ))
           )}
@@ -180,27 +186,66 @@ function KpiCard(props: {
 }) {
   return (
     <div
-      className="rounded-2xl border p-4 md:p-5"
+      className="group relative overflow-hidden rounded-3xl border p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
       style={{
         background: props.accent
-          ? "color-mix(in srgb, var(--stitch-color-error, #ef4444) 12%, transparent)"
+          ? "linear-gradient(135deg, color-mix(in srgb, var(--stitch-color-error) 20%, transparent), color-mix(in srgb, var(--stitch-color-error) 8%, transparent))"
           : "var(--stitch-color-surface-container)",
         borderColor:
           "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 25%, transparent)",
       }}
     >
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-          {props.title}
-        </p>
-        <span className="material-symbols-outlined text-[22px]" style={{ opacity: 0.85 }}>
+      <div 
+        className="absolute -right-4 -top-4 rotate-12 opacity-[0.03] transition-transform group-hover:scale-125"
+        style={{ fontSize: "120px" }}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: "inherit" }}>
           {props.icon}
         </span>
       </div>
-      <p className="mt-3 text-xl font-semibold tabular-nums md:text-2xl">{props.value}</p>
-      <p className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-        {props.hint}
-      </p>
+
+      <div className="relative flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div 
+            className="flex h-10 w-10 items-center justify-center rounded-2xl"
+            style={{ 
+              background: props.accent 
+                ? "var(--stitch-color-error-container)" 
+                : "var(--stitch-color-secondary-container)",
+              color: props.accent
+                ? "var(--stitch-color-on-error-container)"
+                : "var(--stitch-color-on-secondary-container)"
+            }}
+          >
+            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: '"FILL" 1' }}>
+              {props.icon}
+            </span>
+          </div>
+          <p className="text-[10px] font-black uppercase tracking-widest opacity-60">
+            {props.title}
+          </p>
+        </div>
+        
+        <div>
+          <p className="text-2xl font-black tabular-nums tracking-tighter md:text-3xl" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+            {props.value}
+          </p>
+          <p className="mt-1 text-xs opacity-60">
+            {props.hint}
+          </p>
+        </div>
+      </div>
     </div>
   );
+}
+
+function getStatusColor(status: string) {
+  switch (status) {
+    case "PENDING_CONFIRMATION": return "#f59e0b"; // amber
+    case "CONFIRMED": return "var(--stitch-color-primary)";
+    case "SHIPPING": return "#3b82f6"; // blue
+    case "COMPLETED": return "#10b981"; // emerald
+    case "CANCELLED": return "var(--stitch-color-error)";
+    default: return "var(--stitch-color-outline)";
+  }
 }

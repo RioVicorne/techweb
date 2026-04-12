@@ -17,6 +17,9 @@ export type CatalogCategory = {
   slug: string;
   name: string;
   parentId: number | null;
+  heroHeadline: string | null;
+  heroSub: string | null;
+  heroGradient: string | null;
 };
 
 const FALLBACK_IMAGE = "https://placehold.co/800x800/png?text=RioShop";
@@ -65,6 +68,9 @@ type DbCategoryRow = {
   slug: string;
   name: string;
   parent_id: number | null;
+  hero_headline: string | null;
+  hero_sub: string | null;
+  hero_gradient: string | null;
 };
 
 export async function getCatalogProducts(): Promise<CatalogProduct[]> {
@@ -86,7 +92,7 @@ export async function getCatalogCategories(): Promise<CatalogCategory[]> {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("categories")
-    .select("id,slug,name,parent_id,is_active,sort_order")
+    .select("id,slug,name,parent_id,is_active,sort_order,hero_headline,hero_sub,hero_gradient")
     .eq("is_active", true)
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
@@ -100,6 +106,9 @@ export async function getCatalogCategories(): Promise<CatalogCategory[]> {
       slug: r.slug,
       name: r.name,
       parentId: r.parent_id ?? null,
+      heroHeadline: r.hero_headline ?? null,
+      heroSub: r.hero_sub ?? null,
+      heroGradient: r.hero_gradient ?? null,
     }));
 }
 

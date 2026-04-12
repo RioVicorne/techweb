@@ -78,58 +78,77 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       style={{ background: "var(--stitch-color-surface)" }}
     >
       <aside
-        className="shrink-0 border-b p-4 md:w-56 md:border-b-0 md:border-r"
+        className="shrink-0 border-b p-5 md:w-64 md:border-b-0 md:border-r"
         style={{
           borderColor:
             "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 35%, transparent)",
           background:
-            "color-mix(in srgb, var(--stitch-color-surface-container, var(--stitch-color-surface)) 100%, transparent)",
+            "var(--stitch-color-surface-container-low)",
         }}
       >
-        <p
-          className="mb-4 text-sm font-semibold tracking-tight"
-          style={{ fontFamily: "var(--stitch-font-headline, var(--stitch-font-body))" }}
-        >
-          RioTranShop · Admin
-        </p>
-        <nav className="flex flex-row flex-wrap gap-2 md:flex-col">
+        <div className="mb-8 flex flex-col gap-1">
+          <p
+            className="text-lg font-black tracking-tighter uppercase italic"
+            style={{ 
+              fontFamily: "var(--stitch-font-headline, var(--stitch-font-body))",
+              color: "var(--stitch-color-primary)" 
+            }}
+          >
+            RioTranShop
+          </p>
+          <p className="text-[10px] font-bold uppercase tracking-widest opacity-60">Admin control</p>
+        </div>
+
+        <nav className="flex flex-row flex-wrap gap-1.5 md:flex-col">
           {nav.map((item) => {
             const active = navActive(pathname, item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors"
+                className="group flex items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-bold transition-all duration-200"
                 style={{
                   background: active
-                    ? "color-mix(in srgb, var(--stitch-color-primary) 22%, transparent)"
+                    ? "var(--stitch-color-secondary-container)"
                     : "transparent",
                   color: active
-                    ? "var(--stitch-color-on-surface)"
+                    ? "var(--stitch-color-on-secondary-container)"
                     : "var(--stitch-color-on-surface-variant)",
                 }}
               >
-                <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                <span 
+                  className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110"
+                  style={{ fontVariationSettings: `"FILL" ${active ? 1 : 0}` }}
+                >
+                  {item.icon}
+                </span>
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="mt-6 flex flex-col gap-2 md:mt-8">
+
+        <div className="mt-8 flex flex-col gap-4 border-t pt-8 md:mt-12" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-outline-variant) 20%, transparent)" }}>
           <button
             type="button"
             onClick={() => void logout()}
-            className="text-left text-xs underline"
+            className="flex items-center gap-2 text-xs font-bold transition hover:opacity-80"
+            style={{ color: "var(--stitch-color-error, #f87171)" }}
+          >
+            <span className="material-symbols-outlined text-[16px]">logout</span>
+            Đăng xuất
+          </button>
+          <Link 
+            href="/" 
+            className="flex items-center gap-2 text-xs font-bold transition hover:opacity-80" 
             style={{ color: "var(--stitch-color-on-surface-variant)" }}
           >
-            Đăng xuất admin
-          </button>
-          <Link href="/" className="text-xs underline" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-            ← Cửa hàng
+            <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+            Về cửa hàng
           </Link>
         </div>
       </aside>
-      <div className="min-w-0 flex-1 p-4 pb-28 md:p-8 md:pb-8">{children}</div>
+      <main className="min-w-0 flex-1 p-6 pb-28 md:p-10 md:pb-10">{children}</main>
     </div>
   );
 }

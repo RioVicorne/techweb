@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { formatVndDisplay } from "@/data/products";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
+import { ORDER_STATUS_TABS, orderStatusTabColor } from "@/lib/order-status-tabs";
 
 type OrderRow = {
   id?: string;
@@ -19,6 +20,7 @@ type OrderRow = {
 type OrderDetail = {
   id: string;
   created_at: string;
+  status: string;
   customer: { name: string; phone: string; email: string; address: string; note?: string };
   lines: unknown[];
   subtotal_vnd: number;
@@ -26,44 +28,15 @@ type OrderDetail = {
   total_vnd: number;
 };
 
-const STATUS_TABS: Array<{ key: string; label: string; icon: string; statuses: string[] }> = [
-  { key: "pending", label: "Chờ xác nhận", icon: "hourglass_top", statuses: ["PENDING_PAYMENT", "PENDING_CONFIRMATION"] },
-  { key: "preparing", label: "Đang chuẩn bị", icon: "inventory_2", statuses: ["CONFIRMED", "PROCESSING", "PACKING"] },
-  { key: "shipping", label: "Đang giao", icon: "local_shipping", statuses: ["SHIPPING", "IN_TRANSIT", "OUT_FOR_DELIVERY"] },
-  { key: "delivered", label: "Đã giao", icon: "verified", statuses: ["DELIVERED", "COMPLETED"] },
-];
-
 function statusLabel(s: string) {
   const map: Record<string, string> = {
-    PENDING_PAYMENT: "Chờ thanh toán",
     PENDING_CONFIRMATION: "Chờ xác nhận",
     CONFIRMED: "Đã xác nhận",
-    PROCESSING: "Đang xử lý",
-    PACKING: "Đang đóng gói",
     SHIPPING: "Đang giao",
-    IN_TRANSIT: "Đang vận chuyển",
-    OUT_FOR_DELIVERY: "Sắp giao",
-    DELIVERED: "Đã giao",
     COMPLETED: "Hoàn tất",
     CANCELLED: "Đã hủy",
   };
   return map[s] ?? s;
-}
-
-function tabColor(tabKey: string) {
-  // Keep vibrant, distinct colors for the timeline icons (mobile).
-  switch (tabKey) {
-    case "pending":
-      return { fg: "var(--stitch-color-secondary, #f59e0b)", bg: "color-mix(in srgb, var(--stitch-color-secondary, #f59e0b) 18%, transparent)" };
-    case "preparing":
-      return { fg: "var(--stitch-color-tertiary, #8b5cf6)", bg: "color-mix(in srgb, var(--stitch-color-tertiary, #8b5cf6) 18%, transparent)" };
-    case "shipping":
-      return { fg: "var(--stitch-color-primary, #22c55e)", bg: "color-mix(in srgb, var(--stitch-color-primary, #22c55e) 18%, transparent)" };
-    case "delivered":
-      return { fg: "var(--stitch-color-success, #10b981)", bg: "color-mix(in srgb, var(--stitch-color-success, #10b981) 18%, transparent)" };
-    default:
-      return { fg: "var(--stitch-color-primary)", bg: "color-mix(in srgb, var(--stitch-color-primary) 18%, transparent)" };
-  }
 }
 
 export function OrdersClient() {
@@ -81,7 +54,10 @@ export function OrdersClient() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [detail, setDetail] = useState<OrderDetail | null>(null);
 
-  const activeTab = useMemo(() => STATUS_TABS.find((t) => t.key === tabKey) ?? STATUS_TABS[0], [tabKey]);
+  const activeTab = useMemo(
+    () => ORDER_STATUS_TABS.find((t) => t.key === tabKey) ?? ORDER_STATUS_TABS[0],
+    [tabKey],
+  );
 
   const filteredOrders = useMemo(() => {
     const allow = new Set(activeTab.statuses);
@@ -180,16 +156,16 @@ export function OrdersClient() {
               aria-hidden
             />
 
-            <div className="flex items-center justify-between gap-3 sm:grid sm:grid-cols-4">
-            {STATUS_TABS.map((t) => {
+            <div className="flex items-center justify-between gap-2 sm:grid sm:grid-cols-5 sm:gap-3">
+            {ORDER_STATUS_TABS.map((t) => {
               const n = t.statuses.reduce((sum, s) => sum + (counts[s] ?? 0), 0);
               const active = t.key === activeTab.key;
-              const c = tabColor(t.key);
+              const c = orderStatusTabColor(t.key);
               return (
                 <button
                   key={t.key}
                   type="button"
-                  className="relative rounded-2xl p-0 text-center transition active:scale-[0.99] sm:rounded-2xl sm:border sm:p-3"
+                  className="relative min-w-0 rounded-2xl p-0 text-center transition active:scale-[0.99] sm:rounded-2xl sm:border sm:p-3"
                   style={{
                     background: "transparent",
                     borderColor: active
@@ -481,36 +457,62 @@ export function OrdersClient() {
                 </div>
                 <div className="mt-3 grid gap-3">
                   {[
-                    { label: "Chờ xác nhận", icon: "hourglass_top" },
-                    { label: "Đang chuẩn bị", icon: "inventory_2" },
-                    { label: "Đang giao", icon: "local_shipping" },
-                    { label: "Đã giao", icon: "verified" },
-                  ].map((s, idx) => (
-                    <div key={s.label} className="flex items-center gap-3">
+                    { label: "Chờ xác nhận", icon: "hourglass_top", key: "PENDING_CONFIRMATION" },
+                    { label: "Đang chuẩn bị", icon: "inventory_2", key: "CONFIRMED" },
+                    { label: "Đang giao", icon: "local_shipping", key: "SHIPPING" },
+                    { label: "Hoàn tất", icon: "verified", key: "COMPLETED" },
+                  ].map((s, idx) => {
+                    // Simple logic: if progress is further, show as completed
+                    const statusChain = ["PENDING_CONFIRMATION", "CONFIRMED", "SHIPPING", "COMPLETED"];
+                    const currentIdx = statusChain.indexOf(detail.status);
+                    const isPassed = currentIdx >= idx;
+                    const isCancelled = detail.status === "CANCELLED";
+
+                    return (
+                      <div key={s.label} className="flex items-center gap-3" style={{ opacity: isCancelled && idx > 0 ? 0.3 : 1 }}>
+                        <div
+                          className="flex h-9 w-9 items-center justify-center rounded-xl transition-all"
+                          style={{
+                            background: isPassed 
+                              ? "color-mix(in srgb, var(--stitch-color-primary) 25%, transparent)"
+                              : "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                            color: isPassed ? "var(--stitch-color-primary)" : "var(--stitch-color-on-surface-variant)",
+                            border: "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 20%, transparent)",
+                          }}
+                        >
+                          <span className="material-symbols-outlined text-[20px]" aria-hidden>
+                            {isPassed ? "check_circle" : s.icon}
+                          </span>
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-black text-white">
+                            {s.label}
+                          </div>
+                          <div className="text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                            {detail.status === s.key ? "Trạng thái hiện tại" : isPassed ? "Đã hoàn thành" : "Chờ xử lý"}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {detail.status === "CANCELLED" && (
+                    <div className="flex items-center gap-3">
                       <div
                         className="flex h-9 w-9 items-center justify-center rounded-xl"
                         style={{
-                          background:
-                            idx === 0
-                              ? "color-mix(in srgb, var(--stitch-color-primary) 25%, transparent)"
-                              : "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
-                          color: "var(--stitch-color-primary)",
-                          border:
-                            "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 20%, transparent)",
+                          background: "var(--stitch-color-error-container)",
+                          color: "var(--stitch-color-on-error-container)",
+                          border: "1px solid var(--stitch-color-error)",
                         }}
                       >
-                        <span className="material-symbols-outlined text-[20px]" aria-hidden>
-                          {s.icon}
-                        </span>
+                        <span className="material-symbols-outlined text-[20px]" aria-hidden>cancel</span>
                       </div>
                       <div className="min-w-0">
-                        <div className="text-sm font-black text-white">{s.label}</div>
-                        <div className="text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                          {idx === 0 ? "Trạng thái hiện tại hiển thị theo hệ thống" : "—"}
-                        </div>
+                        <div className="text-sm font-black text-white">Đã hủy</div>
+                        <div className="text-xs opacity-60">Đơn hàng đã được quản trị viên hủy</div>
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             </>

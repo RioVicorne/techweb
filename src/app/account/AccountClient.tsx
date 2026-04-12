@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
+import { ORDER_STATUS_TABS, orderStatusTabColor } from "@/lib/order-status-tabs";
 import { formatVndDisplay } from "@/data/products";
 import * as pcVN from "pc-vn";
 
@@ -599,6 +600,85 @@ export function AccountClient() {
               </Link>
             </div>
 
+            <div className="relative mt-5">
+              <div
+                className="absolute left-6 right-6 top-5 h-[2px] sm:hidden"
+                style={{
+                  background:
+                    "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 22%, transparent)",
+                }}
+                aria-hidden
+              />
+
+              <div className="flex items-center justify-between gap-2 sm:grid sm:grid-cols-5 sm:gap-3">
+                {ORDER_STATUS_TABS.map((t) => {
+                  const n = t.statuses.reduce((sum, s) => sum + (statusCounts[s] ?? 0), 0);
+                  const c = orderStatusTabColor(t.key);
+                  return (
+                    <button
+                      key={t.key}
+                      type="button"
+                      className="relative min-w-0 rounded-2xl p-0 text-center transition active:scale-[0.99] sm:rounded-2xl sm:border sm:p-3"
+                      style={{
+                        background: "transparent",
+                        borderColor:
+                          "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+                      }}
+                      aria-pressed={false}
+                      aria-label={`Xem đơn hàng: ${t.label}`}
+                      onClick={() => router.push(`/orders?tab=${encodeURIComponent(t.key)}`)}
+                    >
+                      <div className="sm:hidden">
+                        <div
+                          className="mx-auto flex h-10 w-10 items-center justify-center rounded-full"
+                          style={{
+                            background:
+                              "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
+                            color: c.fg,
+                            border:
+                              "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 18%, transparent)",
+                          }}
+                          aria-hidden
+                        >
+                          <span className="material-symbols-outlined text-[20px]">{t.icon}</span>
+                        </div>
+                      </div>
+
+                      <div className="hidden sm:block">
+                        <div
+                          className="relative mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl"
+                          style={{
+                            background:
+                              "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 20%, transparent)",
+                            color: "var(--stitch-color-primary)",
+                          }}
+                        >
+                          <span className="material-symbols-outlined text-[22px]" aria-hidden>
+                            {t.icon}
+                          </span>
+                          {n > 0 ? (
+                            <span
+                              className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black text-white"
+                              style={{ background: "var(--stitch-color-secondary)" }}
+                              aria-label={`${n} đơn ${t.label}`}
+                            >
+                              {n > 99 ? "99+" : n}
+                            </span>
+                          ) : null}
+                        </div>
+                        <div
+                          className="text-[11px] font-black leading-tight"
+                          style={{ color: "var(--stitch-color-on-surface)" }}
+                        >
+                          {t.label}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <div id="order-detail" className="mt-5">
               {selectedOrderLoading ? (
                 <div
@@ -711,78 +791,6 @@ export function AccountClient() {
                   Không tìm thấy đơn hàng <span className="font-black text-white">{selectedOrderId}</span>.
                 </div>
               ) : null}
-            </div>
-
-            <div className="mt-5 grid grid-cols-4 gap-3">
-              {[
-                {
-                  label: "Chờ xác nhận",
-                  icon: "hourglass_top",
-                  statuses: ["PENDING_PAYMENT", "PENDING_CONFIRMATION"],
-                },
-                { label: "Đang chuẩn bị", icon: "inventory_2", statuses: ["CONFIRMED", "PROCESSING", "PACKING"] },
-                {
-                  label: "Đang giao",
-                  icon: "local_shipping",
-                  statuses: ["SHIPPING", "IN_TRANSIT", "OUT_FOR_DELIVERY"],
-                },
-                { label: "Đã giao", icon: "verified", statuses: ["DELIVERED", "COMPLETED"] },
-              ].map((x) => {
-                const n = x.statuses.reduce((sum, s) => sum + (statusCounts[s] ?? 0), 0);
-                const active = false;
-                return (
-                  <button
-                    type="button"
-                    key={x.label}
-                    className="rounded-2xl border p-3 text-center transition active:scale-[0.99]"
-                    style={{
-                      background:
-                        "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
-                      borderColor:
-                        active
-                          ? "color-mix(in srgb, var(--stitch-color-primary) 45%, transparent)"
-                          : "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
-                    }}
-                    onClick={() => {
-                      const tab =
-                        x.label === "Chờ xác nhận"
-                          ? "pending"
-                          : x.label === "Đang chuẩn bị"
-                            ? "preparing"
-                            : x.label === "Đang giao"
-                              ? "shipping"
-                              : "delivered";
-                      router.push(`/orders?tab=${encodeURIComponent(tab)}`);
-                    }}
-                    aria-label={`Xem đơn hàng: ${x.label}`}
-                  >
-                    <div
-                      className="relative mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl"
-                      style={{
-                        background:
-                          "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 20%, transparent)",
-                        color: "var(--stitch-color-primary)",
-                      }}
-                    >
-                      <span className="material-symbols-outlined text-[22px]" aria-hidden>
-                        {x.icon}
-                      </span>
-                      {n > 0 ? (
-                        <span
-                          className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black text-white"
-                          style={{ background: "var(--stitch-color-secondary)" }}
-                          aria-label={`${n} đơn ${x.label}`}
-                        >
-                          {n > 99 ? "99+" : n}
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="text-[11px] font-black leading-tight" style={{ color: "var(--stitch-color-on-surface)" }}>
-                      {x.label}
-                    </div>
-                  </button>
-                );
-              })}
             </div>
 
             {/* Address (icon summary -> expand editor) */}

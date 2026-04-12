@@ -6,7 +6,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/context/cart-context";
 import {
   NAV_CATEGORY_MENU_MAX,
-  STATIC_NAV_CATEGORIES,
   iconForCategorySlug,
   type NavCategoryItem,
 } from "@/lib/nav-category-fallback";
@@ -77,7 +76,7 @@ export function MobileBottomNav() {
   }, []);
 
   const categoryMenu = useMemo(() => {
-    const src = navCategories.length > 0 ? navCategories : STATIC_NAV_CATEGORIES;
+    const src = navCategories;
     return src.slice(0, NAV_CATEGORY_MENU_MAX).map((c) => ({
       key: c.slug,
       label: c.name,

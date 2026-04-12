@@ -39,9 +39,7 @@ export function HomeDesktopProductGrid({ products }: { products: CatalogProduct[
           <h3 className="mb-2 line-clamp-2 text-sm font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
             {p.title}
           </h3>
-          <p className="mb-3 line-clamp-2 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-            Hiệu năng gaming • Bảo hành chính hãng • Giao nhanh
-          </p>
+
           <p className="mb-4 text-lg font-black" style={{ color: "var(--stitch-color-primary)" }}>
             {p.price} <span className="text-xs font-normal">VND</span>
           </p>

@@ -7,7 +7,6 @@ import { useCart } from "@/context/cart-context";
 import { HeaderSearch } from "@/components/features/shop/shared/HeaderSearch";
 import {
   NAV_CATEGORY_MENU_MAX,
-  STATIC_NAV_CATEGORIES,
   type NavCategoryItem,
 } from "@/lib/nav-category-fallback";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
@@ -15,9 +14,7 @@ import { getSupabaseBrowser } from "@/lib/supabase/browser";
 type CatalogProduct = { id: string; title: string; img: string; price: string };
 type NavCategory = NavCategoryItem;
 
-function mergeNavCategories(remote: NavCategory[]): NavCategory[] {
-  return remote.length > 0 ? remote : STATIC_NAV_CATEGORIES;
-}
+
 
 function CategoryNavDropdownUI({
   categories,
@@ -113,18 +110,16 @@ function CategoryNavDropdownUI({
 
 function HeaderCategoryNav({ categories }: { categories: NavCategory[] }) {
   const searchParams = useSearchParams();
-  const merged = mergeNavCategories(categories);
   return (
     <CategoryNavDropdownUI
-      categories={merged}
+      categories={categories}
       activeCategorySlug={searchParams.get("category") ?? ""}
     />
   );
 }
 
 function HeaderCategoryNavFallback({ categories }: { categories: NavCategory[] }) {
-  const merged = mergeNavCategories(categories);
-  return <CategoryNavDropdownUI categories={merged} activeCategorySlug="" />;
+  return <CategoryNavDropdownUI categories={categories} activeCategorySlug="" />;
 }
 
 function norm(s: string) {

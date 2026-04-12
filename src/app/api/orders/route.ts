@@ -57,7 +57,7 @@ export async function POST(req: Request) {
       .insert({
         order_code: orderId,
         user_id: userData.user.id,
-        status: "PENDING_PAYMENT",
+        status: "PENDING_CONFIRMATION",
         currency: "VND",
         subtotal: Math.round(subtotalVnd),
         shipping_fee: Math.round(shippingVnd),
