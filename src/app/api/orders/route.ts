@@ -64,12 +64,11 @@ export async function POST(req: Request) {
         discount: 0,
         total: Math.round(totalVnd),
         full_name: c.name,
-        // DB column is non-null in schema; store empty string if user only has email.
-        phone: c.phone || "",
+        // Now nullable in schema
+        phone: c.phone || null,
         address_line: c.address,
-        city: "",
-        // Persist email in a nullable text field (no dedicated email column in this schema).
-        grid_code: c.email || null,
+        city: null,
+        email: c.email || null,
         note: c.note || null,
         delivery_method: "STANDARD",
       })
@@ -79,9 +78,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: orderErr?.message || "Failed to create order" }, { status: 500 });
     }
 
+    // Lookup product IDs (bigint) from slugs for proper FK linkage in order_items.
+    const slugs = [...new Set(body.lines.map((l) => l.productId))];
+    const { data: productRows } = await supabase
+      .from("products")
+      .select("id,slug")
+      .in("slug", slugs);
+    const slugToId = Object.fromEntries(
+      (productRows ?? []).map((p) => [p.slug, p.id as number]),
+    );
+
     const orderItems = body.lines.map((l) => ({
       order_id: inserted.id,
-      product_id: null,
+      product_id: slugToId[l.productId] ?? null,
       variant_id: null,
       product_name_snapshot: l.title,
       variant_name_snapshot: null,
