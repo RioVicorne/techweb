@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
-import { ORDER_STATUS_TABS, orderStatusTabColor } from "@/lib/order-status-tabs";
+import { ORDER_STATUS_TABS, orderStatusTabColor, orderRowStatusLabel } from "@/lib/order-status-tabs";
 import { formatVndDisplay } from "@/data/products";
 import * as pcVN from "pc-vn";
 
@@ -441,7 +441,7 @@ export function AccountClient() {
                       className="text-2xl font-black italic tracking-tighter text-white"
                       style={{ fontFamily: "var(--stitch-font-headline)" }}
                     >
-                      Edit profile
+                      Chỉnh sửa thông tin
                     </h1>
                     <p className="mt-1 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                       {email}
@@ -1154,7 +1154,7 @@ export function AccountClient() {
 
             {loading ? (
               <p className="mt-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                Loading...
+                Đang tải...
               </p>
             ) : purchases.length === 0 ? (
               <div className="mt-4">
@@ -1236,15 +1236,15 @@ export function AccountClient() {
               className="text-lg font-bold text-white"
               style={{ fontFamily: "var(--stitch-font-headline)" }}
             >
-              Recent orders
+              Đơn hàng gần đây
             </h3>
             {loading ? (
               <p className="mt-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                Loading...
+                Đang tải...
               </p>
             ) : filteredOrders.length === 0 ? (
               <p className="mt-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                No orders yet.
+                Chưa có đơn hàng nào.
               </p>
             ) : (
               <div className="mt-4 space-y-3">
@@ -1272,7 +1272,7 @@ export function AccountClient() {
                           {formatVndDisplay(Number(o.total) || 0)} {o.currency || "VND"}
                         </div>
                         <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                          {o.status}
+                          {orderRowStatusLabel(String(o.status))}
                         </div>
                       </div>
                     </div>
