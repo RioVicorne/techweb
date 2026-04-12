@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CyberPulse Order Nexus</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#24233b",
+                        "on-primary-fixed-variant": "#002a61",
+                        "surface-container-lowest": "#000000",
+                        "tertiary": "#ffcd65",
+                        "background": "#0c0c1d",
+                        "on-surface": "#e6e3fb",
+                        "error-container": "#a70138",
+                        "surface": "#0c0c1d",
+                        "on-surface-variant": "#aba9bf",
+                        "error": "#ff6e84",
+                        "primary-fixed-dim": "#5291ff",
+                        "outline-variant": "#474659",
+                        "on-primary": "#002c66",
+                        "tertiary-fixed-dim": "#ebaf00",
+                        "on-error": "#490013",
+                        "surface-bright": "#2a2a43",
+                        "tertiary-dim": "#ebaf00",
+                        "surface-container-highest": "#24233b",
+                        "on-secondary": "#48001a",
+                        "on-primary-fixed": "#000000",
+                        "secondary-container": "#bc004f",
+                        "on-tertiary": "#5f4500",
+                        "on-tertiary-container": "#543c00",
+                        "surface-container": "#18182b",
+                        "secondary-fixed": "#ffc2cc",
+                        "on-primary-container": "#00214f",
+                        "secondary-fixed-dim": "#ffadbc",
+                        "tertiary-fixed": "#fcbc05",
+                        "tertiary-container": "#fcbc05",
+                        "on-secondary-fixed": "#6d002b",
+                        "inverse-surface": "#fcf8ff",
+                        "secondary-dim": "#e50062",
+                        "primary-fixed": "#6d9fff",
+                        "on-background": "#e6e3fb",
+                        "on-tertiary-fixed-variant": "#5f4500",
+                        "on-tertiary-fixed": "#3b2900",
+                        "surface-container-high": "#1d1d33",
+                        "on-secondary-container": "#fff5f6",
+                        "inverse-primary": "#005bc3",
+                        "secondary": "#ff6c90",
+                        "on-error-container": "#ffb2b9",
+                        "primary-container": "#6d9fff",
+                        "surface-tint": "#85adff",
+                        "primary-dim": "#1470e8",
+                        "primary": "#85adff",
+                        "on-secondary-fixed-variant": "#a20043",
+                        "inverse-on-surface": "#545366",
+                        "surface-container-low": "#121223",
+                        "error-dim": "#d73357",
+                        "surface-dim": "#0c0c1d",
+                        "outline": "#757388"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(18, 18, 35, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary selection:text-on-primary">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 h-16 bg-[#0c0c1d]/80 backdrop-blur-2xl bg-[#121223] border-b border-white/5 shadow-[0_8px_32px_0_rgba(133,173,255,0.05)] flex items-center justify-between px-8 w-full">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#85adff] to-[#1470e8] font-headline">CyberPulse</span>
+<nav class="hidden md:flex items-center gap-6 font-['Space_Grotesk'] tracking-tight text-sm uppercase">
+<a class="text-slate-400 font-medium hover:text-[#85adff] hover:bg-white/5 transition-all duration-300 px-3 py-1 rounded-md" href="#">Network</a>
+<a class="text-[#85adff] font-bold border-b-2 border-[#85adff] px-3 py-1" href="#">Operations</a>
+<a class="text-slate-400 font-medium hover:text-[#85adff] hover:bg-white/5 transition-all duration-300 px-3 py-1 rounded-md" href="#">Logistics</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#85adff] active:scale-95 transition-transform p-2 rounded-full hover:bg-white/5">dns</button>
+<button class="material-symbols-outlined text-[#85adff] active:scale-95 transition-transform p-2 rounded-full hover:bg-white/5">notifications</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-primary/20">
+<img alt="Admin Profile Avatar" class="w-full h-full object-cover" data-alt="Professional headshot of a futuristic system administrator with subtle cybernetic enhancements and sharp blue lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_XFUpFn1-rhaMOY5YL-w5X_2QGlFmanJIgAQS0a7qHIP3G7Oeo699z3GqFbxJ_WA6Vvi5kMTadkSO9IImiaRZoQeNchYlXGz8SR8qcEqB006i6GI9D35ZJ5QIVWChYeo-JMwqjhxO6CGHMO9wvZWRlePzx22qYDrMkDnCBj90xLPi8KV9GmGBXKDECRpLfSOVfsNm7wpubWcwFQzO7L4LAM8EOszvovYo1lgTDVaax9xuO5Ce17wKXTxQkLgH8tt2uz81Zo2PJIIa"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-72 z-40 bg-[#0c0c1d] bg-[#121223] border-r border-white/5 shadow-2xl flex flex-col pt-20 pb-8 h-full font-['Space_Grotesk'] font-medium">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-2 h-8 bg-primary rounded-full"></div>
+<div>
+<h2 class="text-xl font-bold text-[#85adff]">Admin Panel</h2>
+<p class="text-[10px] uppercase tracking-widest text-slate-500">Operational Nexus</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-[#ff6c90] group transition-all hover:translate-x-1 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-[#ff6c90] group transition-all hover:translate-x-1 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Inventory</span>
+</a>
+<a class="flex items-center gap-4 bg-[#85adff]/10 text-[#85adff] border-r-4 border-[#85adff] px-6 py-4 shadow-[inset_-10px_0_20px_rgba(133,173,255,0.05)] transition-all" href="#">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+<span class="font-bold">Orders</span>
+</a>
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-[#ff6c90] group transition-all hover:translate-x-1 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Customers</span>
+</a>
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-[#ff6c90] group transition-all hover:translate-x-1 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span>Analytics</span>
+</a>
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-[#ff6c90] group transition-all hover:translate-x-1 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="px-6 mt-auto">
+<div class="bg-surface-container rounded-xl p-4 border border-white/5">
+<p class="text-xs text-slate-500 mb-2 font-headline">SYSTEM STATUS</p>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+<span class="text-sm font-bold text-on-surface">UPLINK ACTIVE</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-72 pt-20 p-8 min-h-screen">
+<header class="mb-8 flex justify-between items-end">
+<div>
+<h1 class="text-4xl font-black font-headline tracking-tight text-white mb-2">Order Processing</h1>
+<p class="text-slate-400">Managing real-time fulfillment pipelines and logistics distribution.</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-surface-container-high px-4 py-2 rounded-lg border border-white/5 flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary">bolt</span>
+<div>
+<p class="text-[10px] text-slate-500 uppercase font-headline leading-none">Queue Speed</p>
+<p class="text-lg font-bold text-white leading-none">1.2s/Order</p>
+</div>
+</div>
+</div>
+</header>
+<div class="grid grid-cols-12 gap-8">
+<!-- Order List (Left) -->
+<div class="col-span-12 lg:col-span-5 space-y-4">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline font-bold text-lg text-primary tracking-wide">PENDING OPERATIONS</h3>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest">12 ACTIVE</span>
+</div>
+<!-- Order Cards -->
+<div class="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto pr-2 custom-scrollbar">
+<!-- Card 1: Selected State -->
+<div class="bg-surface-bright border-l-4 border-primary p-5 rounded-r-xl shadow-xl transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h4 class="text-white font-bold font-headline">#CP-98421</h4>
+<p class="text-xs text-slate-400">Customer: Elias Thorne</p>
+</div>
+<span class="text-[10px] font-black text-primary bg-primary/10 px-2 py-1 rounded uppercase tracking-tighter flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified_user</span>
+                                Payment Verified
+                            </span>
+</div>
+<div class="flex gap-2 mb-3">
+<span class="bg-surface-container-highest text-[10px] text-on-surface-variant px-2 py-1 rounded">2x Neuro-Link v4</span>
+<span class="bg-surface-container-highest text-[10px] text-on-surface-variant px-2 py-1 rounded">1x Cryo-Coolant</span>
+</div>
+<div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+<div class="bg-primary w-1/4 h-full shadow-[0_0_8px_rgba(133,173,255,0.8)]"></div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container hover:bg-surface-container-high p-5 rounded-xl border border-white/5 transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h4 class="text-on-surface font-bold font-headline group-hover:text-primary transition-colors">#CP-98425</h4>
+<p class="text-xs text-slate-500">Customer: Sarah Jenkins</p>
+</div>
+<span class="text-[10px] font-black text-tertiary bg-tertiary/10 px-2 py-1 rounded uppercase tracking-tighter flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">sync</span>
+                                Processing Uplink
+                            </span>
+</div>
+<div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+<div class="bg-tertiary w-1/2 h-full shadow-[0_0_8px_rgba(255,205,101,0.5)]"></div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container hover:bg-surface-container-high p-5 rounded-xl border border-white/5 transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h4 class="text-on-surface font-bold font-headline group-hover:text-primary transition-colors">#CP-98429</h4>
+<p class="text-xs text-slate-500">Customer: Unit-749 (Logistics)</p>
+</div>
+<span class="text-[10px] font-black text-secondary bg-secondary/10 px-2 py-1 rounded uppercase tracking-tighter flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">local_shipping</span>
+                                Dispatched
+                            </span>
+</div>
+<div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+<div class="bg-secondary w-3/4 h-full shadow-[0_0_8px_rgba(255,108,144,0.5)]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Detailed View (Right) -->
+<div class="col-span-12 lg:col-span-7">
+<div class="bg-surface-container-low rounded-2xl overflow-hidden shadow-2xl border border-white/5 flex flex-col h-full">
+<!-- Detail Header -->
+<div class="p-8 border-b border-white/5 bg-gradient-to-br from-surface-container to-surface-container-low">
+<div class="flex justify-between items-start mb-6">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<h2 class="text-3xl font-black font-headline tracking-tighter">ORDER #CP-98421</h2>
+<span class="material-symbols-outlined text-primary" data-weight="fill" style="font-variation-settings: 'FILL' 1;">stars</span>
+</div>
+<div class="flex gap-4 text-sm">
+<span class="text-slate-400">Logged: 2023.11.14 | 14:22:01</span>
+<span class="text-primary font-bold">Priority: HIGH</span>
+</div>
+</div>
+<div class="text-right">
+<p class="text-[10px] uppercase tracking-widest text-slate-500 font-headline">Value</p>
+<p class="text-2xl font-black text-white">$14,299.00</p>
+</div>
+</div>
+<!-- Progress Visualization -->
+<div class="relative pt-10 pb-4">
+<div class="absolute top-1/2 left-0 w-full h-0.5 bg-white/10 -translate-y-1/2"></div>
+<div class="absolute top-1/2 left-0 w-1/4 h-1 bg-primary -translate-y-1/2 shadow-[0_0_15px_rgba(133,173,255,0.8)]"></div>
+<div class="relative flex justify-between">
+<div class="flex flex-col items-center gap-2">
+<div class="w-4 h-4 rounded-full bg-primary ring-4 ring-primary/20 ring-offset-4 ring-offset-surface-container"></div>
+<span class="text-[9px] font-black uppercase text-primary tracking-tighter">Verified</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-4 h-4 rounded-full bg-surface-bright border border-white/20"></div>
+<span class="text-[9px] font-black uppercase text-slate-500 tracking-tighter">Processing</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-4 h-4 rounded-full bg-surface-bright border border-white/20"></div>
+<span class="text-[9px] font-black uppercase text-slate-500 tracking-tighter">Packaging</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-4 h-4 rounded-full bg-surface-bright border border-white/20"></div>
+<span class="text-[9px] font-black uppercase text-slate-500 tracking-tighter">Dispatched</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Details Content -->
+<div class="p-8 grid grid-cols-2 gap-8 flex-1 overflow-y-auto">
+<!-- Left Col: Customer/Address -->
+<div class="space-y-6">
+<section>
+<h5 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3 font-headline">CUSTOMER IDENTITY</h5>
+<div class="flex items-center gap-4">
+<img alt="Customer Avatar" class="w-12 h-12 rounded-lg object-cover border border-white/10" data-alt="Close-up portrait of a tech-savvy man in his 30s wearing a dark turtleneck against a neon-lit urban background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACC-HZ2sLv0HsD6rhLT-7ZHWZ572oNjLKFQX2F3cPRL-aS8A0oeXStj784Nn2KKOBBJbgGpyXVlqIRTv6HGN7BEihvEH73tfRus1iKxw0SlnVd9vjOoApldRN_9AIf9dNj2O8kNSutQ49ibfRhS-TcR27m3XPlYigxBeY_A46LTcq42Hg16HgVgSa4Q4U9aAmI2A68PrGi99QZ9SczX3R2tbs6jF3dnY0OebIFsQJHLQb3gRF1C-qy4wjAus2CEgUdUJGo06Nx0xga"/>
+<div>
+<p class="font-bold text-on-surface">Elias Thorne</p>
+<p class="text-xs text-slate-400 italic">e.thorne@nexus-grid.com</p>
+</div>
+</div>
+</section>
+<section>
+<h5 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3 font-headline">SHIPPING COORDINATES</h5>
+<div class="p-4 bg-surface-container rounded-xl border border-white/5">
+<p class="text-sm font-medium leading-relaxed">
+                                        Sector 7-G, Neo-Tokyo Sprawl<br/>
+                                        Level 142, Cloud-Anchor 4<br/>
+                                        C-4-88-2931-XT
+                                    </p>
+<div class="mt-4 h-24 rounded-lg overflow-hidden border border-white/5 opacity-80">
+<img alt="Map Location" class="w-full h-full object-cover grayscale" data-alt="Digital topographic map of a futuristic city grid with glowing blue nodes and network lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLEJPI9emnf3vE63ZpwT6N6TT2mqQ6NWMrjm1SXLEDR6CP2uZ6Q7rJU6zRKk6FJvYdRonojsqsz-Blmw0VJHAMZc5_oppuer_U3Hc6oGePGGuZgmKqSSdj8n4lQAK78lg26VHy3NqJMJp9Mi7tvWBL4o6AajxeuxLIDGCxOXV3sTGMFqxnl7KbEFqeXWxn_uLH8yysxWbYB3EzFEsfF2mNNHboviFgKpNZ2Ko9IVfKuir3JSAgHlIS5PPEyrQFKqjaizCj53JdIURa"/>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Col: Items List -->
+<div class="space-y-6">
+<h5 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3 font-headline">MANIFEST ITEMS</h5>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-3 bg-surface-container rounded-lg border-l-2 border-primary">
+<div class="flex gap-3 items-center">
+<div class="w-10 h-10 bg-surface-bright rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">memory</span>
+</div>
+<div>
+<p class="text-sm font-bold">Neuro-Link v4</p>
+<p class="text-[10px] text-slate-500 tracking-tighter">SKU: NL-04-A</p>
+</div>
+</div>
+<p class="text-sm font-black">x2</p>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container rounded-lg border-l-2 border-slate-700">
+<div class="flex gap-3 items-center">
+<div class="w-10 h-10 bg-surface-bright rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-500">ac_unit</span>
+</div>
+<div>
+<p class="text-sm font-bold">Cryo-Coolant</p>
+<p class="text-[10px] text-slate-500 tracking-tighter">SKU: CC-99-L</p>
+</div>
+</div>
+<p class="text-sm font-black">x1</p>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container rounded-lg border-l-2 border-slate-700">
+<div class="flex gap-3 items-center">
+<div class="w-10 h-10 bg-surface-bright rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-500">cable</span>
+</div>
+<div>
+<p class="text-sm font-bold">Optic-Fibre 10m</p>
+<p class="text-[10px] text-slate-500 tracking-tighter">SKU: OF-10-C</p>
+</div>
+</div>
+<p class="text-sm font-black">x5</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Actions Footer -->
+<div class="p-6 bg-surface-container border-t border-white/5 flex gap-4 justify-end">
+<button class="flex items-center gap-2 px-6 py-2.5 rounded-full border border-outline-variant hover:bg-white/5 text-slate-300 font-bold transition-all text-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm">print</span>
+                            Print Manifest
+                        </button>
+<button class="flex items-center gap-2 px-6 py-2.5 rounded-full border border-secondary text-secondary hover:bg-secondary/10 font-bold transition-all text-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm">cancel</span>
+                            Cancel Uplink
+                        </button>
+<button class="flex items-center gap-2 px-8 py-2.5 rounded-full bg-gradient-to-r from-primary to-primary-dim text-on-primary font-black shadow-[0_0_20px_rgba(133,173,255,0.4)] hover:shadow-[0_0_30px_rgba(133,173,255,0.6)] hover:scale-105 active:scale-95 transition-all text-sm uppercase tracking-tighter">
+<span class="material-symbols-outlined text-sm" data-weight="fill" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+                            Deploy Order
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB (Suppressing as per guidelines for focused task screen, but showing dashboard utility if needed) -->
+<!-- Suppressed on Order Details focused screen -->
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #474659;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #85adff;
+        }
+    </style>
+</body></html>

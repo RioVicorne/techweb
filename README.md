@@ -34,6 +34,18 @@ Checkout flow:
 - `POST /api/orders` creates an order in Supabase (falls back to local storage if Supabase isn't configured)
 - `POST /api/stripe/checkout-session` creates a Stripe Checkout session and returns `url`
 
+## 3) Admin dashboard (optional)
+
+Admin uses a **separate login** at `/admin/login` (not the shop Supabase account). Set in `.env.local`:
+
+```bash
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your-strong-password
+ADMIN_SESSION_SECRET=   # random long string, e.g. openssl rand -base64 32
+```
+
+Then open `/admin` — you will be redirected to `/admin/login` until you sign in with those credentials. Session is stored in an HttpOnly cookie. Use **Đăng xuất admin** in the sidebar to clear it.
+
 ## Run locally
 
 ```bash

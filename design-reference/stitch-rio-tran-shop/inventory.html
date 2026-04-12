@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CyberPulse | Inventory Nexus</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "surface-variant": "#24233b",
+                "on-primary-fixed-variant": "#002a61",
+                "surface-container-lowest": "#000000",
+                "tertiary": "#ffcd65",
+                "background": "#0c0c1d",
+                "on-surface": "#e6e3fb",
+                "error-container": "#a70138",
+                "surface": "#0c0c1d",
+                "on-surface-variant": "#aba9bf",
+                "error": "#ff6e84",
+                "primary-fixed-dim": "#5291ff",
+                "outline-variant": "#474659",
+                "on-primary": "#002c66",
+                "tertiary-fixed-dim": "#ebaf00",
+                "on-error": "#490013",
+                "surface-bright": "#2a2a43",
+                "tertiary-dim": "#ebaf00",
+                "surface-container-highest": "#24233b",
+                "on-secondary": "#48001a",
+                "on-primary-fixed": "#000000",
+                "secondary-container": "#bc004f",
+                "on-tertiary": "#5f4500",
+                "on-tertiary-container": "#543c00",
+                "surface-container": "#18182b",
+                "secondary-fixed": "#ffc2cc",
+                "on-primary-container": "#00214f",
+                "secondary-fixed-dim": "#ffadbc",
+                "tertiary-fixed": "#fcbc05",
+                "tertiary-container": "#fcbc05",
+                "on-secondary-fixed": "#6d002b",
+                "inverse-surface": "#fcf8ff",
+                "secondary-dim": "#e50062",
+                "primary-fixed": "#6d9fff",
+                "on-background": "#e6e3fb",
+                "on-tertiary-fixed-variant": "#5f4500",
+                "on-tertiary-fixed": "#3b2900",
+                "surface-container-high": "#1d1d33",
+                "on-secondary-container": "#fff5f6",
+                "inverse-primary": "#005bc3",
+                "secondary": "#ff6c90",
+                "on-error-container": "#ffb2b9",
+                "primary-container": "#6d9fff",
+                "surface-tint": "#85adff",
+                "primary-dim": "#1470e8",
+                "primary": "#85adff",
+                "on-secondary-fixed-variant": "#a20043",
+                "inverse-on-surface": "#545366",
+                "surface-container-low": "#121223",
+                "error-dim": "#d73357",
+                "surface-dim": "#0c0c1d",
+                "outline": "#757388"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "fontFamily": {
+                "headline": ["Space Grotesk"],
+                "body": ["Manrope"],
+                "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .font-headline { font-family: 'Space Grotesk', sans-serif; }
+        .glass-panel {
+            background: rgba(24, 24, 43, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface selection:bg-primary/30 selection:text-primary">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-full w-72 z-40 bg-[#0c0c1d] bg-[#121223] border-r border-white/5 shadow-2xl flex flex-col pt-20 pb-8 hidden md:flex">
+<div class="px-8 mb-10">
+<h2 class="text-xl font-bold text-[#85adff] font-headline">Admin Panel</h2>
+<p class="text-xs text-slate-500 font-medium tracking-widest uppercase">Operational Nexus</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-[#ff6c90] group transition-all hover:translate-x-1 duration-200 ease-out font-['Space_Grotesk'] font-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<!-- Active Tab: Inventory -->
+<a class="flex items-center gap-4 bg-[#85adff]/10 text-[#85adff] border-r-4 border-[#85adff] px-6 py-4 shadow-[inset_-10px_0_20px_rgba(133,173,255,0.05)] font-['Space_Grotesk'] font-medium" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+                Inventory
+            </a>
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-[#ff6c90] group transition-all hover:translate-x-1 duration-200 ease-out font-['Space_Grotesk'] font-medium" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+                Orders
+            </a>
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-[#ff6c90] group transition-all hover:translate-x-1 duration-200 ease-out font-['Space_Grotesk'] font-medium" href="#">
+<span class="material-symbols-outlined">group</span>
+                Customers
+            </a>
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-[#ff6c90] group transition-all hover:translate-x-1 duration-200 ease-out font-['Space_Grotesk'] font-medium" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-[#ff6c90] group transition-all hover:translate-x-1 duration-200 ease-out font-['Space_Grotesk'] font-medium" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="px-6 mt-auto">
+<div class="glass-panel p-4 rounded-xl flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-secondary p-[1px]">
+<img alt="Admin Profile Avatar" class="w-full h-full rounded-full object-cover" data-alt="Close up portrait of a tech-focused male professional with sleek digital glasses and soft neon blue lighting reflect on face" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7qnrkeHPCVVJqHItQaxEVCpFhbQ6vrdSw2IyVwdQBBBKtcmiqZHOqHMKhPwDWLmU_kMJMDFBDpEobKYr0vsVYtFfXAPdvqU8aABbXWjo2KJObjzOZkEKGCJBPHddeG1HZbrM8TGY-LF1NXoYZLLYoqqsV3d5wH5OxEflGK3lMwpdONO5Wu4uIOj5xjWpez2EaGgV_iuTXU68SXDkul7Fjbz5bcmzYSzv9cGDicJVZvM4sfQFB9C-bq-fdK1JIK4Sem8WQ410xl3tL"/>
+</div>
+<div>
+<p class="text-sm font-bold text-white">CP-SYSTEM-01</p>
+<p class="text-[10px] text-primary uppercase tracking-tighter">Root Authority</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 w-full z-50 h-16 bg-[#0c0c1d]/80 backdrop-blur-2xl bg-[#121223] border-b border-white/5 shadow-[0_8px_32px_0_rgba(133,173,255,0.05)] flex items-center justify-between px-8 w-full">
+<div class="flex items-center gap-12">
+<h1 class="text-2xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#85adff] to-[#1470e8]">CyberPulse</h1>
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">search</span>
+<input class="bg-surface-container border-none rounded-full pl-10 pr-4 py-1.5 text-xs text-on-surface focus:ring-1 focus:ring-secondary w-64 font-headline tracking-widest placeholder:text-slate-600 transition-all" placeholder="QUERY HARDWARE DATABASE..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-[#85adff] hover:text-white transition-colors active:scale-95">
+<span class="material-symbols-outlined">dns</span>
+</button>
+<div class="relative">
+<button class="text-[#85adff] hover:text-white transition-colors active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-secondary rounded-full animate-pulse"></span>
+</div>
+<button class="text-[#85adff] hover:text-white transition-colors active:scale-95">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-12 pl-0 md:pl-72 pr-4 md:pr-8 min-h-screen">
+<div class="max-w-7xl mx-auto space-y-8">
+<!-- Inventory Header & Action Bar -->
+<section class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-4 md:px-0">
+<div class="space-y-1">
+<h2 class="text-4xl font-black font-headline tracking-tighter text-white">INVENTORY_CORE</h2>
+<p class="text-slate-500 font-medium">Real-time status of high-performance components across all nodes.</p>
+</div>
+<div class="flex flex-wrap items-center gap-3">
+<button class="px-6 py-2.5 bg-surface-container-high text-white font-headline text-sm font-bold rounded-full hover:bg-surface-bright transition-all flex items-center gap-2 border border-white/5 active:scale-95">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+                        ADVANCED_FILTER
+                    </button>
+<button class="px-6 py-2.5 bg-gradient-to-r from-primary to-primary-dim text-on-primary-container font-headline text-sm font-bold rounded-full shadow-[0_0_20px_rgba(133,173,255,0.3)] hover:scale-105 transition-all flex items-center gap-2 active:scale-95">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">add</span>
+                        INITIALIZE_NEW_SKU
+                    </button>
+</div>
+</section>
+<!-- Stats Grid (Bento Style) -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-4 md:px-0">
+<div class="glass-panel p-6 rounded-2xl group hover:bg-primary/5 transition-all duration-500">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-primary text-3xl">memory</span>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total SKU</span>
+</div>
+<div class="text-3xl font-black font-headline">1,284</div>
+<div class="mt-2 flex items-center gap-2 text-xs text-primary">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+<span>+12 New this week</span>
+</div>
+</div>
+<div class="glass-panel p-6 rounded-2xl group hover:bg-error/5 transition-all duration-500">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-error text-3xl">warning</span>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Critical Alert</span>
+</div>
+<div class="text-3xl font-black font-headline">07</div>
+<div class="mt-2 flex items-center gap-2 text-xs text-error">
+<span class="material-symbols-outlined text-xs">priority_high</span>
+<span>Restock required immediately</span>
+</div>
+</div>
+<div class="glass-panel p-6 rounded-2xl group hover:bg-tertiary/5 transition-all duration-500">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-tertiary text-3xl">package_2</span>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Incoming Batch</span>
+</div>
+<div class="text-3xl font-black font-headline">420</div>
+<div class="mt-2 flex items-center gap-2 text-xs text-tertiary">
+<span class="material-symbols-outlined text-xs">local_shipping</span>
+<span>ETA: 48 Hours</span>
+</div>
+</div>
+<div class="glass-panel p-6 rounded-2xl group hover:bg-secondary/5 transition-all duration-500">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-secondary text-3xl">payments</span>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Vault Value</span>
+</div>
+<div class="text-3xl font-black font-headline">$2.4M</div>
+<div class="mt-2 flex items-center gap-2 text-xs text-secondary">
+<span class="material-symbols-outlined text-xs">equalizer</span>
+<span>Inventory Liquidity: High</span>
+</div>
+</div>
+</section>
+<!-- Sophisticated Data Table -->
+<section class="glass-panel rounded-3xl overflow-hidden shadow-2xl mx-4 md:mx-0">
+<div class="p-6 border-b border-white/5 flex items-center justify-between">
+<h3 class="font-headline font-bold text-lg tracking-tight">CENTRAL_REGISTRY</h3>
+<div class="flex gap-2">
+<span class="w-2 h-2 rounded-full bg-primary/40"></span>
+<span class="w-2 h-2 rounded-full bg-primary/40"></span>
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-headline">Product_ID</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-headline">Asset_Identity</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-headline">Class</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-headline text-center">Status_Node</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-headline text-right">Units</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-headline text-right">Unit_Price</th>
+<th class="px-6 py-4"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<!-- Row 1 -->
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-5 font-headline text-xs font-medium text-slate-400">SKU-NV-9090</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high overflow-hidden border border-white/5 group-hover:border-primary/50 transition-colors">
+<img alt="Graphics Card" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Modern high-end graphics card with visible copper heat pipes and sleek black shroud in dramatic studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBof4lZo_64bmpslIxHfKn-bye9d2vaoBXsl1EdoN-Dzpy3QM-_levg1527CyTfc8ZShG09YHw3DknS2_6XtNS3q7cgmk_9Hl_o_Bg3l_dKELSkxrkXhKDekv3m8vAF3TDU1AWYws5bud7A_n5tjB8MEgQFx7FDXTfw_9woiOGCsYWFUzPEfGBCDXIEbXs1we0073Nq6OvY7zckzXvPZpG1CVDLUIhjLvWyNz4JWsjhIpLY4UNeGs5vysWoa7LJGiUBbVKCCe9ki6QV"/>
+</div>
+<span class="font-bold text-white text-sm">RTX 5090 Cyber-Edition</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-1 bg-secondary-container/20 text-secondary text-[10px] font-bold rounded border border-secondary/20">GPU</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex justify-center">
+<span class="flex items-center gap-1.5 px-3 py-1 bg-error-container/20 text-error text-[10px] font-black rounded-full border border-error/30 animate-pulse">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                            CRITICAL
+                                        </span>
+</div>
+</td>
+<td class="px-6 py-5 text-right font-headline font-bold text-error">12</td>
+<td class="px-6 py-5 text-right font-headline font-medium">$1,999.00</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-5 font-headline text-xs font-medium text-slate-400">SKU-INT-149</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high overflow-hidden border border-white/5 group-hover:border-primary/50 transition-colors">
+<img alt="Processor" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Microchip processor on a circuit board with golden pins and blue cybernetic light glows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVRyPxFilmqT7TQPgZXgWzETmHWMDCmUnJ2cBrFleDERYJjTdU-CG2rbO7e_Wveif-8LMjzkAdgMNpA7E9ivV4B1Ey-3_sFPohopaaa5RN6Cir4V_IGh7jrvW7FunleyamaaXUvdVuxGid9fKMdFNYs-ovOf2o7Wfob9XwDNFTn-J0duLCDthcpzVUjEpOgYIHPVADe6dtkOlo7CgxcfEzWG4gM0MnLZ3v8Sr_ftf5jtrd3gZObLe6PEL4RMGCI5Y8-TqPRRzupBod"/>
+</div>
+<span class="font-bold text-white text-sm">Intel Core i9-14900K</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded border border-primary/20">CPU</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex justify-center">
+<span class="flex items-center gap-1.5 px-3 py-1 bg-tertiary-container/10 text-tertiary text-[10px] font-black rounded-full border border-tertiary/30">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                                            WARNING
+                                        </span>
+</div>
+</td>
+<td class="px-6 py-5 text-right font-headline font-bold text-tertiary">85</td>
+<td class="px-6 py-5 text-right font-headline font-medium">$589.00</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-5 font-headline text-xs font-medium text-slate-400">SKU-LG-ULT-34</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high overflow-hidden border border-white/5 group-hover:border-primary/50 transition-colors">
+<img alt="Monitor" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Ultrawide curved gaming monitor displaying a vibrant futuristic abstract wallpaper in a dark room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCynaaCKarHNwypuJ-mGrmBzH7osu3SK_g6501xgvxDIUU2BkH1ENPIAaUBv4o41FZtZf5Dsh5lGJprytnLjhONF8VkDg6-XbcCjey8xmFn52XA_BEEUBuxRWJndF7E7MT-USbbnZC9hGOxVfXNrNOr4s9R8hdYa3k9Eok8I-VY7r6Ot2OoAWBEtrSsGnV_OaAJUDX9cZQU8TVAuwPZdtQ_XIgtss7fW_PjRxfN27QiRSpbcIe9nTmHLVO5JvS-ofDbf-L-eTVXGHl7"/>
+</div>
+<span class="font-bold text-white text-sm">UltraGear 34" OLED</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-1 bg-surface-bright text-on-surface-variant text-[10px] font-bold rounded border border-white/10">PERIPHERALS</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex justify-center">
+<span class="flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary text-[10px] font-black rounded-full border border-primary/30">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                            STABLE
+                                        </span>
+</div>
+</td>
+<td class="px-6 py-5 text-right font-headline font-bold text-primary">240</td>
+<td class="px-6 py-5 text-right font-headline font-medium">$1,299.00</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-5 font-headline text-xs font-medium text-slate-400">SKU-RZ-VIP-03</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high overflow-hidden border border-white/5 group-hover:border-primary/50 transition-colors">
+<img alt="Mouse" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="High precision wireless gaming mouse with RGB lighting on a dark desk mat" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFidq9stn2atLXziJ4GLR8Tzeum2FDWkceF8n_6Kt29UdyG02mqs1tResQDCqHvnBAaSpxaovvDNRXoe2HB6wG3FZPjpVM_Vg5NJaaItEIN6QqXhfTFN7ssB9tIPpIDFSQee3eAUsxWb8V8GbrdyAkjJG0uuEkfncY0XP5kJlBd1mkmgbWiEjyJcwUyiMNUiyKKFX3J_lL_MV7NymTDG5wnfUL2fWTE8yEwq3PwzJcicPvTl9SESXTn_y_lP4xv0VP8zgzIvDokPlY"/>
+</div>
+<span class="font-bold text-white text-sm">Viper V3 Pro Wireless</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-1 bg-surface-bright text-on-surface-variant text-[10px] font-bold rounded border border-white/10">PERIPHERALS</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex justify-center">
+<span class="flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary text-[10px] font-black rounded-full border border-primary/30">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                            STABLE
+                                        </span>
+</div>
+</td>
+<td class="px-6 py-5 text-right font-headline font-bold text-primary">1,102</td>
+<td class="px-6 py-5 text-right font-headline font-medium">$149.00</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-surface-container-low/30 border-t border-white/5 flex items-center justify-between">
+<p class="text-xs text-slate-500 font-medium">SHOWING 1-4 OF 1,284 ASSETS</p>
+<div class="flex gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-high text-slate-400 hover:text-white transition-all">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-on-primary-container font-bold text-xs">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-high text-slate-400 hover:text-white transition-all text-xs">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-high text-slate-400 hover:text-white transition-all text-xs">3</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-high text-slate-400 hover:text-white transition-all">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Quick Adjustment Area -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 md:px-0 pb-12">
+<div class="lg:col-span-2 glass-panel p-8 rounded-3xl relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl rounded-full -mr-16 -mt-16"></div>
+<h3 class="font-headline text-xl font-bold mb-6">RAPID_STOCK_ADJUSTMENT</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">TARGET_SKU</label>
+<select class="w-full bg-surface-container border-none rounded-xl py-3 px-4 text-on-surface focus:ring-1 focus:ring-primary appearance-none">
+<option>SELECT COMPONENT...</option>
+<option>RTX 5090 Cyber-Edition</option>
+<option>Intel Core i9-14900K</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">QUANTITY_DELTA</label>
+<input class="w-full bg-surface-container border-none rounded-xl py-3 px-4 text-on-surface focus:ring-1 focus:ring-secondary" placeholder="+/- Units" type="number"/>
+</div>
+</div>
+<div class="mt-8 flex items-center justify-between">
+<p class="text-xs text-slate-500 max-w-xs">All adjustments are logged with Admin ID and timestamped for audit protocol.</p>
+<button class="px-8 py-3 bg-secondary text-on-secondary font-headline font-bold rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg shadow-secondary/20">
+                            EXECUTE_DELTA
+                        </button>
+</div>
+</div>
+<div class="glass-panel p-8 rounded-3xl flex flex-col justify-between bg-gradient-to-br from-surface-container to-surface-container-low border-white/5">
+<div>
+<h3 class="font-headline text-xl font-bold mb-2">SYSTEM_LOG</h3>
+<p class="text-xs text-slate-500 mb-6">Recent automated processes and overrides.</p>
+<div class="space-y-4">
+<div class="flex items-start gap-3">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5"></span>
+<div>
+<p class="text-[10px] font-bold text-white leading-tight uppercase">Batch-004 Delivered</p>
+<p class="text-[9px] text-slate-500 font-headline uppercase tracking-tighter">04:22 AM - AUTOMATED</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="w-1.5 h-1.5 rounded-full bg-error mt-1.5"></span>
+<div>
+<p class="text-[10px] font-bold text-white leading-tight uppercase">Stock Overflow Alert</p>
+<p class="text-[9px] text-slate-500 font-headline uppercase tracking-tighter">01:15 AM - SENSOR_7</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-600 mt-1.5"></span>
+<div>
+<p class="text-[10px] font-bold text-white leading-tight uppercase">Database Synced</p>
+<p class="text-[9px] text-slate-500 font-headline uppercase tracking-tighter">23:59 PM - GLOBAL_NODE</p>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-2 border border-white/10 rounded-full text-[10px] font-bold tracking-widest uppercase hover:bg-white/5 transition-colors">
+                        VIEW_FULL_MANIFEST
+                    </button>
+</div>
+</section>
+</div>
+</main>
+<!-- Mobile Nav Anchor -->
+<nav class="md:hidden fixed bottom-0 w-full bg-[#0c0c1d] border-t border-white/5 px-6 py-4 flex justify-between items-center z-50">
+<button class="text-slate-500"><span class="material-symbols-outlined">dashboard</span></button>
+<button class="text-primary border-t-2 border-primary pt-1"><span class="material-symbols-outlined">inventory_2</span></button>
+<button class="text-slate-500"><span class="material-symbols-outlined">shopping_cart</span></button>
+<button class="text-slate-500"><span class="material-symbols-outlined">group</span></button>
+<button class="text-slate-500"><span class="material-symbols-outlined">settings</span></button>
+</nav>
+</body></html>
