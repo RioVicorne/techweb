@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { iconForCategorySlug } from "@/lib/nav-category-fallback";
 import { getCatalogCategories, getCatalogProductsByCategorySlug } from "@/lib/catalog";
 
 type CategoryChip = {
@@ -7,17 +8,6 @@ type CategoryChip = {
   label: string;
   icon: string;
 };
-
-function iconForCategorySlug(slug: string): string {
-  const s = slug.toLowerCase();
-  if (s.includes("mouse")) return "mouse";
-  if (s.includes("audio") || s.includes("head")) return "headphones";
-  if (s.includes("stream")) return "videocam";
-  if (s.includes("periph") || s.includes("keyboard")) return "keyboard";
-  if (s.includes("hardware") || s.includes("storage")) return "storage";
-  if (s.includes("memory")) return "memory";
-  return "category";
-}
 
 export default async function CategoryPage({
   searchParams,

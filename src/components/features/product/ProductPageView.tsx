@@ -17,13 +17,13 @@ export function ProductPageView({ product }: { product: Product }) {
         <div className="mb-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition active:scale-95"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
             style={{ background: "var(--stitch-color-surface-container)", color: "var(--stitch-color-primary)" }}
           >
             <span className="material-symbols-outlined" aria-hidden>
               arrow_back
             </span>
-            Back
+            Quay lại
           </Link>
         </div>
 
@@ -79,7 +79,7 @@ export function ProductPageView({ product }: { product: Product }) {
 
         <section className="mb-8">
           <h2 className="mb-4 text-2xl font-black italic tracking-tighter text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
-            Technical Specs
+            Thông số kỹ thuật
           </h2>
 
           <div className="space-y-3">
@@ -136,13 +136,17 @@ export function ProductPageView({ product }: { product: Product }) {
           </div>
         </section>
 
-        <section className="mb-10">
+        <section id="user-feedback" className="mb-10 scroll-mt-28">
           <div className="mb-4 flex items-center justify-between gap-4">
             <h2 className="text-2xl font-black italic tracking-tighter text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
-              User Feedback
+              Đánh giá từ người dùng
             </h2>
-            <Link href="#" className="text-sm font-bold transition hover:underline" style={{ color: "var(--stitch-color-primary)" }}>
-              View All 2.4k
+            <Link
+              href="#user-feedback"
+              className="min-h-[44px] text-sm font-bold transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)] rounded"
+              style={{ color: "var(--stitch-color-primary)" }}
+            >
+              Xem tất cả đánh giá
             </Link>
           </div>
 

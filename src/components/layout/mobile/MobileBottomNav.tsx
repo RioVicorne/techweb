@@ -4,6 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/context/cart-context";
+import {
+  NAV_CATEGORY_MENU_MAX,
+  STATIC_NAV_CATEGORIES,
+  iconForCategorySlug,
+  type NavCategoryItem,
+} from "@/lib/nav-category-fallback";
 
 type NavItem = {
   href: string;
@@ -20,15 +26,6 @@ const ITEMS: NavItem[] = [
   { href: "/account", label: "Tài khoản", icon: "account_circle", match: (p) => p.startsWith("/account") },
 ];
 
-const CATEGORY_MENU: Array<{ key: string; label: string; icon: string }> = [
-  { key: "headset", label: "Tai nghe", icon: "headphones" },
-  { key: "mouse", label: "Chuột", icon: "mouse" },
-  { key: "peripherals", label: "Bàn phím", icon: "keyboard" },
-  { key: "hardware", label: "Phần cứng", icon: "storage" },
-  { key: "streaming", label: "Streaming", icon: "videocam" },
-  { key: "memory", label: "Bộ nhớ", icon: "memory" },
-];
-
 function isHiddenOn(pathname: string) {
   return pathname.startsWith("/checkout") || pathname.startsWith("/product");
 }
@@ -37,6 +34,7 @@ export function MobileBottomNav() {
   const pathname = usePathname() || "/";
   const { itemCount } = useCart();
   const [categoryOpen, setCategoryOpen] = useState(false);
+  const [navCategories, setNavCategories] = useState<NavCategoryItem[]>([]);
   const categoryWrapRef = useRef<HTMLDivElement | null>(null);
 
   const categoryActive = useMemo(() => pathname.startsWith("/category"), [pathname]);
@@ -63,6 +61,29 @@ export function MobileBottomNav() {
       document.removeEventListener("keydown", onKeyDown);
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/catalog/categories", { method: "GET" })
+      .then((r) => r.json())
+      .then((json: { categories?: NavCategoryItem[] }) => {
+        if (cancelled || !Array.isArray(json.categories)) return;
+        setNavCategories(json.categories.filter((c) => c.slug && c.name));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const categoryMenu = useMemo(() => {
+    const src = navCategories.length > 0 ? navCategories : STATIC_NAV_CATEGORIES;
+    return src.slice(0, NAV_CATEGORY_MENU_MAX).map((c) => ({
+      key: c.slug,
+      label: c.name,
+      icon: iconForCategorySlug(c.slug),
+    }));
+  }, [navCategories]);
 
   if (isHiddenOn(pathname)) return null;
 
@@ -148,7 +169,7 @@ export function MobileBottomNav() {
                       }}
                     />
                     <div className="grid gap-1">
-                      {CATEGORY_MENU.map((c) => (
+                      {categoryMenu.map((c) => (
                         <Link
                           key={c.key}
                           role="menuitem"

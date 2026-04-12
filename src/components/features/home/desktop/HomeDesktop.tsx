@@ -1,18 +1,32 @@
 import Image from "next/image";
 import Link from "next/link";
+import { HomeCategoryChips } from "@/components/features/home/shared/HomeCategoryChips";
+import type { HomeCategoryChipItem } from "@/components/features/home/shared/HomeCategoryChips";
+import { HomeDesktopProductGrid } from "@/components/features/home/shared/HomeDesktopProductGrid";
+import { HOME_CTA_LABEL, HOME_EXPLORE_HREF } from "@/components/features/home/shared/homeHeroCopy";
 import { HERO_IMG, SIDE_CONSOLE, SIDE_PC } from "@/components/features/home/shared/homeImages";
 import type { CatalogProduct } from "@/lib/catalog";
 
-export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
+export function HomeDesktop({
+  hotProducts,
+  newProducts,
+  categories,
+}: {
+  hotProducts: CatalogProduct[];
+  newProducts: CatalogProduct[];
+  categories: HomeCategoryChipItem[];
+}) {
   return (
     <div className="hidden md:block">
       <aside className="pointer-events-none fixed left-6 top-1/2 z-40 hidden -translate-y-1/2 xl:pointer-events-auto xl:flex xl:flex-col xl:gap-4">
-        <div
-          className="group flex h-64 w-12 cursor-pointer flex-col items-center justify-center gap-8 rounded-full py-6 transition-all hover:opacity-95"
+        <Link
+          href="/#hot-deals"
+          className="group flex h-64 w-12 flex-col items-center justify-center gap-8 rounded-full py-6 transition-all hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
           style={{
             background:
               "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
           }}
+          aria-label="Flash sale — xuống mục deal hot"
         >
           <span
             className="text-[10px] font-black uppercase tracking-[0.3em]"
@@ -20,21 +34,23 @@ export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
           >
             FLASH SALE
           </span>
-          <span className="material-symbols-outlined animate-pulse" style={{ color: "var(--stitch-color-secondary)" }}>
+          <span className="material-symbols-outlined animate-pulse" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>
             bolt
           </span>
-        </div>
+        </Link>
       </aside>
 
       <aside className="pointer-events-none fixed right-6 top-1/2 z-40 hidden -translate-y-1/2 xl:pointer-events-auto xl:flex xl:flex-col xl:gap-4">
-        <div
-          className="group flex h-64 w-12 cursor-pointer flex-col items-center justify-center gap-8 rounded-full border py-6 transition-all hover:opacity-95"
+        <Link
+          href="/#new-drops"
+          className="group flex h-64 w-12 flex-col items-center justify-center gap-8 rounded-full border py-6 transition-all hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-primary)]"
           style={{
             background:
               "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
             borderColor:
               "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
           }}
+          aria-label="Hàng mới — xuống mục New Drops"
         >
           <span
             className="text-[10px] font-black uppercase tracking-[0.3em]"
@@ -42,10 +58,10 @@ export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
           >
             NEW DROP
           </span>
-          <span className="material-symbols-outlined" style={{ color: "var(--stitch-color-primary)" }}>
+          <span className="material-symbols-outlined" style={{ color: "var(--stitch-color-primary)" }} aria-hidden>
             rocket_launch
           </span>
-        </div>
+        </Link>
       </aside>
 
       <main className="mx-auto max-w-screen-2xl px-6 pb-12 pt-24 md:px-12">
@@ -75,7 +91,7 @@ export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
                   color: "var(--stitch-color-on-secondary-container)",
                 }}
               >
-                Limited Edition
+                Phiên bản giới hạn
               </span>
               <h1
                 className="mb-4 text-4xl font-bold italic leading-tight tracking-tighter text-white md:text-6xl"
@@ -85,19 +101,18 @@ export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
                 <span style={{ color: "var(--stitch-color-primary)" }}>ELITE X</span>
               </h1>
               <p className="mb-8 text-lg font-medium" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                Next-generation haptic feedback. Zero latency. Pure dominance. Experience the
-                future of competitive play.
+                Phản hồi xúc giác thế hệ mới — độ trễ gần như bằng không. Trải nghiệm chơi cạnh tranh đỉnh cao.
               </p>
-              <button
-                type="button"
-                className="group flex items-center gap-3 rounded-full px-8 py-4 font-extrabold transition-all active:scale-95"
+              <Link
+                href={HOME_EXPLORE_HREF}
+                className="group inline-flex min-h-[44px] items-center gap-3 rounded-full px-8 py-4 font-extrabold transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--stitch-color-surface)]"
                 style={{ background: "#ffffff", color: "var(--stitch-color-surface)" }}
               >
-                DISCOVER NOW
-                <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">
+                {HOME_CTA_LABEL}
+                <span className="material-symbols-outlined transition-transform group-hover:translate-x-1" aria-hidden>
                   arrow_forward
                 </span>
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -154,7 +169,7 @@ export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
           </div>
         </section>
 
-        <section className="mb-20">
+        <section id="hot-deals" className="mb-20 scroll-mt-28">
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2
@@ -162,81 +177,53 @@ export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
                 style={{ fontFamily: "var(--stitch-font-headline)" }}
               >
                 <span className="h-0.5 w-10" style={{ background: "var(--stitch-color-secondary)" }} />
-                HOT DEALS
+                DEAL HOT
               </h2>
               <p className="mt-2" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                The most wanted hardware at exclusive prices.
+                Phần cứng được săn nhiều nhất với mức giá ưu đãi.
               </p>
             </div>
-            <button
-              type="button"
-              className="flex items-center gap-2 font-bold transition hover:underline"
+            <Link
+              href={HOME_EXPLORE_HREF}
+              className="flex min-h-[44px] items-center gap-2 rounded-lg px-1 font-bold transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
               style={{ color: "var(--stitch-color-primary)" }}
             >
-              View All
-              <span className="material-symbols-outlined text-sm">open_in_new</span>
-            </button>
+              Xem tất cả
+              <span className="material-symbols-outlined text-sm" aria-hidden>
+                open_in_new
+              </span>
+            </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
-            {products.map((p) => (
-              <Link
-                key={p.id}
-                href={`/product/${p.id}`}
-                className="group/card relative block rounded-3xl border p-4 transition-all duration-300 hover:opacity-95 active:scale-[0.99] hover:bg-[var(--stitch-color-surface-bright,var(--stitch-color-surface-container))]"
-                style={{
-                  background: "var(--stitch-color-surface-container)",
-                  borderColor:
-                    "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
-                }}
-                aria-label={`Xem sản phẩm: ${p.title}`}
+          <HomeDesktopProductGrid products={hotProducts} />
+        </section>
+
+        <section id="new-drops" className="mb-20 scroll-mt-28">
+          <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2
+                className="text-2xl font-black italic tracking-tighter text-white md:text-3xl"
+                style={{ fontFamily: "var(--stitch-font-headline)" }}
               >
-                {"badge" in p && p.badge ? (
-                  <div className="absolute right-4 top-4 z-10">
-                    <div className="rounded-full px-3 py-1 text-[10px] font-black text-white" style={{ background: "var(--stitch-color-secondary)" }}>
-                      {p.badge}
-                    </div>
-                  </div>
-                ) : null}
-                {"tag" in p && p.tag ? (
-                  <div className="absolute left-4 top-4 z-10">
-                    <div
-                      className="rounded-full px-3 py-1 text-[10px] font-black text-white"
-                      style={{ background: "var(--stitch-color-primary-dim, var(--stitch-color-primary))" }}
-                    >
-                      {p.tag}
-                    </div>
-                  </div>
-                ) : null}
-                <div
-                  className="relative mb-4 h-44 overflow-hidden rounded-2xl"
-                  style={{
-                    background:
-                      "var(--stitch-color-surface-container-low, var(--stitch-color-surface))",
-                  }}
-                >
-                  <Image
-                    src={p.img}
-                    alt={p.title}
-                    fill
-                    className={p.title.includes("Mouse") ? "object-contain" : "object-cover"}
-                    sizes="(max-width: 640px) 100vw, 25vw"
-                    unoptimized
-                  />
-                </div>
-                {/* Hide rating on list cards; show on product detail only. */}
-                <h3 className="mb-2 line-clamp-2 text-sm font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
-                  {p.title}
-                </h3>
-                <p className="mb-3 line-clamp-2 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                  Hiệu năng gaming • Bảo hành chính hãng • Giao nhanh
-                </p>
-                <p className="mb-4 text-lg font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                  {p.price} <span className="text-xs font-normal">VND</span>
-                </p>
-              </Link>
-            ))}
+                New Drops
+              </h2>
+              <p className="mt-2" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                Sản phẩm mới cập nhật — cùng bộ lọc danh mục với Deal hot.
+              </p>
+            </div>
+            <Link
+              href={HOME_EXPLORE_HREF}
+              className="flex min-h-[44px] items-center gap-2 rounded-lg px-1 font-bold transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
+              style={{ color: "var(--stitch-color-primary)" }}
+            >
+              Xem tất cả
+              <span className="material-symbols-outlined text-sm" aria-hidden>
+                open_in_new
+              </span>
+            </Link>
           </div>
+
+          <HomeDesktopProductGrid products={newProducts} />
         </section>
 
         <section className="mb-12">
@@ -247,58 +234,11 @@ export function HomeDesktop({ products }: { products: CatalogProduct[] }) {
               color: "var(--stitch-color-on-surface-variant)",
             }}
           >
-            BROWSE GEAR
+            DUYỆT PHỤ KIỆN
           </h2>
-          <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-4">
-            {[
-              { icon: "computer", label: "Laptops", accent: "secondary" as const },
-              { icon: "videogame_asset", label: "Consoles", accent: "primary" as const },
-              { icon: "headphones", label: "Audio", accent: "neutral" as const },
-              { icon: "keyboard", label: "Peripherals", accent: "neutral" as const },
-              { icon: "storage", label: "Hardware", accent: "neutral" as const },
-            ].map((c) => {
-              const isPri = c.accent === "primary";
-              const isSec = c.accent === "secondary";
-              return (
-                <div
-                  key={c.label}
-                  className="flex h-32 w-64 flex-shrink-0 cursor-pointer items-center justify-center gap-4 rounded-2xl border transition-all"
-                  style={{
-                    background: isSec
-                      ? "color-mix(in srgb, var(--stitch-color-secondary-container) 20%, transparent)"
-                      : isPri
-                        ? "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 20%, transparent)"
-                        : "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
-                    borderColor: isSec
-                      ? "color-mix(in srgb, var(--stitch-color-secondary) 20%, transparent)"
-                      : isPri
-                        ? "color-mix(in srgb, var(--stitch-color-primary) 20%, transparent)"
-                        : "transparent",
-                  }}
-                >
-                  <span
-                    className="material-symbols-outlined text-4xl"
-                    style={{
-                      color:
-                        c.accent === "neutral"
-                          ? "var(--stitch-color-on-surface-variant)"
-                          : isSec
-                            ? "var(--stitch-color-secondary)"
-                            : "var(--stitch-color-primary)",
-                    }}
-                  >
-                    {c.icon}
-                  </span>
-                  <span className="text-xl font-bold" style={{ fontFamily: "var(--stitch-font-headline)" }}>
-                    {c.label}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+          <HomeCategoryChips categories={categories} variant="desktop" />
         </section>
       </main>
     </div>
   );
 }
-

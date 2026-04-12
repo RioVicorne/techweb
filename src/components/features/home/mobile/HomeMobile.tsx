@@ -1,9 +1,22 @@
 import Image from "next/image";
 import Link from "next/link";
+import { HomeCategoryChips } from "@/components/features/home/shared/HomeCategoryChips";
+import type { HomeCategoryChipItem } from "@/components/features/home/shared/HomeCategoryChips";
+import { HOME_CTA_LABEL, HOME_EXPLORE_HREF } from "@/components/features/home/shared/homeHeroCopy";
 import { HERO_IMG } from "@/components/features/home/shared/homeImages";
+import { HomeProductCardBadges } from "@/components/features/home/shared/HomeProductCardBadges";
+import { imageObjectFitForProductTitle } from "@/components/features/home/shared/homeSections";
 import type { CatalogProduct } from "@/lib/catalog";
 
-export function HomeMobile({ products }: { products: CatalogProduct[] }) {
+export function HomeMobile({
+  hotProducts,
+  newProducts,
+  categories,
+}: {
+  hotProducts: CatalogProduct[];
+  newProducts: CatalogProduct[];
+  categories: HomeCategoryChipItem[];
+}) {
   return (
     <div className="md:hidden">
       <main className="mx-auto max-w-screen-2xl px-5 pb-20 pt-24">
@@ -44,14 +57,14 @@ export function HomeMobile({ products }: { products: CatalogProduct[] }) {
               OVERCLOCK YOUR REALITY
             </h1>
             <Link
-              href="#"
-              className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-extrabold transition-all active:scale-95"
+              href={HOME_EXPLORE_HREF}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full px-6 py-3 text-sm font-extrabold transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
               style={{
                 background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
                 color: "var(--stitch-color-on-primary)",
               }}
             >
-              Discover now
+              {HOME_CTA_LABEL}
               <span className="material-symbols-outlined" aria-hidden>
                 arrow_forward
               </span>
@@ -69,67 +82,21 @@ export function HomeMobile({ products }: { products: CatalogProduct[] }) {
                 className="h-0.5 w-10"
                 style={{ background: "var(--stitch-color-secondary)" }}
               />
-              Browse Gear
+              Duyệt phụ kiện
             </h2>
             <Link
-              href="#"
-              className="flex items-center gap-2 text-sm font-bold transition hover:underline"
+              href={HOME_EXPLORE_HREF}
+              className="flex min-h-[44px] items-center gap-2 text-sm font-bold transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
               style={{ color: "var(--stitch-color-primary)" }}
             >
-              View All
+              Xem tất cả
               <span className="material-symbols-outlined text-sm" aria-hidden>
                 open_in_new
               </span>
             </Link>
           </div>
 
-          <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-2">
-            {[
-              { icon: "storage", label: "Hardware", accent: "neutral" as const, categoryKey: "hardware" },
-              { icon: "mouse", label: "mouse", accent: "primary" as const, categoryKey: "mouse" },
-              { icon: "keyboard", label: "Peripherals", accent: "neutral" as const, categoryKey: "peripherals" },
-              { icon: "videocam", label: "Streaming", accent: "neutral" as const, categoryKey: "streaming" },
-              { icon: "headphones", label: "Audio", accent: "secondary" as const, categoryKey: "audio" },
-            ].map((c) => {
-              const isPri = c.accent === "primary";
-              const isSec = c.accent === "secondary";
-              return (
-                <Link
-                  key={c.label}
-                  href={`/category?category=${encodeURIComponent(c.categoryKey)}`}
-                  className="flex h-12 min-w-max items-center justify-center gap-2 rounded-2xl border px-4 transition-all active:scale-95"
-                  style={{
-                    background: isSec
-                      ? "color-mix(in srgb, var(--stitch-color-secondary-container) 20%, transparent)"
-                      : isPri
-                        ? "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 18%, transparent)"
-                        : "color-mix(in srgb, var(--stitch-color-surface-container-high) 90%, transparent)",
-                    borderColor: isSec
-                      ? "color-mix(in srgb, var(--stitch-color-secondary) 20%, transparent)"
-                      : isPri
-                        ? "color-mix(in srgb, var(--stitch-color-primary) 20%, transparent)"
-                        : "transparent",
-                  }}
-                >
-                  <span
-                    className="material-symbols-outlined text-lg"
-                    style={{
-                      color:
-                        c.accent === "neutral"
-                          ? "var(--stitch-color-on-surface-variant)"
-                          : isSec
-                            ? "var(--stitch-color-secondary)"
-                            : "var(--stitch-color-primary)",
-                    }}
-                    aria-hidden
-                  >
-                    {c.icon}
-                  </span>
-                  <span className="text-sm font-bold">{c.label}</span>
-                </Link>
-              );
-            })}
-          </div>
+          <HomeCategoryChips categories={categories} variant="mobile" />
         </section>
 
         <section className="mb-10">
@@ -146,40 +113,25 @@ export function HomeMobile({ products }: { products: CatalogProduct[] }) {
                 >
                   local_fire_department
                 </span>
-                Hot Deals
+                Deal hot
               </h2>
               <div
                 className="mt-2 inline-flex items-center rounded-full px-3 py-1 text-[11px] font-black"
                 style={{ background: "var(--stitch-color-secondary)", color: "white" }}
               >
-                Ends in 04:22:10
+                Ưu đãi có hạn
               </div>
             </div>
           </div>
 
           <div className="space-y-4">
-            {products.slice(0, 2).map((p) => (
+            {hotProducts.map((p) => (
               <div
                 key={p.id}
                 className="group relative overflow-hidden rounded-3xl p-4"
                 style={{ background: "var(--stitch-color-surface-container)" }}
               >
-                {"badge" in p && p.badge ? (
-                  <div
-                    className="absolute left-4 top-4 rounded-full px-3 py-1 text-[10px] font-black text-white"
-                    style={{ background: "var(--stitch-color-secondary)" }}
-                  >
-                    {p.badge}
-                  </div>
-                ) : null}
-                {"tag" in p && p.tag ? (
-                  <div
-                    className="absolute right-4 top-4 rounded-full px-3 py-1 text-[10px] font-black text-white"
-                    style={{ background: "var(--stitch-color-primary-dim, var(--stitch-color-primary))" }}
-                  >
-                    {p.tag}
-                  </div>
-                ) : null}
+                <HomeProductCardBadges product={p} />
 
                 <div className="flex flex-col gap-3 pt-10">
                   <div className="flex gap-4">
@@ -195,7 +147,7 @@ export function HomeMobile({ products }: { products: CatalogProduct[] }) {
                         src={p.img}
                         alt={p.title}
                         fill
-                        className="object-cover"
+                        className={imageObjectFitForProductTitle(p.title)}
                         sizes="80px"
                         unoptimized
                       />
@@ -232,7 +184,7 @@ export function HomeMobile({ products }: { products: CatalogProduct[] }) {
           </div>
         </section>
 
-        <section className="mb-12">
+        <section id="new-drops" className="mb-12 scroll-mt-28">
           <h2
             className="mb-4 text-2xl font-black uppercase italic tracking-tighter text-white"
             style={{ fontFamily: "var(--stitch-font-headline)" }}
@@ -240,7 +192,7 @@ export function HomeMobile({ products }: { products: CatalogProduct[] }) {
             New Drops
           </h2>
           <div className="grid grid-cols-2 gap-4">
-            {products.slice(2).map((p) => (
+            {newProducts.map((p) => (
               <Link
                 key={p.id}
                 href={`/product/${p.id}`}
@@ -254,7 +206,14 @@ export function HomeMobile({ products }: { products: CatalogProduct[] }) {
                       "var(--stitch-color-surface-container-low, var(--stitch-color-surface))",
                   }}
                 >
-                  <Image src={p.img} alt={p.title} fill className="object-cover" sizes="150px" unoptimized />
+                  <Image
+                    src={p.img}
+                    alt={p.title}
+                    fill
+                    className={imageObjectFitForProductTitle(p.title)}
+                    sizes="150px"
+                    unoptimized
+                  />
                 </div>
                 <p className="line-clamp-1 text-sm font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
                   {p.title}
@@ -270,4 +229,3 @@ export function HomeMobile({ products }: { products: CatalogProduct[] }) {
     </div>
   );
 }
-
