@@ -149,7 +149,11 @@ export function SuccessClient() {
             Tiếp tục mua sắm
           </Link>
           <Link
-            href={orderId ? `/orders?orderId=${encodeURIComponent(orderId)}` : "/orders"}
+            href={
+              orderId
+                ? `/orders?tab=pending&orderId=${encodeURIComponent(orderId)}`
+                : "/orders"
+            }
             className="inline-flex items-center justify-center rounded-xl px-8 py-3 text-sm font-bold transition active:scale-95"
             style={{
               background: "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",

@@ -5,12 +5,19 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { formatVndDisplay } from "@/data/products";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
-import { ORDER_STATUS_TABS, orderStatusTabColor } from "@/lib/order-status-tabs";
+import {
+  ORDER_PROGRESS_STEPS,
+  ORDER_STATUS_TABS,
+  orderRowStatusLabel,
+  orderStatusTabColor,
+} from "@/lib/order-status-tabs";
+import { useLiveOrderTime } from "@/hooks/useLiveOrderTime";
 
 type OrderRow = {
   id?: string;
   order_code: string;
   created_at: string;
+  updated_at?: string | null;
   status: string;
   total: number;
   currency: string;
@@ -28,15 +35,17 @@ type OrderDetail = {
   total_vnd: number;
 };
 
-function statusLabel(s: string) {
-  const map: Record<string, string> = {
-    PENDING_CONFIRMATION: "Chờ xác nhận",
-    CONFIRMED: "Đã xác nhận",
-    SHIPPING: "Đang giao",
-    COMPLETED: "Hoàn tất",
-    CANCELLED: "Đã hủy",
-  };
-  return map[s] ?? s;
+function OrderCreatedAtLabel({ iso }: { iso: string }) {
+  const label = useLiveOrderTime(iso);
+  return <>{label}</>;
+}
+
+function orderEventTimeIso(order: OrderRow): string {
+  if (order.status === "CANCELLED") {
+    const cancelledAt = String(order.updated_at ?? "").trim();
+    if (cancelledAt) return cancelledAt;
+  }
+  return order.created_at;
 }
 
 export function OrdersClient() {
@@ -44,7 +53,7 @@ export function OrdersClient() {
   const params = useSearchParams();
   const supabase = useMemo(() => getSupabaseBrowser(), []);
 
-  const tabKey = (params.get("tab") || "pending").trim();
+  const tabKeyRaw = (params.get("tab") || "").trim();
   const orderId = (params.get("orderId") || "").trim();
 
   const [loading, setLoading] = useState(true);
@@ -55,14 +64,15 @@ export function OrdersClient() {
   const [detail, setDetail] = useState<OrderDetail | null>(null);
 
   const activeTab = useMemo(
-    () => ORDER_STATUS_TABS.find((t) => t.key === tabKey) ?? ORDER_STATUS_TABS[0],
-    [tabKey],
+    () => (tabKeyRaw ? ORDER_STATUS_TABS.find((t) => t.key === tabKeyRaw) ?? null : null),
+    [tabKeyRaw],
   );
 
   const filteredOrders = useMemo(() => {
+    if (!activeTab) return [];
     const allow = new Set(activeTab.statuses);
     return orders.filter((o) => allow.has(String(o.status || "")));
-  }, [orders, activeTab.statuses]);
+  }, [orders, activeTab]);
 
   useEffect(() => {
     let cancelled = false;
@@ -98,8 +108,9 @@ export function OrdersClient() {
   useEffect(() => {
     let cancelled = false;
     async function run() {
-      if (!orderId) {
+      if (!orderId || !activeTab) {
         setDetail(null);
+        setDetailLoading(false);
         return;
       }
       setDetailLoading(true);
@@ -119,7 +130,7 @@ export function OrdersClient() {
     return () => {
       cancelled = true;
     };
-  }, [orderId]);
+  }, [orderId, activeTab]);
 
   return (
     <main className="mx-auto max-w-screen-2xl px-6 pb-20 pt-28 md:px-12">
@@ -159,7 +170,7 @@ export function OrdersClient() {
             <div className="flex items-center justify-between gap-2 sm:grid sm:grid-cols-5 sm:gap-3">
             {ORDER_STATUS_TABS.map((t) => {
               const n = t.statuses.reduce((sum, s) => sum + (counts[s] ?? 0), 0);
-              const active = t.key === activeTab.key;
+              const active = t.key === activeTab?.key;
               const c = orderStatusTabColor(t.key);
               return (
                 <button
@@ -236,7 +247,7 @@ export function OrdersClient() {
           <div className="mt-5">
             <div className="flex items-center justify-between gap-4">
               <h2 className="text-base font-black text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
-                {activeTab.label}
+                {activeTab ? activeTab.label : "Đơn hàng"}
               </h2>
               <Link href="/checkout" className="text-sm font-black transition hover:underline" style={{ color: "var(--stitch-color-primary)" }}>
                 Mua thêm
@@ -246,6 +257,10 @@ export function OrdersClient() {
             {loading ? (
               <p className="mt-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 Đang tải...
+              </p>
+            ) : !activeTab ? (
+              <p className="mt-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                Chọn một tab trạng thái phía trên để xem danh sách đơn đầy đủ.
               </p>
             ) : filteredOrders.length === 0 ? (
               <p className="mt-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -271,48 +286,52 @@ export function OrdersClient() {
                       router.push(`/orders?${sp.toString()}`);
                     }}
                   >
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div
-                          className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border"
-                          style={{
-                            background: "var(--stitch-color-surface-container-low)",
-                            borderColor:
-                              "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
-                          }}
-                        >
-                          {o.first_item?.image ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={o.first_item.image} alt="" className="h-full w-full object-cover" />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center opacity-60">
-                              <span className="material-symbols-outlined" aria-hidden>
-                                inventory_2
-                              </span>
-                            </div>
-                          )}
+                    <div className="flex w-full gap-3">
+                      <div
+                        className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border"
+                        style={{
+                          background: "var(--stitch-color-surface-container-low)",
+                          borderColor:
+                            "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+                        }}
+                      >
+                        {o.first_item?.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={o.first_item.image} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center opacity-60">
+                            <span className="material-symbols-outlined" aria-hidden>
+                              inventory_2
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 truncate text-sm font-black text-white">RioShop</div>
+                          <div
+                            className="shrink-0 text-right text-xs font-black leading-tight"
+                            style={{ color: "var(--stitch-color-primary)" }}
+                          >
+                            {orderRowStatusLabel(String(o.status || ""))}
+                          </div>
                         </div>
 
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="truncate text-sm font-black text-white">RioShop</div>
-                            <div className="text-xs font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                              {statusLabel(String(o.status || ""))}
-                            </div>
-                          </div>
+                        <div className="mt-1 line-clamp-2 text-sm font-bold text-white">
+                          {o.first_item?.title || o.order_code}
+                        </div>
 
-                          <div className="mt-1 line-clamp-2 text-sm font-bold text-white">
-                            {o.first_item?.title || o.order_code}
+                        <div className="mt-1 flex items-end justify-between gap-3">
+                          <div className="min-w-0 text-xs leading-snug" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                            <OrderCreatedAtLabel iso={orderEventTimeIso(o)} />
+                            {o.first_item?.qty ? ` • x${o.first_item.qty}` : ""}
                           </div>
-
-                          <div className="mt-1 flex items-center justify-between gap-3">
-                            <div className="text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                              {new Date(o.created_at).toLocaleString()}
-                              {o.first_item?.qty ? ` • x${o.first_item.qty}` : ""}
-                            </div>
-                            <div className="text-sm font-black" style={{ color: "var(--stitch-color-on-surface)" }}>
-                              {formatVndDisplay(Number(o.total) || 0)} {o.currency || "VND"}
-                            </div>
+                          <div
+                            className="shrink-0 text-right text-sm font-black tabular-nums leading-tight"
+                            style={{ color: "var(--stitch-color-on-surface)" }}
+                          >
+                            {formatVndDisplay(Number(o.total) || 0)} {o.currency || "VND"}
                           </div>
                         </div>
                       </div>
@@ -377,7 +396,7 @@ export function OrdersClient() {
             <h2 className="text-base font-black text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
               Chi tiết đơn
             </h2>
-            {orderId ? (
+            {orderId && activeTab ? (
               <button
                 type="button"
                 className="text-sm font-black transition hover:underline"
@@ -393,9 +412,13 @@ export function OrdersClient() {
             ) : null}
           </div>
 
-          {!orderId ? (
+          {!activeTab ? (
             <p className="mt-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-              Chọn một đơn hàng để xem tiến độ giao hàng và địa chỉ.
+              Chọn tab trạng thái bên trái trước; sau đó chọn một đơn để xem chi tiết đầy đủ (tiến độ, địa chỉ, tổng tiền).
+            </p>
+          ) : !orderId ? (
+            <p className="mt-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+              Chọn một đơn hàng trong danh sách để xem tiến độ giao hàng và địa chỉ.
             </p>
           ) : detailLoading ? (
             <p className="mt-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -410,7 +433,7 @@ export function OrdersClient() {
                 </div>
                 <div className="mt-1 text-sm font-black text-white">{detail.id}</div>
                 <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                  {new Date(detail.created_at).toLocaleString()}
+                  <OrderCreatedAtLabel iso={detail.created_at} />
                 </div>
               </div>
 
@@ -456,12 +479,7 @@ export function OrdersClient() {
                   Tiến độ
                 </div>
                 <div className="mt-3 grid gap-3">
-                  {[
-                    { label: "Chờ xác nhận", icon: "hourglass_top", key: "PENDING_CONFIRMATION" },
-                    { label: "Đang chuẩn bị", icon: "inventory_2", key: "CONFIRMED" },
-                    { label: "Đang giao", icon: "local_shipping", key: "SHIPPING" },
-                    { label: "Hoàn tất", icon: "verified", key: "COMPLETED" },
-                  ].map((s, idx) => {
+                  {ORDER_PROGRESS_STEPS.map((s, idx) => {
                     // Simple logic: if progress is further, show as completed
                     const statusChain = ["PENDING_CONFIRMATION", "CONFIRMED", "SHIPPING", "COMPLETED"];
                     const currentIdx = statusChain.indexOf(detail.status);

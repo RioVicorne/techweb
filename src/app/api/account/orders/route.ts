@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from("orders")
-      .select("id,order_code,created_at,status,total,currency")
+      .select("id,order_code,created_at,updated_at,status,total,currency")
       .eq("user_id", userData.user.id)
       .order("created_at", { ascending: false })
       .limit(20);
