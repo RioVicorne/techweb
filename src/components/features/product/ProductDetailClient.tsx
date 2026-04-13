@@ -164,57 +164,38 @@ export function ProductDetailClient({ product, productId }: { product: Product; 
             Thông số kỹ thuật
           </h2>
 
-          <div className="space-y-3">
-            <details className="group rounded-3xl p-4" style={{ background: "var(--stitch-color-surface-container)" }}>
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
-                <span className="text-sm font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
-                  <span className="material-symbols-outlined mr-2" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>
-                    tune
-                  </span>
-                  Connectivity
-                </span>
-                <span className="material-symbols-outlined transition group-open:rotate-180" style={{ color: "var(--stitch-color-on-surface-variant)" }} aria-hidden>
-                  expand_more
-                </span>
-              </summary>
-              <div className="mt-3 text-sm leading-relaxed" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                Wireless, low-latency link tuned for competitive response. Ready for streaming + high-performance rigs.
-              </div>
-            </details>
-
-            <details className="group rounded-3xl p-4" style={{ background: "var(--stitch-color-surface-container)" }}>
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
-                <span className="text-sm font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
-                  <span className="material-symbols-outlined mr-2" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>
-                    build
-                  </span>
-                  Switch Type
-                </span>
-                <span className="material-symbols-outlined transition group-open:rotate-180" style={{ color: "var(--stitch-color-on-surface-variant)" }} aria-hidden>
-                  expand_more
-                </span>
-              </summary>
-              <div className="mt-3 text-sm leading-relaxed" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                Precision-tuned switch design with consistent tactile feedback for high APM gameplay.
-              </div>
-            </details>
-
-            <details className="group rounded-3xl p-4" style={{ background: "var(--stitch-color-surface-container)" }}>
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
-                <span className="text-sm font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
-                  <span className="material-symbols-outlined mr-2" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>
-                    zoom_out_map
-                  </span>
-                  Weight &amp; Dimensions
-                </span>
-                <span className="material-symbols-outlined transition group-open:rotate-180" style={{ color: "var(--stitch-color-on-surface-variant)" }} aria-hidden>
-                  expand_more
-                </span>
-              </summary>
-              <div className="mt-3 text-sm leading-relaxed" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                Lightweight build with balanced dimensions for long sessions and ergonomic control.
-              </div>
-            </details>
+          <div className="overflow-hidden rounded-2xl" style={{ background: "var(--stitch-color-surface-container)" }}>
+            <table className="w-full text-sm">
+              <tbody>
+                <tr className="border-b" style={{ borderColor: "var(--stitch-color-outline-variant, var(--stitch-color-outline))" }}>
+                  <td className="flex items-center gap-2 px-4 py-3 font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
+                    <span className="material-symbols-outlined text-base" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>tune</span>
+                    Connectivity
+                  </td>
+                  <td className="px-4 py-3" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                    Wireless, low-latency link tuned for competitive response. Ready for streaming + high-performance rigs.
+                  </td>
+                </tr>
+                <tr className="border-b" style={{ borderColor: "var(--stitch-color-outline-variant, var(--stitch-color-outline))" }}>
+                  <td className="flex items-center gap-2 px-4 py-3 font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
+                    <span className="material-symbols-outlined text-base" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>build</span>
+                    Switch Type
+                  </td>
+                  <td className="px-4 py-3" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                    Precision-tuned switch design with consistent tactile feedback for high APM gameplay.
+                  </td>
+                </tr>
+                <tr>
+                  <td className="flex items-center gap-2 px-4 py-3 font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
+                    <span className="material-symbols-outlined text-base" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>zoom_out_map</span>
+                    Weight &amp; Dimensions
+                  </td>
+                  <td className="px-4 py-3" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                    Lightweight build with balanced dimensions for long sessions and ergonomic control.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </section>
 
