@@ -116,7 +116,7 @@ export function CategoryProductCard({ product: p }: Props) {
         <p className="text-xl font-black" style={{ color: "var(--stitch-color-primary)" }}>
           {p.price}
           <span className="ml-1 text-xs font-normal" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-            VND
+            đ
           </span>
         </p>
 

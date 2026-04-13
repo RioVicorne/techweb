@@ -100,18 +100,18 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
             >
               <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 <span>Tạm tính</span>
-                <span className="tabular-nums text-white">{formatVndDisplay(order.subtotalVnd)} VND</span>
+                <span className="tabular-nums text-white">{formatVndDisplay(order.subtotalVnd)} đ</span>
               </div>
               <div className="mt-2 flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 <span>Vận chuyển</span>
                 <span className="tabular-nums text-white">
-                  {order.shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(order.shippingVnd)} VND`}
+                  {order.shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(order.shippingVnd)} đ`}
                 </span>
               </div>
               <div className="mt-3 flex justify-between text-base font-black">
                 <span style={{ color: "var(--stitch-color-on-surface)" }}>Tổng cộng</span>
                 <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
-                  {formatVndDisplay(order.totalVnd)} VND
+                  {formatVndDisplay(order.totalVnd)} đ
                 </span>
               </div>
             </div>

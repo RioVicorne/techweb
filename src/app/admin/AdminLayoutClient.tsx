@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 const nav = [
   { href: "/admin", label: "Tổng quan", icon: "dashboard" },
+  { href: "/admin/products", label: "Sản phẩm", icon: "shopping_bag" },
   { href: "/admin/orders", label: "Xử lý đơn", icon: "orders" },
   { href: "/admin/inventory", label: "Kho hàng", icon: "inventory_2" },
 ];

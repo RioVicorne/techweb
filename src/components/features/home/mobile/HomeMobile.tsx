@@ -163,7 +163,7 @@ export function HomeMobile({
                         {p.title}
                       </Link>
                       <p className="mt-2 text-lg font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                        {p.price} <span className="text-xs font-normal">VND</span>
+                        {p.price} <span className="text-xs font-normal">đ</span>
                       </p>
                     </div>
                   </div>
@@ -219,7 +219,7 @@ export function HomeMobile({
                   {p.title}
                 </p>
                 <p className="mt-2 text-base font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                  {p.price} <span className="text-[10px] font-normal">VND</span>
+                  {p.price} <span className="text-[10px] font-normal">đ</span>
                 </p>
               </Link>
             ))}

@@ -42,7 +42,7 @@ function SearchHitsDropdown({
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-black text-white">{p.title}</div>
                 <div className="mt-0.5 text-xs font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                  {p.price} VND
+                  {p.price} đ
                 </div>
               </div>
             </button>

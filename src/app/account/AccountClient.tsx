@@ -745,18 +745,18 @@ export function AccountClient() {
                   <div className="mt-4 grid gap-2 text-sm">
                     <div className="flex justify-between" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                       <span>Tạm tính</span>
-                      <span className="tabular-nums text-white">{formatVndDisplay(selectedOrder.subtotalVnd)} VND</span>
+                      <span className="tabular-nums text-white">{formatVndDisplay(selectedOrder.subtotalVnd)} đ</span>
                     </div>
                     <div className="flex justify-between" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                       <span>Vận chuyển</span>
                       <span className="tabular-nums text-white">
-                        {selectedOrder.shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(selectedOrder.shippingVnd)} VND`}
+                        {selectedOrder.shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(selectedOrder.shippingVnd)} đ`}
                       </span>
                     </div>
                     <div className="flex justify-between text-base font-black">
                       <span style={{ color: "var(--stitch-color-on-surface)" }}>Tổng cộng</span>
                       <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
-                        {formatVndDisplay(selectedOrder.totalVnd)} VND
+                        {formatVndDisplay(selectedOrder.totalVnd)} đ
                       </span>
                     </div>
                   </div>
@@ -1181,7 +1181,7 @@ export function AccountClient() {
                       <div className="p-3">
                         <div className="line-clamp-1 text-sm font-bold text-white">{p.title}</div>
                         <div className="mt-1 text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                          {p.price} <span className="text-[10px] font-normal">VND</span>
+                          {p.price} <span className="text-[10px] font-normal">đ</span>
                         </div>
                       </div>
                     </Link>
@@ -1218,7 +1218,7 @@ export function AccountClient() {
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                        {formatVndDisplay(Number(x.unit_price) || 0)} VND
+                        {formatVndDisplay(Number(x.unit_price) || 0)} đ
                       </div>
                       <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                         Order {x.last_order_code}
@@ -1269,7 +1269,7 @@ export function AccountClient() {
                       </div>
                       <div className="text-right">
                         <div className="text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                          {formatVndDisplay(Number(o.total) || 0)} {o.currency || "VND"}
+                          {formatVndDisplay(Number(o.total) || 0)} đ
                         </div>
                         <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                           {orderRowStatusLabel(String(o.status))}

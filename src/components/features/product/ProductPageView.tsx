@@ -52,7 +52,7 @@ export function ProductPageView({ product }: { product: Product }) {
                 {product.title}
               </h1>
               <p className="mt-2 text-xl font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                {product.price} <span className="text-sm font-normal">VND</span>
+                {product.price} <span className="text-sm font-normal">đ</span>
               </p>
               <p className="mt-3 text-sm font-medium" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 Engineered for elite competitive play. Pure kinetic energy, tuned for dominance.

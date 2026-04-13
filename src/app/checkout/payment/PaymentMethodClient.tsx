@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-type PaymentMethodId = "COD" | "MOMO" | "BANK" | "CARD";
+type PaymentMethodId = "COD" | "MOMO" | "BANK";
 
 const METHODS: Array<{
   id: PaymentMethodId;
@@ -14,13 +14,12 @@ const METHODS: Array<{
   accent: "primary" | "secondary" | "neutral";
 }> = [
   { id: "COD", title: "Thanh toán khi nhận hàng (COD)", desc: "Trả tiền mặt khi nhận.", icon: "local_shipping", accent: "neutral" },
-  { id: "MOMO", title: "Ví MoMo", desc: "Xác nhận nhanh qua MoMo.", icon: "payments", accent: "secondary" },
+  { id: "MOMO", title: "Ví MoMo", desc: "Quét QR MoMo để thanh toán.", icon: "payments", accent: "secondary" },
   { id: "BANK", title: "Chuyển khoản ngân hàng", desc: "Chuyển khoản theo hướng dẫn.", icon: "account_balance", accent: "neutral" },
-  { id: "CARD", title: "Thẻ (Stripe)", desc: "Thanh toán bằng thẻ quốc tế.", icon: "credit_card", accent: "primary" },
 ];
 
 function isPaymentMethodId(x: string | null): x is PaymentMethodId {
-  return x === "COD" || x === "MOMO" || x === "BANK" || x === "CARD";
+  return x === "COD" || x === "MOMO" || x === "BANK";
 }
 
 export function PaymentMethodClient() {

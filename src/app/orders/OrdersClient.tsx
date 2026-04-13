@@ -331,7 +331,7 @@ export function OrdersClient() {
                             className="shrink-0 text-right text-sm font-black tabular-nums leading-tight"
                             style={{ color: "var(--stitch-color-on-surface)" }}
                           >
-                            {formatVndDisplay(Number(o.total) || 0)} {o.currency || "VND"}
+                            {formatVndDisplay(Number(o.total) || 0)} đ
                           </div>
                         </div>
                       </div>
@@ -441,18 +441,18 @@ export function OrdersClient() {
                    style={{ borderColor: "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)" }}>
                 <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <span>Tạm tính</span>
-                  <span className="tabular-nums text-white">{formatVndDisplay(detail.subtotal_vnd)} VND</span>
+                  <span className="tabular-nums text-white">{formatVndDisplay(detail.subtotal_vnd)} đ</span>
                 </div>
                 <div className="mt-2 flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <span>Vận chuyển</span>
                   <span className="tabular-nums text-white">
-                    {detail.shipping_vnd === 0 ? "Miễn phí" : `${formatVndDisplay(detail.shipping_vnd)} VND`}
+                    {detail.shipping_vnd === 0 ? "Miễn phí" : `${formatVndDisplay(detail.shipping_vnd)} đ`}
                   </span>
                 </div>
                 <div className="mt-3 flex justify-between text-base font-black">
                   <span style={{ color: "var(--stitch-color-on-surface)" }}>Tổng cộng</span>
                   <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
-                    {formatVndDisplay(detail.total_vnd)} VND
+                    {formatVndDisplay(detail.total_vnd)} đ
                   </span>
                 </div>
               </div>

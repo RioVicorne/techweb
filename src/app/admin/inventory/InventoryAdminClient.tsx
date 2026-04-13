@@ -148,7 +148,7 @@ export function InventoryAdminClient() {
                       )}
                     </td>
                     <td className="px-5 py-4 align-middle tabular-nums font-bold">
-                      {formatVndDisplay(r.price)} <span className="text-[10px] font-normal opacity-40">₫</span>
+                      {formatVndDisplay(r.price)} <span className="text-[10px] font-normal opacity-40">đ</span>
                     </td>
                     <td className="px-5 py-4 align-middle tabular-nums opacity-60 font-bold">{r.quantityOnHand}</td>
                     <td className="px-5 py-4 align-middle tabular-nums opacity-60 font-bold">{r.reserved}</td>

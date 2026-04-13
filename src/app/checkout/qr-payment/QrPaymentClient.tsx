@@ -31,7 +31,7 @@ export function QrPaymentClient() {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState(900); // 15 minutes
+  const [countdown, setCountdown] = useState(300); // 5 minutes
   const [isPaid, setIsPaid] = useState(false);
 
   useEffect(() => {
@@ -106,7 +106,7 @@ export function QrPaymentClient() {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          setError("Mã QR đã hết hạn. Vui lòng đặt lại đơn hàng mới.");
+          setError("Mã QR đã hết hạn.");
           return 0;
         }
         return prev - 1;
@@ -264,7 +264,7 @@ export function QrPaymentClient() {
           </div>
 
           <div className="space-y-2 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-            <p className="font-black text-white">{formatVndDisplay(totalVnd)} VND</p>
+            <p className="font-black text-white">{formatVndDisplay(totalVnd)} đ</p>
             <p>Mã đơn: <span className="font-black text-white">{orderCode}</span></p>
             <p>Ngân hàng: <span className="font-bold text-white">{BANK.accountName}</span></p>
             <p>Số TK: <span className="font-bold text-white">{BANK.accountNumber}</span> ({BANK.code})</p>

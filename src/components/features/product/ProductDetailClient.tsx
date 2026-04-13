@@ -113,7 +113,7 @@ export function ProductDetailClient({ product, productId }: { product: Product; 
 
             <div className="mt-4 flex items-baseline gap-3">
               <p className="text-2xl font-black md:text-3xl" style={{ color: "var(--stitch-color-primary)" }}>
-                {product.price} <span className="text-base font-normal">VND</span>
+                {product.price} <span className="text-base font-normal">đ</span>
               </p>
             </div>
 
@@ -321,7 +321,7 @@ export function ProductDetailClient({ product, productId }: { product: Product; 
                       {rp.title}
                     </p>
                     <p className="mt-1 text-base font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                      {rp.price} <span className="text-xs font-normal">VND</span>
+                      {rp.price} <span className="text-xs font-normal">đ</span>
                     </p>
                   </div>
                 </Link>

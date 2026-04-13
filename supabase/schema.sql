@@ -129,7 +129,7 @@ create table if not exists public.orders (
   user_id uuid null references auth.users (id) on delete set null,
 
   status text not null default 'PENDING_PAYMENT',
-  currency text not null default 'VND',
+  currency text not null default 'đ',
 
   subtotal int not null default 0,
   shipping_fee int not null default 0,

@@ -60,7 +60,6 @@ function PaymentMethodBadge({ method, status }: { method: string; status: string
   const methodLabels: Record<string, string> = {
     BANK: "Chuyển khoản",
     MOMO: "MoMo",
-    STRIPE: "Thẻ",
     COD: "COD",
   };
   return (
@@ -161,14 +160,14 @@ export function OrdersAdminClient() {
     await load();
   }
 
-  async function patchPaymentStatus(orderId: string, paymentStatus: string) {
+  async function confirmBankPaidAndConfirmed(orderId: string) {
     setUpdatingId(orderId);
     setError(null);
     const res = await fetch(`/api/admin/orders/${orderId}`, {
       method: "PATCH",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ paymentStatus }),
+      body: JSON.stringify({ paymentStatus: "PAID", status: "CONFIRMED" }),
     });
     setUpdatingId(null);
     if (!res.ok) {
@@ -333,7 +332,7 @@ export function OrdersAdminClient() {
                           <PaymentMethodBadge method={o.payment_method} status={o.payment_status ?? "UNPAID"} />
                         ) : (
                           <div className="text-[10px] font-black uppercase tracking-widest text-[var(--stitch-color-primary)] opacity-80">
-                            {o.currency || "VND"}
+                            đ
                           </div>
                         )}
                       </div>
@@ -349,7 +348,7 @@ export function OrdersAdminClient() {
                           type="button"
                           onClick={() => {
                             if (confirm(`Xác nhận đơn ${o.order_code} đã thanh toán?`)) {
-                              void patchPaymentStatus(o.id, "PAID");
+                              void confirmBankPaidAndConfirmed(o.id);
                             }
                           }}
                           className="mt-1 inline-flex items-center gap-1 rounded-lg bg-emerald-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-400 transition hover:bg-emerald-500/30"

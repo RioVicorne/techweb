@@ -100,7 +100,7 @@ export function SearchClient() {
               <div className="p-3">
                 <div className="line-clamp-2 text-sm font-black text-white">{p.title}</div>
                 <div className="mt-2 text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                  {p.price} <span className="text-[10px] font-normal">VND</span>
+                  {p.price} <span className="text-[10px] font-normal">đ</span>
                 </div>
               </div>
             </Link>

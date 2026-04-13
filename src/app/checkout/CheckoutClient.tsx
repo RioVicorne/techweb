@@ -45,7 +45,7 @@ export function CheckoutClient() {
     title: string;
     subtitle: string;
     kind: "PERCENT" | "AMOUNT" | "FREESHIP";
-    value: number; // percent 0-100, or amount VND
+    value: number; // percent 0-100, or amount đ
     minSubtotalVnd?: number;
     maxDiscountVnd?: number;
   };
@@ -226,7 +226,7 @@ export function CheckoutClient() {
     // If cart changes and voucher no longer qualifies, keep it applied but show error.
     if (!appliedDiscountVoucher) return;
     if (typeof appliedDiscountVoucher.minSubtotalVnd === "number" && cartSubtotalVnd < appliedDiscountVoucher.minSubtotalVnd) {
-      setVoucherError(`Voucher ${appliedDiscountVoucher.code} áp dụng cho đơn từ ${formatVndDisplay(appliedDiscountVoucher.minSubtotalVnd)} VND.`);
+      setVoucherError(`Voucher ${appliedDiscountVoucher.code} áp dụng cho đơn từ ${formatVndDisplay(appliedDiscountVoucher.minSubtotalVnd)} đ.`);
       return;
     }
     setVoucherError(null);
@@ -237,9 +237,7 @@ export function CheckoutClient() {
       ? "Ví MoMo"
       : paymentMethodId === "BANK"
         ? "Chuyển khoản"
-        : paymentMethodId === "CARD"
-          ? "Thẻ (Stripe)"
-          : "COD";
+        : "COD";
 
   // Prevent a brief "empty cart" flash when we clear cart state during a successful submit.
   if (placing) {
@@ -451,7 +449,7 @@ export function CheckoutClient() {
                       paymentMethod: paymentMethodId,
                     }),
                   });
-                  const json = (await res.json()) as { orderId?: string; error?: string; qrCodeUrl?: string };
+                  const json = (await res.json()) as { orderId?: string; error?: string; qrCodeUrl?: string; moMoDeepLink?: string };
                   if (!res.ok || !json.orderId) throw new Error(json.error || "Không thể tạo đơn hàng.");
                   orderId = json.orderId;
 
@@ -459,6 +457,20 @@ export function CheckoutClient() {
                   if (paymentMethodId === "BANK" && json.qrCodeUrl) {
                     clearAll();
                     router.push(`/checkout/qr-payment?orderId=${encodeURIComponent(orderId)}`);
+                    return;
+                  }
+
+                  // MOMO payment → handle mobile vs desktop
+                  if (paymentMethodId === "MOMO") {
+                    const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+                    clearAll();
+                    if (isMobile && json.moMoDeepLink) {
+                      // Mobile: open MoMo app directly via deep link
+                      window.location.href = json.moMoDeepLink;
+                    } else {
+                      // Desktop: show QR code page
+                      router.push(`/checkout/momo-payment?orderId=${encodeURIComponent(orderId)}`);
+                    }
                     return;
                   }
                 } catch {
@@ -476,25 +488,26 @@ export function CheckoutClient() {
                   totalVnd,
                 });
 
-                // 2) Try Stripe Checkout if configured; otherwise go to success immediately.
-                try {
-                  const res = await fetch("/api/stripe/checkout-session", {
-                    method: "POST",
-                    headers: { "content-type": "application/json" },
-                    body: JSON.stringify({ orderId }),
-                  });
-                  const json = (await res.json()) as { url?: string; error?: string };
-                  if (res.ok && json.url) {
-                    clearAll();
-                    window.location.href = json.url;
-                    return;
+                // Fallback payment flow (when order creation failed, use local order)
+                if (paymentMethodId === "MOMO") {
+                  const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+                  if (isMobile) {
+                    window.location.href = `momo://transfer?phone=0353648265&amount=${cartSubtotalVnd + shippingVnd}&message=${encodeURIComponent("TT " + orderId)}`;
+                  } else {
+                    router.push(`/checkout/momo-payment?orderId=${encodeURIComponent(orderId)}`);
                   }
-                } catch {
-                  // ignore stripe failure and continue to success page
+                  clearAll();
+                  return;
                 }
 
+                if (paymentMethodId === "BANK") {
+                  router.push(`/checkout/qr-payment?orderId=${encodeURIComponent(orderId)}`);
+                  clearAll();
+                  return;
+                }
+
+                // COD: go directly to success
                 router.push(`/checkout/success?orderId=${encodeURIComponent(orderId)}`);
-                // Clear cart after navigation is initiated to avoid a UI flash on this page.
                 clearAll();
               } catch (err) {
                 setSubmitError(err instanceof Error ? err.message : "Đặt hàng thất bại. Vui lòng thử lại.");
@@ -623,14 +636,14 @@ export function CheckoutClient() {
 
                             setAppliedDiscountVoucher(v);
                             if (typeof v.minSubtotalVnd === "number" && cartSubtotalVnd < v.minSubtotalVnd) {
-                              setVoucherError(`Voucher ${v.code} áp dụng cho đơn từ ${formatVndDisplay(v.minSubtotalVnd)} VND.`);
+                              setVoucherError(`Voucher ${v.code} áp dụng cho đơn từ ${formatVndDisplay(v.minSubtotalVnd)} đ.`);
                             } else {
                               setVoucherError(null);
                             }
                           }}
                           title={
                             disabled && typeof v.minSubtotalVnd === "number"
-                              ? `Đơn tối thiểu ${formatVndDisplay(v.minSubtotalVnd)} VND`
+                              ? `Đơn tối thiểu ${formatVndDisplay(v.minSubtotalVnd)} đ`
                               : v.subtitle
                           }
                         >
@@ -725,7 +738,7 @@ export function CheckoutClient() {
                         <>
                           giảm{" "}
                           <span style={{ color: "var(--stitch-color-primary)" }}>
-                            {formatVndDisplay(discountVoucherVnd + shippingDiscountVnd)} VND
+                            {formatVndDisplay(discountVoucherVnd + shippingDiscountVnd)} đ
                           </span>
                         </>
                       ) : (
@@ -772,7 +785,7 @@ export function CheckoutClient() {
                     <div className="min-w-0">
                       <p className="text-sm font-black text-white">Hyper-Sonic Courier</p>
                       <p className="mt-1 text-xs font-bold" style={{ color: "var(--stitch-color-secondary)" }}>
-                        +{formatVndDisplay(45_000)} VND
+                        +{formatVndDisplay(45_000)} đ
                       </p>
                     </div>
                     <span
@@ -831,7 +844,7 @@ export function CheckoutClient() {
                   <p className="mt-2 text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                     {cartSubtotalVnd >= 2_000_000
                       ? "3-5 cycles deployment (free)."
-                      : "3-5 cycles deployment (+30,000 VND if needed)."}
+                      : "3-5 cycles deployment (+30,000 đ if needed)."}
                   </p>
                 </button>
               </div>
@@ -866,7 +879,7 @@ export function CheckoutClient() {
                     <div className="min-w-0">
                       <p className="text-sm font-black text-white">Hyper-Sonic Courier</p>
                       <p className="mt-1 text-xs font-bold" style={{ color: "var(--stitch-color-secondary)" }}>
-                        +{formatVndDisplay(45_000)} VND
+                        +{formatVndDisplay(45_000)} đ
                       </p>
                     </div>
                     <span className="material-symbols-outlined" style={{ color: deliveryMethod === "HYPERSONIC" ? "var(--stitch-color-secondary)" : "var(--stitch-color-on-surface-variant)" }} aria-hidden>
@@ -905,7 +918,7 @@ export function CheckoutClient() {
                     </span>
                   </div>
                   <p className="mt-2 text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                    {cartSubtotalVnd >= 2_000_000 ? "3-5 cycles deployment (free)." : "3-5 cycles deployment (+30,000 VND if needed)."}
+                    {cartSubtotalVnd >= 2_000_000 ? "3-5 cycles deployment (free)." : "3-5 cycles deployment (+30,000 đ if needed)."}
                   </p>
                 </button>
               </div>
@@ -964,7 +977,7 @@ export function CheckoutClient() {
                 </p>
               </div>
               <div className="text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                {formatVndDisplay(totalVnd)} <span className="text-[11px] font-normal">VND</span>
+                {formatVndDisplay(totalVnd)} <span className="text-[11px] font-normal">đ</span>
               </div>
             </div>
 
@@ -994,7 +1007,7 @@ export function CheckoutClient() {
                         {line.title}
                       </p>
                       <p className="mt-1 text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                        {formatVndDisplay(line.priceVnd)} <span className="text-xs font-normal">VND</span>
+                        {formatVndDisplay(line.priceVnd)} <span className="text-xs font-normal">đ</span>
                       </p>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <div
@@ -1035,7 +1048,7 @@ export function CheckoutClient() {
                       </div>
                     </div>
                     <p className="shrink-0 text-sm font-black tabular-nums text-white">
-                      {formatVndDisplay(line.priceVnd * line.qty)} <span className="text-[10px] font-normal">VND</span>
+                      {formatVndDisplay(line.priceVnd * line.qty)} <span className="text-[10px] font-normal">đ</span>
                     </p>
                   </li>
                 ))}
@@ -1044,19 +1057,19 @@ export function CheckoutClient() {
               <div className="mt-4 space-y-2 rounded-2xl p-3" style={{ background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))" }}>
                 <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <span>Tạm tính</span>
-                  <span className="tabular-nums text-white">{formatVndDisplay(cartSubtotalVnd)} VND</span>
+                  <span className="tabular-nums text-white">{formatVndDisplay(cartSubtotalVnd)} đ</span>
                 </div>
                 <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <span>Phí vận chuyển</span>
                   <span className="tabular-nums text-white">
-                    {shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(shippingVnd)} VND`}
+                    {shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(shippingVnd)} đ`}
                   </span>
                 </div>
                 {discountVoucherVnd > 0 ? (
                   <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                     <span>Giảm giá</span>
                     <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
-                      -{formatVndDisplay(discountVoucherVnd)} VND
+                      -{formatVndDisplay(discountVoucherVnd)} đ
                     </span>
                   </div>
                 ) : null}
@@ -1064,14 +1077,14 @@ export function CheckoutClient() {
                   <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                     <span>Freeship</span>
                     <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
-                      -{formatVndDisplay(shippingDiscountVnd)} VND
+                      -{formatVndDisplay(shippingDiscountVnd)} đ
                     </span>
                   </div>
                 ) : null}
                 <div className="flex justify-between text-base font-black">
                   <span style={{ color: "var(--stitch-color-on-surface)" }}>Tổng cộng</span>
                   <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
-                    {formatVndDisplay(totalVnd)} VND
+                    {formatVndDisplay(totalVnd)} đ
                   </span>
                 </div>
               </div>
@@ -1123,7 +1136,7 @@ export function CheckoutClient() {
                       {line.title}
                     </p>
                     <p className="mt-0.5 text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
-                      {line.priceDisplay} <span className="text-xs font-normal">VND</span>
+                      {line.priceDisplay} <span className="text-xs font-normal">đ</span>
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <div
@@ -1164,7 +1177,7 @@ export function CheckoutClient() {
                     </div>
                   </div>
                   <p className="shrink-0 text-sm font-bold tabular-nums text-white">
-                    {formatVndDisplay(line.priceVnd * line.qty)} <span className="text-[10px] font-normal">VND</span>
+                    {formatVndDisplay(line.priceVnd * line.qty)} <span className="text-[10px] font-normal">đ</span>
                   </p>
                 </li>
               ))}
@@ -1179,19 +1192,19 @@ export function CheckoutClient() {
             >
               <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 <span>Tạm tính</span>
-                <span className="tabular-nums text-white">{formatVndDisplay(cartSubtotalVnd)} VND</span>
+                <span className="tabular-nums text-white">{formatVndDisplay(cartSubtotalVnd)} đ</span>
               </div>
               <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 <span>Phí vận chuyển</span>
                 <span className="tabular-nums text-white">
-                  {shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(shippingVnd)} VND`}
+                  {shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(shippingVnd)} đ`}
                 </span>
               </div>
               {discountVoucherVnd > 0 ? (
                 <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <span>Giảm giá</span>
                   <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
-                    -{formatVndDisplay(discountVoucherVnd)} VND
+                    -{formatVndDisplay(discountVoucherVnd)} đ
                   </span>
                 </div>
               ) : null}
@@ -1199,21 +1212,21 @@ export function CheckoutClient() {
                 <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <span>Freeship</span>
                   <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
-                    -{formatVndDisplay(shippingDiscountVnd)} VND
+                    -{formatVndDisplay(shippingDiscountVnd)} đ
                   </span>
                 </div>
               ) : null}
               <div className="flex justify-between text-base font-black">
                 <span style={{ color: "var(--stitch-color-on-surface)" }}>Tổng cộng</span>
                 <span className="tabular-nums" style={{ color: "var(--stitch-color-primary)" }}>
-                  {formatVndDisplay(totalVnd)} VND
+                  {formatVndDisplay(totalVnd)} đ
                 </span>
               </div>
             </div>
 
             <p className="mt-4 text-xs leading-relaxed" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
               {deliveryMethod === "STANDARD"
-                ? "Đơn từ 2.000.000 VND được miễn phí giao hàng tiêu chuẩn."
+                ? "Đơn từ 2.000.000 đ được miễn phí giao hàng tiêu chuẩn."
                 : "Hyper-Sonic Courier ưu tiên xử lý nhanh để giảm độ trễ."}
             </p>
           </div>

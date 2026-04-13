@@ -15,7 +15,7 @@ export function parseDisplayPriceToVnd(display: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-/** Định dạng VND kiểu 1.450.000 */
+/** Định dạng đ kiểu 1.450.000 */
 export function formatVndDisplay(amount: number): string {
   return Math.max(0, Math.floor(amount))
     .toString()

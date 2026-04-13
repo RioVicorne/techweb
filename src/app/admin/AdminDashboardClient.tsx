@@ -92,13 +92,13 @@ export function AdminDashboardClient() {
         />
         <KpiCard
           title="Doanh thu 30 ngày"
-          value={`${formatVndDisplay(stats.revenueVndLast30Days)} ₫`}
+          value={`${formatVndDisplay(stats.revenueVndLast30Days)} đ`}
           hint="Trừ đơn đã hủy"
           icon="payments"
         />
         <KpiCard
           title="Doanh thu tích lũy"
-          value={`${formatVndDisplay(stats.revenueVndAllTime)} ₫`}
+          value={`${formatVndDisplay(stats.revenueVndAllTime)} đ`}
           hint="Trừ đơn đã hủy"
           icon="account_balance_wallet"
         />

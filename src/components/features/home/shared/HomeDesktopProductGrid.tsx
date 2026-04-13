@@ -41,7 +41,7 @@ export function HomeDesktopProductGrid({ products }: { products: CatalogProduct[
           </h3>
 
           <p className="mb-4 text-lg font-black" style={{ color: "var(--stitch-color-primary)" }}>
-            {p.price} <span className="text-xs font-normal">VND</span>
+            {p.price} <span className="text-xs font-normal">đ</span>
           </p>
         </Link>
       ))}
