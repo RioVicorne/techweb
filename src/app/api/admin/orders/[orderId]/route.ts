@@ -12,10 +12,19 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderI
     const id = (orderId || "").trim();
     if (!id) return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
 
-    const body = (await req.json()) as { status?: string };
+    const body = (await req.json()) as { status?: string; paymentStatus?: string };
     const nextStatus = (body.status || "").trim();
-    if (!nextStatus || !isValidAdminOrderStatus(nextStatus)) {
+    const nextPaymentStatus = (body.paymentStatus || "").trim();
+
+    // Validate order status if provided
+    if (nextStatus && !isValidAdminOrderStatus(nextStatus)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+    }
+
+    // Validate payment status if provided
+    const validPaymentStatuses = ["UNPAID", "AWAITING_PAYMENT", "PAID", "REFUNDED"];
+    if (nextPaymentStatus && !validPaymentStatuses.includes(nextPaymentStatus)) {
+      return NextResponse.json({ error: "Invalid payment status" }, { status: 400 });
     }
 
     const supabase = getSupabaseAdmin();
@@ -31,11 +40,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderI
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (nextStatus) updateData.status = nextStatus;
+    if (nextPaymentStatus) updateData.payment_status = nextPaymentStatus;
+
     const { data: updated, error: updErr } = await supabase
       .from("orders")
-      .update({ status: nextStatus, updated_at: new Date().toISOString() })
+      .update(updateData)
       .eq("id", id)
-      .select("id,order_code,status,updated_at")
+      .select("id,order_code,status,payment_status,updated_at")
       .single();
 
     if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });

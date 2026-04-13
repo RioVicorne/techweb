@@ -4,6 +4,18 @@ import { getSupabaseServerAuth } from "@/lib/supabase/server-auth";
 import type { CartLine } from "@/context/cart-context";
 import { createOrderId } from "@/lib/orders";
 
+/** Config for VietQR / bank transfer */
+const BANK = {
+  code: "BIDV",
+  accountNumber: "8886612856",
+  accountName: "TRAN DINH KHOA",
+};
+
+function buildVietQrUrl(orderCode: string, amountVnd: number): string {
+  const message = `TT ${orderCode}`.slice(0, 25); // VietQR addInfo max ~25 chars
+  return `https://img.vietqr.io/image/${BANK.code}-${BANK.accountNumber}-compact.png?amount=${amountVnd}&addInfo=${encodeURIComponent(message)}`;
+}
+
 type CreateOrderBody = {
   customer: {
     name: string;
@@ -16,6 +28,7 @@ type CreateOrderBody = {
   subtotalVnd: number;
   shippingVnd: number;
   totalVnd: number;
+  paymentMethod?: "COD" | "MOMO" | "BANK" | "CARD";
 };
 
 export async function POST(req: Request) {
@@ -50,6 +63,9 @@ export async function POST(req: Request) {
     }
 
     const orderId = createOrderId();
+    const paymentMethod = (body as Partial<CreateOrderBody>).paymentMethod || "COD";
+    const qrCodeUrl = paymentMethod === "BANK" ? buildVietQrUrl(orderId, Math.round(totalVnd)) : null;
+
     const supabase = getSupabaseAdmin();
     // RioShop schema stores order header + order items separately.
     const { data: inserted, error: orderErr } = await supabase
@@ -71,8 +87,12 @@ export async function POST(req: Request) {
         email: c.email || null,
         note: c.note || null,
         delivery_method: "STANDARD",
+        // Payment fields
+        payment_method: paymentMethod === "BANK" ? "BANK" : paymentMethod === "MOMO" ? "MOMO" : paymentMethod === "CARD" ? "STRIPE" : "COD",
+        payment_status: paymentMethod === "BANK" ? "AWAITING_PAYMENT" : "UNPAID",
+        qr_code_url: qrCodeUrl,
       })
-      .select("id,order_code,created_at")
+      .select("id,order_code,created_at,qr_code_url")
       .single();
     if (orderErr || !inserted) {
       return NextResponse.json({ error: orderErr?.message || "Failed to create order" }, { status: 500 });
@@ -107,7 +127,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: itemsErr.message }, { status: 500 });
     }
 
-    return NextResponse.json({ orderId }, { status: 200 });
+    return NextResponse.json({ orderId, qrCodeUrl: inserted.qr_code_url }, { status: 200 });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Unknown error" },

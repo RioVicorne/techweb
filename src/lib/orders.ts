@@ -16,6 +16,9 @@ export type Order = {
   subtotalVnd: number;
   shippingVnd: number;
   totalVnd: number;
+  paymentMethod?: string;
+  paymentStatus?: string;
+  qrCodeUrl?: string | null;
 };
 
 const STORAGE_KEY = "rioshop-orders-v1";

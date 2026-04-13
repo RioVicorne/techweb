@@ -18,6 +18,8 @@ type OrderRow = {
   city?: string;
   note?: string;
   first_item?: { title: string; image: string; qty: number } | null;
+  payment_method?: string | null;
+  payment_status?: string | null;
 };
 
 function statusLabelVi(s: string) {
@@ -29,6 +31,63 @@ function statusLabelVi(s: string) {
     CANCELLED: "Đã hủy",
   };
   return map[s] ?? s;
+}
+
+function paymentStatusLabel(s: string) {
+  const map: Record<string, string> = {
+    UNPAID: "Chưa trả",
+    AWAITING_PAYMENT: "Chờ thanh toán",
+    PAID: "Đã trả",
+    REFUNDED: "Hoàn tiền",
+  };
+  return map[s] ?? s;
+}
+
+function paymentStatusColor(s: string) {
+  switch (s) {
+    case "PAID":
+      return "#10b981";
+    case "AWAITING_PAYMENT":
+      return "#f59e0b";
+    case "REFUNDED":
+      return "#6b7280";
+    default:
+      return "#94a3b8";
+  }
+}
+
+function PaymentMethodBadge({ method, status }: { method: string; status: string }) {
+  const methodLabels: Record<string, string> = {
+    BANK: "Chuyển khoản",
+    MOMO: "MoMo",
+    STRIPE: "Thẻ",
+    COD: "COD",
+  };
+  return (
+    <div className="flex items-center gap-1.5">
+      <span
+        className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider"
+        style={{
+          background: "rgba(255,255,255,0.06)",
+          color: "rgba(255,255,255,0.55)",
+          border: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        {methodLabels[method] ?? method}
+      </span>
+      <span
+        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider"
+        style={{
+          background: `color-mix(in srgb, ${paymentStatusColor(status)} 15%, transparent)`,
+          color: paymentStatusColor(status),
+          border: `1px solid color-mix(in srgb, ${paymentStatusColor(status)} 30%, transparent)`,
+        }}
+      >
+        <span className="h-1.5 w-1.5 rounded-full" style={{ background: paymentStatusColor(status) }} />
+        {paymentStatusLabel(status)}
+      </span>
+    </div>
+  );
 }
 
 export function OrdersAdminClient() {
@@ -92,6 +151,24 @@ export function OrdersAdminClient() {
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
+    });
+    setUpdatingId(null);
+    if (!res.ok) {
+      const j = (await res.json().catch(() => ({}))) as { error?: string };
+      setError(j.error ?? "Cập nhật thất bại");
+      return;
+    }
+    await load();
+  }
+
+  async function patchPaymentStatus(orderId: string, paymentStatus: string) {
+    setUpdatingId(orderId);
+    setError(null);
+    const res = await fetch(`/api/admin/orders/${orderId}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentStatus }),
     });
     setUpdatingId(null);
     if (!res.ok) {
@@ -251,8 +328,14 @@ export function OrdersAdminClient() {
                       <div className="text-xl font-black tabular-nums tracking-tighter text-white">
                         {formatVndDisplay(Number(o.total ?? 0))}
                       </div>
-                      <div className="text-[10px] font-black uppercase tracking-widest text-[var(--stitch-color-primary)] opacity-80">
-                        {o.currency || "VND"} • Trả trước
+                      <div className="flex flex-col items-end gap-1">
+                        {o.payment_method ? (
+                          <PaymentMethodBadge method={o.payment_method} status={o.payment_status ?? "UNPAID"} />
+                        ) : (
+                          <div className="text-[10px] font-black uppercase tracking-widest text-[var(--stitch-color-primary)] opacity-80">
+                            {o.currency || "VND"}
+                          </div>
+                        )}
                       </div>
                       <div className="text-[10px] font-bold uppercase tracking-widest text-white/45">
                         {new Date(o.created_at).toLocaleDateString("vi-VN")}{" "}
@@ -261,6 +344,23 @@ export function OrdersAdminClient() {
                           minute: "2-digit",
                         })}
                       </div>
+                      {o.payment_method === "BANK" && o.payment_status === "AWAITING_PAYMENT" ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm(`Xác nhận đơn ${o.order_code} đã thanh toán?`)) {
+                              void patchPaymentStatus(o.id, "PAID");
+                            }
+                          }}
+                          className="mt-1 inline-flex items-center gap-1 rounded-lg bg-emerald-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-400 transition hover:bg-emerald-500/30"
+                          style={{ border: "1px solid color-mix(in srgb, #10b981 30%, transparent)" }}
+                        >
+                          <span className="material-symbols-outlined text-[14px]" aria-hidden>
+                            check
+                          </span>
+                          Xác nhận đã trả
+                        </button>
+                      ) : null}
                     </div>
                   </td>
 

@@ -448,11 +448,19 @@ export function CheckoutClient() {
                       subtotalVnd: cartSubtotalVnd,
                       shippingVnd,
                       totalVnd,
+                      paymentMethod: paymentMethodId,
                     }),
                   });
-                  const json = (await res.json()) as { orderId?: string; error?: string };
+                  const json = (await res.json()) as { orderId?: string; error?: string; qrCodeUrl?: string };
                   if (!res.ok || !json.orderId) throw new Error(json.error || "Không thể tạo đơn hàng.");
                   orderId = json.orderId;
+
+                  // BANK payment → redirect to QR payment page
+                  if (paymentMethodId === "BANK" && json.qrCodeUrl) {
+                    clearAll();
+                    router.push(`/checkout/qr-payment?orderId=${encodeURIComponent(orderId)}`);
+                    return;
+                  }
                 } catch {
                   orderId = createOrderId();
                 }

@@ -13,7 +13,7 @@ export async function GET(
     const supabase = getSupabaseAdmin();
     const { data: order, error } = await supabase
       .from("orders")
-      .select("id,order_code,created_at,subtotal,shipping_fee,total,full_name,phone,address_line,city,grid_code,note")
+      .select("id,order_code,created_at,subtotal,shipping_fee,total,full_name,phone,address_line,city,grid_code,note,payment_method,payment_status,qr_code_url")
       .eq("order_code", orderId)
       .maybeSingle();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -45,6 +45,9 @@ export async function GET(
         order: {
           id: String(order.order_code),
           created_at: String(order.created_at),
+          payment_method: String(order.payment_method ?? ""),
+          payment_status: String(order.payment_status ?? "UNPAID"),
+          qr_code_url: order.qr_code_url ? String(order.qr_code_url) : null,
           customer: {
             name: String(order.full_name ?? ""),
             phone: String(order.phone ?? ""),

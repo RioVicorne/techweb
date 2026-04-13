@@ -14,6 +14,9 @@ type ServerOrderRow = {
   subtotal_vnd: number;
   shipping_vnd: number;
   total_vnd: number;
+  payment_method?: string;
+  payment_status?: string;
+  qr_code_url?: string | null;
 };
 
 export function SuccessClient() {
@@ -56,6 +59,9 @@ export function SuccessClient() {
           subtotalVnd: o.subtotal_vnd,
           shippingVnd: o.shipping_vnd,
           totalVnd: o.total_vnd,
+          paymentMethod: o.payment_method ?? "",
+          paymentStatus: o.payment_status ?? "",
+          qrCodeUrl: o.qr_code_url ?? null,
         };
         if (!cancelled) setServerOrder(mapped);
       } finally {
