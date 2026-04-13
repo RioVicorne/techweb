@@ -22,6 +22,8 @@ type RelatedProduct = {
 export function ProductDetailClient({ product, productId }: { product: Product; productId: number }) {
   const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([]);
   const [loadingRelated, setLoadingRelated] = useState(true);
+  const [isSpecsOpen, setIsSpecsOpen] = useState(false);
+  const [isReviewsOpen, setIsReviewsOpen] = useState(false);
 
   useEffect(() => {
     const fetchRelated = async () => {
@@ -39,6 +41,11 @@ export function ProductDetailClient({ product, productId }: { product: Product; 
     };
     fetchRelated();
   }, [product.id]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash === "#user-feedback") setIsReviewsOpen(true);
+  }, []);
 
   const metricLatency = "0.1ms";
   const metricSensor = "30K DPI";
@@ -157,57 +164,110 @@ export function ProductDetailClient({ product, productId }: { product: Product; 
 
         {/* Specs */}
         <section className="mb-10">
-          <h2
-            className="mb-4 text-2xl font-black italic tracking-tighter text-white"
-            style={{ fontFamily: "var(--stitch-font-headline)" }}
+          <button
+            type="button"
+            className="flex w-full items-center justify-between gap-4 pb-4 text-left"
+            onClick={() => setIsSpecsOpen((v) => !v)}
+            aria-expanded={isSpecsOpen}
           >
-            Thông số kỹ thuật
-          </h2>
+            <span
+              className="text-2xl font-black italic tracking-tighter text-white"
+              style={{ fontFamily: "var(--stitch-font-headline)" }}
+            >
+              Thông số kỹ thuật
+            </span>
+            <span
+              className={[
+                "material-symbols-outlined shrink-0 text-2xl transition-transform duration-200",
+                isSpecsOpen ? "rotate-180" : "rotate-0",
+              ].join(" ")}
+              style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              aria-hidden
+            >
+              expand_more
+            </span>
+          </button>
 
-          <div className="overflow-hidden rounded-2xl" style={{ background: "var(--stitch-color-surface-container)" }}>
-            <table className="w-full text-sm">
-              <tbody>
-                <tr className="border-b" style={{ borderColor: "var(--stitch-color-outline-variant, var(--stitch-color-outline))" }}>
-                  <td className="flex items-center gap-2 px-4 py-3 font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
-                    <span className="material-symbols-outlined text-base" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>tune</span>
-                    Connectivity
-                  </td>
-                  <td className="px-4 py-3" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                    Wireless, low-latency link tuned for competitive response. Ready for streaming + high-performance rigs.
-                  </td>
-                </tr>
-                <tr className="border-b" style={{ borderColor: "var(--stitch-color-outline-variant, var(--stitch-color-outline))" }}>
-                  <td className="flex items-center gap-2 px-4 py-3 font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
-                    <span className="material-symbols-outlined text-base" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>build</span>
-                    Switch Type
-                  </td>
-                  <td className="px-4 py-3" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                    Precision-tuned switch design with consistent tactile feedback for high APM gameplay.
-                  </td>
-                </tr>
-                <tr>
-                  <td className="flex items-center gap-2 px-4 py-3 font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
-                    <span className="material-symbols-outlined text-base" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>zoom_out_map</span>
-                    Weight &amp; Dimensions
-                  </td>
-                  <td className="px-4 py-3" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                    Lightweight build with balanced dimensions for long sessions and ergonomic control.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div
+            className={[
+              "grid transition-[grid-template-rows,opacity] duration-200 ease-out",
+              isSpecsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+            ].join(" ")}
+          >
+            <div className="min-h-0 overflow-hidden">
+              <div className="overflow-hidden rounded-2xl" style={{ background: "var(--stitch-color-surface-container)" }}>
+                <table className="w-full text-sm">
+                  <tbody>
+                    <tr className="border-b" style={{ borderColor: "var(--stitch-color-outline-variant, var(--stitch-color-outline))" }}>
+                      <td className="flex items-center gap-2 px-4 py-3 font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
+                        <span className="material-symbols-outlined text-base" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>tune</span>
+                        Connectivity
+                      </td>
+                      <td className="px-4 py-3" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                        Wireless, low-latency link tuned for competitive response. Ready for streaming + high-performance rigs.
+                      </td>
+                    </tr>
+                    <tr className="border-b" style={{ borderColor: "var(--stitch-color-outline-variant, var(--stitch-color-outline))" }}>
+                      <td className="flex items-center gap-2 px-4 py-3 font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
+                        <span className="material-symbols-outlined text-base" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>build</span>
+                        Switch Type
+                      </td>
+                      <td className="px-4 py-3" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                        Precision-tuned switch design with consistent tactile feedback for high APM gameplay.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="flex items-center gap-2 px-4 py-3 font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
+                        <span className="material-symbols-outlined text-base" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>zoom_out_map</span>
+                        Weight &amp; Dimensions
+                      </td>
+                      <td className="px-4 py-3" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                        Lightweight build with balanced dimensions for long sessions and ergonomic control.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Reviews Section */}
         <section id="user-feedback" className="mb-12 scroll-mt-28">
-          <h2
-            className="mb-6 text-2xl font-black italic tracking-tighter text-white"
-            style={{ fontFamily: "var(--stitch-font-headline)" }}
+          <button
+            type="button"
+            className="flex w-full items-center justify-between gap-4 pb-6 text-left"
+            onClick={() => setIsReviewsOpen((v) => !v)}
+            aria-expanded={isReviewsOpen}
           >
-            Đánh giá từ khách hàng
-          </h2>
-          <ProductReviewsSection productId={productId} />
+            <span
+              className="text-2xl font-black italic tracking-tighter text-white"
+              style={{ fontFamily: "var(--stitch-font-headline)" }}
+            >
+              Đánh giá từ khách hàng
+            </span>
+            <span
+              className={[
+                "material-symbols-outlined shrink-0 text-2xl transition-transform duration-200",
+                isReviewsOpen ? "rotate-180" : "rotate-0",
+              ].join(" ")}
+              style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              aria-hidden
+            >
+              expand_more
+            </span>
+          </button>
+
+          <div
+            className={[
+              "grid transition-[grid-template-rows,opacity] duration-200 ease-out",
+              isReviewsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+            ].join(" ")}
+          >
+            <div className="min-h-0 overflow-hidden">
+              <ProductReviewsSection productId={productId} />
+            </div>
+          </div>
         </section>
 
         {/* Related Products */}
