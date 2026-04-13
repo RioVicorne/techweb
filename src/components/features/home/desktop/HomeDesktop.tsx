@@ -3,8 +3,15 @@ import Link from "next/link";
 import { HomeCategoryChips } from "@/components/features/home/shared/HomeCategoryChips";
 import type { HomeCategoryChipItem } from "@/components/features/home/shared/HomeCategoryChips";
 import { HomeDesktopProductGrid } from "@/components/features/home/shared/HomeDesktopProductGrid";
-import { HOME_CTA_LABEL, HOME_EXPLORE_HREF } from "@/components/features/home/shared/homeHeroCopy";
-import { HERO_IMG, SIDE_CONSOLE, SIDE_PC } from "@/components/features/home/shared/homeImages";
+import {
+  HOME_CTA_LABEL,
+  HOME_EXPLORE_HREF,
+} from "@/components/features/home/shared/homeHeroCopy";
+import {
+  HERO_IMG,
+  SIDE_CONSOLE,
+  SIDE_PC,
+} from "@/components/features/home/shared/homeImages";
 import type { CatalogProduct } from "@/lib/catalog";
 
 export function HomeDesktop({
@@ -30,11 +37,18 @@ export function HomeDesktop({
         >
           <span
             className="text-[10px] font-black uppercase tracking-[0.3em]"
-            style={{ color: "var(--stitch-color-secondary)", writingMode: "vertical-rl" }}
+            style={{
+              color: "var(--stitch-color-secondary)",
+              writingMode: "vertical-rl",
+            }}
           >
             FLASH SALE
           </span>
-          <span className="material-symbols-outlined animate-pulse" style={{ color: "var(--stitch-color-secondary)" }} aria-hidden>
+          <span
+            className="material-symbols-outlined animate-pulse"
+            style={{ color: "var(--stitch-color-secondary)" }}
+            aria-hidden
+          >
             bolt
           </span>
         </Link>
@@ -54,11 +68,18 @@ export function HomeDesktop({
         >
           <span
             className="text-[10px] font-black uppercase tracking-[0.3em]"
-            style={{ color: "var(--stitch-color-primary)", writingMode: "vertical-rl" }}
+            style={{
+              color: "var(--stitch-color-primary)",
+              writingMode: "vertical-rl",
+            }}
           >
             NEW DROP
           </span>
-          <span className="material-symbols-outlined" style={{ color: "var(--stitch-color-primary)" }} aria-hidden>
+          <span
+            className="material-symbols-outlined"
+            style={{ color: "var(--stitch-color-primary)" }}
+            aria-hidden
+          >
             rocket_launch
           </span>
         </Link>
@@ -98,18 +119,30 @@ export function HomeDesktop({
                 style={{ fontFamily: "var(--stitch-font-headline)" }}
               >
                 CYBERPULSE{" "}
-                <span style={{ color: "var(--stitch-color-primary)" }}>ELITE X</span>
+                <span style={{ color: "var(--stitch-color-primary)" }}>
+                  ELITE X
+                </span>
               </h1>
-              <p className="mb-8 text-lg font-medium" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                Phản hồi xúc giác thế hệ mới — độ trễ gần như bằng không. Trải nghiệm chơi cạnh tranh đỉnh cao.
+              <p
+                className="mb-8 text-lg font-medium"
+                style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              >
+                Phản hồi xúc giác thế hệ mới — độ trễ gần như bằng không. Trải
+                nghiệm chơi cạnh tranh đỉnh cao.
               </p>
               <Link
                 href={HOME_EXPLORE_HREF}
                 className="group inline-flex min-h-[44px] items-center gap-3 rounded-full px-8 py-4 font-extrabold transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--stitch-color-surface)]"
-                style={{ background: "#ffffff", color: "var(--stitch-color-surface)" }}
+                style={{
+                  background: "#ffffff",
+                  color: "var(--stitch-color-surface)",
+                }}
               >
                 {HOME_CTA_LABEL}
-                <span className="material-symbols-outlined transition-transform group-hover:translate-x-1" aria-hidden>
+                <span
+                  className="material-symbols-outlined transition-transform group-hover:translate-x-1"
+                  aria-hidden
+                >
                   arrow_forward
                 </span>
               </Link>
@@ -133,10 +166,16 @@ export function HomeDesktop({
                     "linear-gradient(to right, color-mix(in srgb, var(--stitch-color-surface-container-lowest, #000) 80%, transparent), transparent)",
                 }}
               >
-                <h2 className="mb-1 text-2xl font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                <h2
+                  className="mb-1 text-2xl font-bold text-white"
+                  style={{ fontFamily: "var(--stitch-font-headline)" }}
+                >
                   RTX SERIES
                 </h2>
-                <p className="text-sm font-bold" style={{ color: "var(--stitch-color-tertiary)" }}>
+                <p
+                  className="text-sm font-bold"
+                  style={{ color: "var(--stitch-color-tertiary)" }}
+                >
                   UP TO 25% OFF
                 </p>
               </div>
@@ -158,10 +197,16 @@ export function HomeDesktop({
                     "linear-gradient(to right, color-mix(in srgb, var(--stitch-color-surface-container-lowest, #000) 80%, transparent), transparent)",
                 }}
               >
-                <h2 className="mb-1 text-2xl font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                <h2
+                  className="mb-1 text-2xl font-bold text-white"
+                  style={{ fontFamily: "var(--stitch-font-headline)" }}
+                >
                   PRO GEAR
                 </h2>
-                <p className="text-sm font-bold" style={{ color: "var(--stitch-color-primary)" }}>
+                <p
+                  className="text-sm font-bold"
+                  style={{ color: "var(--stitch-color-primary)" }}
+                >
                   LEVEL UP YOUR CONSOLE
                 </p>
               </div>
@@ -176,10 +221,16 @@ export function HomeDesktop({
                 className="flex items-center gap-3 text-2xl font-black uppercase italic tracking-tighter text-white md:text-3xl"
                 style={{ fontFamily: "var(--stitch-font-headline)" }}
               >
-                <span className="h-0.5 w-10" style={{ background: "var(--stitch-color-secondary)" }} />
+                <span
+                  className="h-0.5 w-10"
+                  style={{ background: "var(--stitch-color-secondary)" }}
+                />
                 DEAL HOT
               </h2>
-              <p className="mt-2" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+              <p
+                className="mt-2"
+                style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              >
                 Phần cứng được săn nhiều nhất với mức giá ưu đãi.
               </p>
             </div>
@@ -207,7 +258,10 @@ export function HomeDesktop({
               >
                 New Drops
               </h2>
-              <p className="mt-2" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+              <p
+                className="mt-2"
+                style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              >
                 Sản phẩm mới cập nhật — cùng bộ lọc danh mục với Deal hot.
               </p>
             </div>

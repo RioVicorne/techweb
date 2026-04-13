@@ -151,3 +151,116 @@ export async function getCatalogProductBySlug(slug: string): Promise<CatalogProd
   return mapToUiProduct(data as unknown as DbProductRow);
 }
 
+export type ProductDetail = {
+  id: number;
+  slug: string;
+  name: string;
+  description: string | null;
+  brand: string | null;
+  price: string;
+  compareAtPrice: string | null;
+  images: Array<{ url: string; alt: string | null; sortOrder: number }>;
+  variants: Array<{
+    id: number;
+    name: string | null;
+    sku: string;
+    price: number;
+    compareAtPrice: number | null;
+    attributes: Record<string, unknown> | null;
+  }>;
+  stock: number;
+  reviews: string;
+  stars: number;
+};
+
+export async function getProductDetailBySlug(slug: string): Promise<ProductDetail | null> {
+  const s = slug.trim();
+  if (!s) return null;
+
+  const supabase = getSupabaseAdmin();
+
+  // Fetch product with variants and images
+  const { data: product, error } = await supabase
+    .from("products")
+    .select(
+      "id,slug,name,description,brand,default_variant_id,product_variants(id,name,sku,price,compare_at_price,attributes),product_images(url,alt,sort_order)",
+    )
+    .eq("slug", s)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!product) return null;
+
+  const p = product as {
+    id: number;
+    slug: string;
+    name: string;
+    description: string | null;
+    brand: string | null;
+    default_variant_id: number | null;
+    product_variants: Array<{
+      id: number;
+      name: string | null;
+      sku: string;
+      price: number | null;
+      compare_at_price: number | null;
+      attributes: Record<string, unknown> | null;
+    }> | null;
+    product_images: Array<{ url: string | null; alt: string | null; sort_order: number | null }> | null;
+  };
+
+  const variants = (p.product_variants ?? [])
+    .filter((v) => v.price != null)
+    .map((v) => ({
+      id: v.id,
+      name: v.name ?? null,
+      sku: v.sku,
+      price: Math.max(0, Math.floor(v.price ?? 0)),
+      compareAtPrice: v.compare_at_price ? Math.max(0, Math.floor(v.compare_at_price)) : null,
+      attributes: v.attributes ?? null,
+    }));
+
+  const images = (p.product_images ?? [])
+    .filter((i) => typeof i.url === "string" && i.url)
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map((i) => ({
+      url: i.url!,
+      alt: i.alt ?? null,
+      sortOrder: i.sort_order ?? 0,
+    }));
+
+  // Get stock for default variant
+  let stock = 0;
+  if (p.default_variant_id) {
+    const { data: inv } = await supabase
+      .from("inventory")
+      .select("quantity_on_hand,reserved")
+      .eq("variant_id", p.default_variant_id)
+      .maybeSingle();
+
+    stock = Math.max(0, (inv?.quantity_on_hand ?? 0) - (inv?.reserved ?? 0));
+  }
+
+  const defaultVariant = p.default_variant_id
+    ? variants.find((v) => v.id === p.default_variant_id)
+    : variants[0];
+
+  const price = defaultVariant?.price ?? 0;
+  const compareAtPrice = defaultVariant?.compareAtPrice ?? null;
+
+  return {
+    id: p.id,
+    slug: p.slug,
+    name: p.name,
+    description: p.description,
+    brand: p.brand,
+    price: formatVndDisplay(price),
+    compareAtPrice: compareAtPrice != null ? formatVndDisplay(compareAtPrice) : null,
+    images,
+    variants,
+    stock,
+    reviews: "(0)",
+    stars: 5,
+  };
+}
+

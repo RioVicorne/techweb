@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import { formatVndDisplay } from "@/data/products";
 import { ADMIN_ORDER_STATUSES } from "@/lib/admin-allowlist";
 
@@ -177,11 +178,14 @@ export function OrdersAdminClient() {
                       {o.first_item?.title ? (
                         <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-2 pr-4 ring-1 ring-white/10">
                           {o.first_item.image && (
-                            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-black/20">
-                              <img
+                            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-black/20">
+                              <Image
                                 src={o.first_item.image}
                                 alt=""
-                                className="h-full w-full object-cover"
+                                fill
+                                className="object-cover"
+                                sizes="48px"
+                                unoptimized
                               />
                             </div>
                           )}
