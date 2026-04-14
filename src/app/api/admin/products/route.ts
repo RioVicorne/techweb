@@ -11,7 +11,10 @@ export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const limitRaw = Number(url.searchParams.get("limit") || 120);
-    const limit = Math.min(MAX_LIMIT, Math.max(1, Number.isFinite(limitRaw) ? limitRaw : 120));
+    const limit = Math.min(
+      MAX_LIMIT,
+      Math.max(1, Number.isFinite(limitRaw) ? limitRaw : 120),
+    );
 
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
@@ -53,7 +56,8 @@ export async function GET(req: Request) {
       .order("created_at", { ascending: false })
       .limit(limit);
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error)
+      return NextResponse.json({ error: error.message }, { status: 500 });
 
     const products = (data ?? []).map((raw) => {
       const p = raw as unknown as {
@@ -158,6 +162,8 @@ export async function POST(req: NextRequest) {
       price,
       compareAtPrice,
       attributes,
+      imageUrls,
+      categoryId,
     }: {
       name: string;
       slug: string;
@@ -176,10 +182,15 @@ export async function POST(req: NextRequest) {
       price?: number;
       compareAtPrice?: number;
       attributes?: Record<string, unknown>;
+      imageUrls?: string[];
+      categoryId?: number | null;
     } = body;
 
     if (!name || !slug) {
-      return NextResponse.json({ error: "Name and slug are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Name and slug are required" },
+        { status: 400 },
+      );
     }
 
     const supabase = getSupabaseAdmin();
@@ -197,7 +208,10 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (productError) {
-      return NextResponse.json({ error: productError.message }, { status: 500 });
+      return NextResponse.json(
+        { error: productError.message },
+        { status: 500 },
+      );
     }
 
     const productId = (product as { id: number }).id;
@@ -241,11 +255,58 @@ export async function POST(req: NextRequest) {
         .insert(variantRows);
 
       if (variantError) {
-        return NextResponse.json({ error: variantError.message }, { status: 500 });
+        return NextResponse.json(
+          { error: variantError.message },
+          { status: 500 },
+        );
       }
     }
 
-    return NextResponse.json({ product: { id: productId, name, slug } }, { status: 201 });
+    const cleanedImageUrls = (imageUrls ?? [])
+      .map((url) => String(url ?? "").trim())
+      .filter(Boolean)
+      .slice(0, 5);
+
+    if (cleanedImageUrls.length > 0) {
+      const imageRows = cleanedImageUrls.map((url, index) => ({
+        product_id: productId,
+        url,
+        alt: name,
+        sort_order: index,
+      }));
+
+      const { error: imageError } = await supabase
+        .from("product_images")
+        .insert(imageRows);
+
+      if (imageError) {
+        return NextResponse.json(
+          { error: imageError.message },
+          { status: 500 },
+        );
+      }
+    }
+
+    if (typeof categoryId === "number" && Number.isFinite(categoryId) && categoryId > 0) {
+      const { error: categoryError } = await supabase
+        .from("product_categories")
+        .insert({
+          product_id: productId,
+          category_id: categoryId,
+        });
+
+      if (categoryError) {
+        return NextResponse.json(
+          { error: categoryError.message },
+          { status: 500 },
+        );
+      }
+    }
+
+    return NextResponse.json(
+      { product: { id: productId, name, slug } },
+      { status: 201 },
+    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Server error";
     return NextResponse.json({ error: msg }, { status: 500 });
@@ -269,6 +330,8 @@ export async function PATCH(req: NextRequest) {
       price,
       compareAtPrice,
       attributes,
+      imageUrls,
+      categoryId,
     }: {
       id: number;
       name?: string;
@@ -280,10 +343,15 @@ export async function PATCH(req: NextRequest) {
       price?: number;
       compareAtPrice?: number;
       attributes?: Record<string, unknown>;
+      imageUrls?: string[];
+      categoryId?: number | null;
     } = body;
 
     if (!id) {
-      return NextResponse.json({ error: "Product ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Product ID is required" },
+        { status: 400 },
+      );
     }
 
     const updateData: Record<string, unknown> = {};
@@ -308,8 +376,13 @@ export async function PATCH(req: NextRequest) {
 
     const variantUpdates: Record<string, unknown> = {};
     if (sku !== undefined && sku.trim() !== "") variantUpdates.sku = sku.trim();
-    if (price !== undefined && Number.isFinite(price) && price >= 0) variantUpdates.price = price;
-    if (compareAtPrice !== undefined && Number.isFinite(compareAtPrice) && compareAtPrice >= 0) {
+    if (price !== undefined && Number.isFinite(price) && price >= 0)
+      variantUpdates.price = price;
+    if (
+      compareAtPrice !== undefined &&
+      Number.isFinite(compareAtPrice) &&
+      compareAtPrice >= 0
+    ) {
       variantUpdates.compare_at_price = compareAtPrice;
     }
     if (attributes !== undefined) variantUpdates.attributes = attributes;
@@ -324,7 +397,10 @@ export async function PATCH(req: NextRequest) {
         .maybeSingle();
 
       if (firstVariantErr) {
-        return NextResponse.json({ error: firstVariantErr.message }, { status: 500 });
+        return NextResponse.json(
+          { error: firstVariantErr.message },
+          { status: 500 },
+        );
       }
 
       if (firstVariant?.id) {
@@ -334,7 +410,79 @@ export async function PATCH(req: NextRequest) {
           .eq("id", firstVariant.id);
 
         if (variantUpdateErr) {
-          return NextResponse.json({ error: variantUpdateErr.message }, { status: 500 });
+          return NextResponse.json(
+            { error: variantUpdateErr.message },
+            { status: 500 },
+          );
+        }
+      }
+    }
+
+    if (imageUrls !== undefined) {
+      const cleanedImageUrls = (imageUrls ?? [])
+        .map((url) => String(url ?? "").trim())
+        .filter(Boolean)
+        .slice(0, 5);
+
+      const { error: deleteImageErr } = await supabase
+        .from("product_images")
+        .delete()
+        .eq("product_id", id);
+
+      if (deleteImageErr) {
+        return NextResponse.json(
+          { error: deleteImageErr.message },
+          { status: 500 },
+        );
+      }
+
+      if (cleanedImageUrls.length > 0) {
+        const imageRows = cleanedImageUrls.map((url, index) => ({
+          product_id: id,
+          url,
+          alt: name ?? null,
+          sort_order: index,
+        }));
+
+        const { error: imageInsertErr } = await supabase
+          .from("product_images")
+          .insert(imageRows);
+
+        if (imageInsertErr) {
+          return NextResponse.json(
+            { error: imageInsertErr.message },
+            { status: 500 },
+          );
+        }
+      }
+    }
+
+    if (categoryId !== undefined) {
+      const { error: deleteCategoryErr } = await supabase
+        .from("product_categories")
+        .delete()
+        .eq("product_id", id);
+
+      if (deleteCategoryErr) {
+        return NextResponse.json(
+          { error: deleteCategoryErr.message },
+          { status: 500 },
+        );
+      }
+
+      if (typeof categoryId === "number" && Number.isFinite(categoryId) && categoryId > 0) {
+        const { error: categoryInsertErr } = await supabase
+          .from("product_categories")
+          .insert({
+            product_id: id,
+            category_id: categoryId,
+          });
+
+        if (categoryInsertErr) {
+          return NextResponse.json(
+            { error: categoryInsertErr.message },
+            { status: 500 },
+          );
         }
       }
     }
@@ -355,7 +503,10 @@ export async function DELETE(req: NextRequest) {
     const id = Number(url.searchParams.get("id"));
 
     if (!id || !Number.isFinite(id)) {
-      return NextResponse.json({ error: "Product ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Product ID is required" },
+        { status: 400 },
+      );
     }
 
     const supabase = getSupabaseAdmin();

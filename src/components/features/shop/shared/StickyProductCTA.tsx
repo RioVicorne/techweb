@@ -45,10 +45,10 @@ export function StickyProductCTA({ product }: { product: Product }) {
             "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
         }}
       >
-      <div className="flex items-center gap-3">
+      <div className="flex items-stretch gap-3">
         <button
           type="button"
-          className="flex flex-1 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-extrabold text-white transition active:scale-[0.98]"
+          className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-extrabold text-white transition active:scale-[0.98]"
           style={{
             background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
           }}
@@ -59,15 +59,15 @@ export function StickyProductCTA({ product }: { product: Product }) {
             toastTimerRef.current = window.setTimeout(() => setToastOpen(false), 1600);
           }}
         >
-          <span className="material-symbols-outlined" aria-hidden>
+          <span className="material-symbols-outlined shrink-0" aria-hidden>
             add_shopping_cart
           </span>
-          Thêm vào giỏ
+          <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">Thêm vào giỏ</span>
         </button>
 
         <button
           type="button"
-          className="flex flex-1 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-extrabold transition active:scale-[0.98]"
+          className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-extrabold transition active:scale-[0.98]"
           style={{
             background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
             color: "var(--stitch-color-primary)",
@@ -85,10 +85,10 @@ export function StickyProductCTA({ product }: { product: Product }) {
             router.push(`/checkout?buyNow=${encodeURIComponent(product.id)}`);
           }}
         >
-          <span className="material-symbols-outlined" aria-hidden>
+          <span className="material-symbols-outlined shrink-0" aria-hidden>
             bolt
           </span>
-          Mua ngay
+          <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">Mua ngay</span>
         </button>
       </div>
       </div>

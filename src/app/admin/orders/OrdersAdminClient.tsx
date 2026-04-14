@@ -63,9 +63,9 @@ function PaymentMethodBadge({ method, status }: { method: string; status: string
     COD: "COD",
   };
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex flex-wrap items-center justify-end gap-1.5">
       <span
-        className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider"
+        className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider whitespace-nowrap"
         style={{
           background: "rgba(255,255,255,0.06)",
           color: "rgba(255,255,255,0.55)",
@@ -75,7 +75,7 @@ function PaymentMethodBadge({ method, status }: { method: string; status: string
         {methodLabels[method] ?? method}
       </span>
       <span
-        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider"
+        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider whitespace-nowrap"
         style={{
           background: `color-mix(in srgb, ${paymentStatusColor(status)} 15%, transparent)`,
           color: paymentStatusColor(status),
@@ -95,7 +95,6 @@ export function OrdersAdminClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [openStatusMenuId, setOpenStatusMenuId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -120,27 +119,25 @@ export function OrdersAdminClient() {
     void load();
   }, [load]);
 
-  useEffect(() => {
-    if (!openStatusMenuId) return;
-
-    function onPointerDown(e: PointerEvent) {
-      const target = e.target as HTMLElement | null;
-      if (!target?.closest("[data-status-menu-root='true']")) {
-        setOpenStatusMenuId(null);
-      }
-    }
-
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpenStatusMenuId(null);
-    }
-
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [openStatusMenuId]);
+  function applyOrderPatch(updated: {
+    id: string;
+    status?: string | null;
+    payment_status?: string | null;
+  }) {
+    setOrders((prev) => {
+      const next = prev.map((o) => {
+        if (o.id !== updated.id) return o;
+        return {
+          ...o,
+          status: (updated.status ?? o.status) as string,
+          payment_status: (updated.payment_status ?? o.payment_status) as string,
+        };
+      });
+      // Nếu đang lọc theo status, order vừa đổi status có thể không còn thuộc filter.
+      if (filter) return next.filter((o) => o.status === filter);
+      return next;
+    });
+  }
 
   async function patchStatus(orderId: string, status: string) {
     setUpdatingId(orderId);
@@ -157,7 +154,8 @@ export function OrdersAdminClient() {
       setError(j.error ?? "Cập nhật thất bại");
       return;
     }
-    await load();
+    const j = (await res.json().catch(() => ({}))) as { order?: { id: string; status?: string; payment_status?: string } };
+    if (j.order?.id) applyOrderPatch(j.order);
   }
 
   async function confirmBankPaidAndConfirmed(orderId: string) {
@@ -175,7 +173,8 @@ export function OrdersAdminClient() {
       setError(j.error ?? "Cập nhật thất bại");
       return;
     }
-    await load();
+    const j = (await res.json().catch(() => ({}))) as { order?: { id: string; status?: string; payment_status?: string } };
+    if (j.order?.id) applyOrderPatch(j.order);
   }
 
   const renderOrderTable = (orderList: OrderRow[]) => (
@@ -235,7 +234,7 @@ export function OrdersAdminClient() {
                 o.status === "COMPLETED" ||
                 o.status === "CANCELLED";
               const nextStatuses = statusOptions.filter((s) => s !== o.status);
-              const isOpen = openStatusMenuId === o.id && !isLocked;
+              const nextImmediate = nextStatuses[0] ?? "";
 
               return (
                 <tr
@@ -343,7 +342,9 @@ export function OrdersAdminClient() {
                           minute: "2-digit",
                         })}
                       </div>
-                      {o.payment_method === "BANK" && o.payment_status === "AWAITING_PAYMENT" ? (
+                      {o.status !== "CANCELLED" &&
+                      o.payment_method === "BANK" &&
+                      o.payment_status === "AWAITING_PAYMENT" ? (
                         <button
                           type="button"
                           onClick={() => {
@@ -368,65 +369,61 @@ export function OrdersAdminClient() {
                     <div className="flex flex-col gap-4">
                       <StatusBadge status={o.status} />
 
-                      <div className="relative" data-status-menu-root="true">
-                        <button
-                          type="button"
-                          disabled={isLocked}
-                          onClick={() =>
-                            setOpenStatusMenuId((prev) =>
-                              prev === o.id ? null : o.id,
-                            )
-                          }
-                          className="group/menu flex w-full items-center justify-between gap-2 rounded-2xl border bg-white/5 py-2 pl-3 pr-3 text-left text-[10px] font-black uppercase tracking-wide outline-none transition-all hover:bg-white/10 hover:border-white/20 disabled:cursor-not-allowed disabled:opacity-35"
-                          style={{
-                            borderColor: "rgba(255,255,255,0.1)",
-                            fontFamily: "var(--stitch-font-headline)",
-                          }}
-                        >
-                          <span className="inline-flex items-center gap-2">
-                            <span
-                              className="h-2 w-2 rounded-full"
-                              style={{ background: getStatusColor(o.status) }}
-                              aria-hidden
-                            />
-                            {statusLabelVi(o.status)}
-                          </span>
-                          <span className="material-symbols-outlined text-[16px] opacity-55 transition group-hover/menu:opacity-100">
-                            {isOpen ? "expand_less" : "expand_more"}
-                          </span>
-                        </button>
-
-                        {isOpen ? (
-                          <div
-                            className="fixed inset-x-4 bottom-4 z-[80] max-h-[55vh] overflow-y-auto overflow-x-hidden rounded-2xl border bg-[#14171d] p-1.5 shadow-2xl backdrop-blur md:absolute md:inset-x-auto md:bottom-auto md:right-0 md:z-20 md:mt-2 md:max-h-none md:w-full md:min-w-[170px] md:overflow-visible"
-                            style={{ borderColor: "rgba(255,255,255,0.14)" }}
-                          >
-                            {nextStatuses.length === 0 ? (
-                              <div className="px-2 py-2 text-[10px] font-bold uppercase tracking-wide text-white/40">
+                      <div className="flex flex-col gap-2">
+                        {statusOptions.length <= 1 ? (
+                          <div className="text-[10px] font-bold uppercase tracking-wide text-white/40">
+                            Không còn bước tiếp theo
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            {nextImmediate ? (
+                              <button
+                                type="button"
+                                disabled={isLocked}
+                                onClick={() => {
+                                  if (isLocked) return;
+                                  void patchStatus(o.id, nextImmediate);
+                                }}
+                                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border bg-white/5 px-2.5 py-2 text-[9px] font-black uppercase tracking-wide text-white/85 transition enabled:hover:bg-white/10 enabled:hover:border-white/20 enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 sm:px-3 sm:text-[10px] md:w-auto md:justify-start"
+                                style={{
+                                  borderColor: "rgba(255,255,255,0.12)",
+                                  fontFamily: "var(--stitch-font-headline)",
+                                }}
+                                title={`Chuyển sang: ${statusLabelVi(nextImmediate)}`}
+                              >
+                                <span className="material-symbols-outlined text-[14px]" aria-hidden>
+                                  check_box_outline_blank
+                                </span>
+                                <span className="min-w-0 truncate">{statusLabelVi(nextImmediate)}</span>
+                              </button>
+                            ) : (
+                              <div className="text-[10px] font-bold uppercase tracking-wide text-white/40">
                                 Không còn bước tiếp theo
                               </div>
-                            ) : (
-                              nextStatuses.map((s) => (
-                                <button
-                                  key={s}
-                                  type="button"
-                                  className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left text-[10px] font-black uppercase tracking-wide text-white/85 transition hover:bg-white/10 md:text-[10px]"
-                                  onClick={() => {
-                                    setOpenStatusMenuId(null);
-                                    void patchStatus(o.id, s);
-                                  }}
-                                >
-                                  <span
-                                    className="h-2 w-2 rounded-full"
-                                    style={{ background: getStatusColor(s) }}
-                                    aria-hidden
-                                  />
-                                  {statusLabelVi(s)}
-                                </button>
-                              ))
                             )}
+
+                            {nextImmediate === "CONFIRMED" ? (
+                              <button
+                                type="button"
+                                disabled={isLocked}
+                                onClick={() => {
+                                  if (isLocked) return;
+                                  if (confirm(`Hủy đơn ${o.order_code}?`)) {
+                                    void patchStatus(o.id, "CANCELLED");
+                                  }
+                                }}
+                                className="inline-flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border bg-white/5 text-white/70 transition enabled:hover:bg-white/10 enabled:hover:border-white/20 enabled:hover:text-white enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
+                                style={{ borderColor: "rgba(255,255,255,0.12)" }}
+                                title="Hủy đơn"
+                                aria-label="Hủy đơn"
+                              >
+                                <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                                  close
+                                </span>
+                              </button>
+                            ) : null}
                           </div>
-                        ) : null}
+                        )}
                       </div>
 
                       {updatingId === o.id && (

@@ -6,7 +6,7 @@ export async function GET() {
     const categories = await getCatalogCategories();
     return NextResponse.json(
       {
-        categories: categories.map((c) => ({ slug: c.slug, name: c.name })),
+        categories: categories.map((c) => ({ id: c.id, slug: c.slug, name: c.name })),
       },
       { status: 200 },
     );

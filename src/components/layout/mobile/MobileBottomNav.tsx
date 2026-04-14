@@ -20,13 +20,27 @@ type NavItem = {
 
 const ITEMS: NavItem[] = [
   { href: "/", label: "Home", icon: "home", match: (p) => p === "/" },
-  { href: "/category", label: "Danh mục", icon: "grid_view", match: (p) => p.startsWith("/category") },
+  {
+    href: "/category",
+    label: "Danh mục",
+    icon: "grid_view",
+    match: (p) => p.startsWith("/category"),
+  },
   { href: "/#contact", label: "Liên hệ", icon: "call" },
-  { href: "/account", label: "Tài khoản", icon: "account_circle", match: (p) => p.startsWith("/account") },
+  {
+    href: "/account",
+    label: "Tài khoản",
+    icon: "account_circle",
+    match: (p) => p.startsWith("/account"),
+  },
 ];
 
 function isHiddenOn(pathname: string) {
-  return pathname.startsWith("/checkout") || pathname.startsWith("/product");
+  return (
+    pathname.startsWith("/checkout") ||
+    pathname.startsWith("/product") ||
+    pathname.startsWith("/admin")
+  );
 }
 
 export function MobileBottomNav() {
@@ -36,7 +50,10 @@ export function MobileBottomNav() {
   const [navCategories, setNavCategories] = useState<NavCategoryItem[]>([]);
   const categoryWrapRef = useRef<HTMLDivElement | null>(null);
 
-  const categoryActive = useMemo(() => pathname.startsWith("/category"), [pathname]);
+  const categoryActive = useMemo(
+    () => pathname.startsWith("/category"),
+    [pathname],
+  );
 
   useEffect(() => {
     setCategoryOpen(false);
@@ -46,7 +63,8 @@ export function MobileBottomNav() {
     function onPointerDown(e: MouseEvent | TouchEvent) {
       const el = categoryWrapRef.current;
       if (!el) return;
-      if (e.target instanceof Node && !el.contains(e.target)) setCategoryOpen(false);
+      if (e.target instanceof Node && !el.contains(e.target))
+        setCategoryOpen(false);
     }
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") setCategoryOpen(false);
@@ -114,7 +132,9 @@ export function MobileBottomNav() {
                   type="button"
                   className={`relative flex w-full flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition ${categoryActive ? "scale-[1.03] opacity-100" : "opacity-80"} active:scale-[0.98]`}
                   style={{
-                    color: categoryActive ? "var(--stitch-color-primary)" : "var(--stitch-color-on-surface-variant)",
+                    color: categoryActive
+                      ? "var(--stitch-color-primary)"
+                      : "var(--stitch-color-on-surface-variant)",
                     background: categoryActive
                       ? "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 22%, transparent)"
                       : "transparent",
@@ -125,11 +145,16 @@ export function MobileBottomNav() {
                   onClick={() => setCategoryOpen((v) => !v)}
                 >
                   <span className="relative">
-                    <span className="material-symbols-outlined text-[22px] leading-none" aria-hidden>
+                    <span
+                      className="material-symbols-outlined text-[22px] leading-none"
+                      aria-hidden
+                    >
                       {it.icon}
                     </span>
                   </span>
-                  <span className="text-[11px] font-bold leading-none">{it.label}</span>
+                  <span className="text-[11px] font-bold leading-none">
+                    {it.label}
+                  </span>
                 </button>
 
                 {categoryOpen ? (
@@ -155,7 +180,10 @@ export function MobileBottomNav() {
                       }}
                       onClick={() => setCategoryOpen(false)}
                     >
-                      <span className="material-symbols-outlined text-[20px]" aria-hidden>
+                      <span
+                        className="material-symbols-outlined text-[20px]"
+                        aria-hidden
+                      >
                         grid_view
                       </span>
                       Tất cả sản phẩm
@@ -204,7 +232,9 @@ export function MobileBottomNav() {
               href={it.href}
               className={`relative flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition ${tabScale} ${tabOpacity} active:scale-[0.98]`}
               style={{
-                color: active ? "var(--stitch-color-primary)" : "var(--stitch-color-on-surface-variant)",
+                color: active
+                  ? "var(--stitch-color-primary)"
+                  : "var(--stitch-color-on-surface-variant)",
                 background: active
                   ? "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 22%, transparent)"
                   : "transparent",
@@ -212,7 +242,10 @@ export function MobileBottomNav() {
               aria-current={active ? "page" : undefined}
             >
               <span className="relative">
-                <span className="material-symbols-outlined text-[22px] leading-none" aria-hidden>
+                <span
+                  className="material-symbols-outlined text-[22px] leading-none"
+                  aria-hidden
+                >
                   {it.icon}
                 </span>
                 {showBadge ? (
@@ -225,7 +258,9 @@ export function MobileBottomNav() {
                   </span>
                 ) : null}
               </span>
-              <span className="text-[11px] font-bold leading-none">{it.label}</span>
+              <span className="text-[11px] font-bold leading-none">
+                {it.label}
+              </span>
             </Link>
           );
         })}
@@ -233,4 +268,3 @@ export function MobileBottomNav() {
     </nav>
   );
 }
-
