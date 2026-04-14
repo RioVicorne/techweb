@@ -10,7 +10,7 @@ export const ORDER_STATUS_TABS: OrderStatusTabDef[] = [
   { key: "pending", label: "Chờ xác nhận", icon: "hourglass_top", statuses: ["PENDING_CONFIRMATION"] },
   { key: "preparing", label: "Chờ lấy hàng", icon: "inventory_2", statuses: ["CONFIRMED"] },
   { key: "shipping", label: "Chờ giao hàng", icon: "local_shipping", statuses: ["SHIPPING"] },
-  { key: "delivered", label: "Lịch sử đơn hàng", icon: "history", statuses: ["COMPLETED"] },
+  { key: "delivered", label: "Thành công", icon: "history", statuses: ["COMPLETED"] },
   { key: "cancelled", label: "Đã hủy", icon: "cancel", statuses: ["CANCELLED"] },
 ];
 
@@ -19,14 +19,14 @@ export const ORDER_PROGRESS_STEPS: Array<{ label: string; icon: string; key: str
   { label: "Chờ xác nhận", icon: "hourglass_top", key: "PENDING_CONFIRMATION" },
   { label: "Chờ lấy hàng", icon: "inventory_2", key: "CONFIRMED" },
   { label: "Chờ giao hàng", icon: "local_shipping", key: "SHIPPING" },
-  { label: "Lịch sử đơn hàng", icon: "history", key: "COMPLETED" },
+  { label: "Thành công", icon: "history", key: "COMPLETED" },
 ];
 
 const ORDER_STATUS_CODE_LABELS: Record<string, string> = {
   PENDING_CONFIRMATION: "Chờ xác nhận",
   CONFIRMED: "Chờ lấy hàng",
   SHIPPING: "Chờ giao hàng",
-  COMPLETED: "Lịch sử đơn hàng",
+  COMPLETED: "Thành công",
   CANCELLED: "Đã hủy",
 };
 

@@ -398,7 +398,7 @@ export function OrdersAdminClient() {
 
                         {isOpen ? (
                           <div
-                            className="absolute right-0 z-20 mt-2 w-full min-w-[170px] overflow-hidden rounded-2xl border bg-[#14171d] p-1.5 shadow-2xl backdrop-blur"
+                            className="fixed inset-x-4 bottom-4 z-[80] max-h-[55vh] overflow-y-auto overflow-x-hidden rounded-2xl border bg-[#14171d] p-1.5 shadow-2xl backdrop-blur md:absolute md:inset-x-auto md:bottom-auto md:right-0 md:z-20 md:mt-2 md:max-h-none md:w-full md:min-w-[170px] md:overflow-visible"
                             style={{ borderColor: "rgba(255,255,255,0.14)" }}
                           >
                             {nextStatuses.length === 0 ? (
@@ -410,7 +410,7 @@ export function OrdersAdminClient() {
                                 <button
                                   key={s}
                                   type="button"
-                                  className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left text-[10px] font-black uppercase tracking-wide text-white/85 transition hover:bg-white/10"
+                                  className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left text-[10px] font-black uppercase tracking-wide text-white/85 transition hover:bg-white/10 md:text-[10px]"
                                   onClick={() => {
                                     setOpenStatusMenuId(null);
                                     void patchStatus(o.id, s);

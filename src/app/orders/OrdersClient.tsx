@@ -312,7 +312,7 @@ export function OrdersClient() {
                           <div className="min-w-0 truncate text-sm font-black text-white">RioShop</div>
                           <div
                             className="shrink-0 text-right text-xs font-black leading-tight"
-                            style={{ color: "var(--stitch-color-primary)" }}
+                            style={{ color: String(o.status || "") === "COMPLETED" ? "#10b981" : "var(--stitch-color-primary)" }}
                           >
                             {orderRowStatusLabel(String(o.status || ""))}
                           </div>

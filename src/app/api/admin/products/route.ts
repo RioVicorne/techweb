@@ -39,6 +39,14 @@ export async function GET(req: Request) {
           url,
           alt,
           sort_order
+        ),
+        product_categories (
+          category_id,
+          categories (
+            id,
+            name,
+            slug
+          )
         )
       `,
       )
@@ -75,6 +83,16 @@ export async function GET(req: Request) {
               sort_order: number | null;
             }[]
           | null;
+        product_categories:
+          | {
+              category_id: number;
+              categories: {
+                id: number;
+                name: string;
+                slug: string;
+              } | null;
+            }[]
+          | null;
       };
 
       const variants = (p.product_variants ?? []).map((v) => ({
@@ -95,6 +113,13 @@ export async function GET(req: Request) {
           alt: img.alt,
         }));
 
+      const categories = (p.product_categories ?? [])
+        .map((pc) => pc.categories)
+        .filter(
+          (category): category is { id: number; name: string; slug: string } =>
+            Boolean(category?.id && category.name && category.slug),
+        );
+
       return {
         id: p.id,
         slug: p.slug,
@@ -105,6 +130,7 @@ export async function GET(req: Request) {
         createdAt: p.created_at,
         variants,
         images,
+        categories,
       };
     });
 
@@ -128,6 +154,10 @@ export async function POST(req: NextRequest) {
       brand,
       status,
       variants,
+      sku,
+      price,
+      compareAtPrice,
+      attributes,
     }: {
       name: string;
       slug: string;
@@ -142,6 +172,10 @@ export async function POST(req: NextRequest) {
         isActive?: boolean;
         attributes?: Record<string, unknown>;
       }>;
+      sku?: string;
+      price?: number;
+      compareAtPrice?: number;
+      attributes?: Record<string, unknown>;
     } = body;
 
     if (!name || !slug) {
@@ -168,8 +202,31 @@ export async function POST(req: NextRequest) {
 
     const productId = (product as { id: number }).id;
 
-    if (variants && variants.length > 0) {
-      const variantRows = variants.map((v) => ({
+    const normalizedVariants: Array<{
+      sku: string;
+      name?: string;
+      price: number;
+      compareAtPrice?: number;
+      isActive?: boolean;
+      attributes?: Record<string, unknown>;
+    }> =
+      variants && variants.length > 0
+        ? variants
+        : sku && typeof price === "number" && Number.isFinite(price)
+          ? [
+              {
+                sku,
+                name: undefined,
+                price,
+                compareAtPrice,
+                attributes,
+                isActive: true,
+              },
+            ]
+          : [];
+
+    if (normalizedVariants.length > 0) {
+      const variantRows = normalizedVariants.map((v) => ({
         product_id: productId,
         sku: v.sku,
         name: v.name ?? null,
@@ -208,6 +265,10 @@ export async function PATCH(req: NextRequest) {
       description,
       brand,
       status,
+      sku,
+      price,
+      compareAtPrice,
+      attributes,
     }: {
       id: number;
       name?: string;
@@ -215,6 +276,10 @@ export async function PATCH(req: NextRequest) {
       description?: string | null;
       brand?: string | null;
       status?: string;
+      sku?: string;
+      price?: number;
+      compareAtPrice?: number;
+      attributes?: Record<string, unknown>;
     } = body;
 
     if (!id) {
@@ -239,6 +304,39 @@ export async function PATCH(req: NextRequest) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const variantUpdates: Record<string, unknown> = {};
+    if (sku !== undefined && sku.trim() !== "") variantUpdates.sku = sku.trim();
+    if (price !== undefined && Number.isFinite(price) && price >= 0) variantUpdates.price = price;
+    if (compareAtPrice !== undefined && Number.isFinite(compareAtPrice) && compareAtPrice >= 0) {
+      variantUpdates.compare_at_price = compareAtPrice;
+    }
+    if (attributes !== undefined) variantUpdates.attributes = attributes;
+
+    if (Object.keys(variantUpdates).length > 0) {
+      const { data: firstVariant, error: firstVariantErr } = await supabase
+        .from("product_variants")
+        .select("id")
+        .eq("product_id", id)
+        .order("id", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (firstVariantErr) {
+        return NextResponse.json({ error: firstVariantErr.message }, { status: 500 });
+      }
+
+      if (firstVariant?.id) {
+        const { error: variantUpdateErr } = await supabase
+          .from("product_variants")
+          .update(variantUpdates)
+          .eq("id", firstVariant.id);
+
+        if (variantUpdateErr) {
+          return NextResponse.json({ error: variantUpdateErr.message }, { status: 500 });
+        }
+      }
     }
 
     return NextResponse.json({ product }, { status: 200 });

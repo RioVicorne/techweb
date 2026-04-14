@@ -19,6 +19,15 @@ const PAYMENT_STATUS_LABELS: Record<string, string> = {
   REFUNDED: "Đã hoàn tiền",
 };
 
+type OrderLookupResponse = {
+  order?: {
+    id: string;
+    total_vnd: number;
+    payment_status: string;
+    qr_code_url: string | null;
+  };
+};
+
 export function QrPaymentClient() {
   const router = useRouter();
   const params = useSearchParams();
@@ -33,6 +42,23 @@ export function QrPaymentClient() {
   const [error, setError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(300); // 5 minutes
   const [isPaid, setIsPaid] = useState(false);
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
+  const [confirmSuccessText, setConfirmSuccessText] = useState<string | null>(null);
+
+  async function loadOrderStatus(targetOrderId: string): Promise<string | null> {
+    const res = await fetch(`/api/orders/${encodeURIComponent(targetOrderId)}`, { method: "GET" });
+    const json = (await res.json()) as OrderLookupResponse;
+    if (!res.ok || !json.order) {
+      throw new Error("Không tìm thấy đơn hàng");
+    }
+
+    setOrderCode(json.order.id);
+    setTotalVnd(json.order.total_vnd);
+    setPaymentStatus(json.order.payment_status);
+    setQrCodeUrl(json.order.qr_code_url);
+
+    return json.order.payment_status;
+  }
 
   useEffect(() => {
     if (!orderId) return;
@@ -40,36 +66,33 @@ export function QrPaymentClient() {
 
     async function loadOrder() {
       try {
-        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, { method: "GET" });
-        const json = (await res.json()) as { order?: { id: string; total_vnd: number; payment_status: string; qr_code_url: string | null } };
-        if (!res.ok || !json.order) {
-          setError("Không tìm thấy đơn hàng");
-          return;
-        }
+        const latestStatus = await loadOrderStatus(orderId);
         if (cancelled) return;
-        setOrderCode(json.order.id);
-        setTotalVnd(json.order.total_vnd);
-        setPaymentStatus(json.order.payment_status);
-        setQrCodeUrl(json.order.qr_code_url);
 
-        if (json.order.payment_status === "PAID") {
+        if (latestStatus === "PAID") {
           setIsPaid(true);
           router.push(`/checkout/success?orderId=${encodeURIComponent(orderId)}`);
         }
       } catch {
-        setError("Không thể tải thông tin đơn hàng");
+        if (!cancelled) {
+          setError("Không thể tải thông tin đơn hàng");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
-    loadOrder();
+    void loadOrder();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [orderId, router]);
 
   // Supabase Realtime subscription for payment status updates
   useEffect(() => {
     if (!orderId || isPaid) return;
+
+    setConfirmSuccessText(null);
 
     const channel = supabase
       .channel(`order-payment:${orderId}`)
@@ -117,6 +140,32 @@ export function QrPaymentClient() {
 
   const minutes = Math.floor(countdown / 60);
   const seconds = countdown % 60;
+
+  async function handleConfirmPayment() {
+    if (!orderId || confirmingPayment) return;
+
+    setConfirmingPayment(true);
+    setConfirmSuccessText(null);
+
+    try {
+      const latestStatus = await loadOrderStatus(orderId);
+
+      if (latestStatus === "PAID") {
+        setConfirmSuccessText("Thanh toán thành công. Admin đã xác nhận giao dịch.");
+        setIsPaid(true);
+        router.push(`/checkout/success?orderId=${encodeURIComponent(orderId)}`);
+        return;
+      }
+
+      const popupMessage =
+        "Thanh toán thất bại: Admin chưa xác nhận nhận được tiền. Vui lòng kiểm tra lại sau.";
+      window.alert(popupMessage);
+    } catch {
+      window.alert("Không thể đối chiếu thanh toán lúc này. Vui lòng thử lại sau.");
+    } finally {
+      setConfirmingPayment(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -332,6 +381,30 @@ export function QrPaymentClient() {
             <p className="mt-2 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
               Tự động cập nhật khi nhận được tiền
             </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                void handleConfirmPayment();
+              }}
+              disabled={confirmingPayment || isPaid}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-black transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              style={{
+                background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
+                color: "var(--stitch-color-on-primary)",
+              }}
+            >
+              <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                {confirmingPayment ? "hourglass_top" : "fact_check"}
+              </span>
+              {confirmingPayment ? "Đang đối chiếu với admin..." : "Xác nhận thanh toán"}
+            </button>
+
+            {confirmSuccessText ? (
+              <p className="mt-3 text-xs font-bold" style={{ color: "#34d399" }}>
+                {confirmSuccessText}
+              </p>
+            ) : null}
           </div>
 
           <div className="mt-6">
