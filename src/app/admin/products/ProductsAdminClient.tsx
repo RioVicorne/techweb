@@ -45,6 +45,9 @@ type CatalogCategoryOption = {
 
 type FormState = {
   id?: number;
+  variantId?: number;
+  originalCategoryId?: string;
+  originalImageUrls?: string[];
   name: string;
   slug: string;
   description: string;
@@ -207,8 +210,14 @@ export function ProductsAdminClient() {
 
     const primaryCategoryId = p.categories?.[0]?.id;
 
+    const normalizedImageUrls = imageUrls.length > 0 ? imageUrls : [""];
+    const normalizedCategoryId = primaryCategoryId ? String(primaryCategoryId) : "";
+
     setForm({
       id: p.id,
+      variantId: firstVariant?.id,
+      originalCategoryId: normalizedCategoryId,
+      originalImageUrls: normalizedImageUrls,
       name: p.name,
       slug: p.slug,
       description: p.description ?? "",
@@ -221,8 +230,8 @@ export function ProductsAdminClient() {
           ? formatNumericText(String(firstVariant.compareAtPrice))
           : "",
       specsText,
-      categoryId: primaryCategoryId ? String(primaryCategoryId) : "",
-      imageUrls: imageUrls.length > 0 ? imageUrls : [""],
+      categoryId: normalizedCategoryId,
+      imageUrls: normalizedImageUrls,
     });
     setFormOpen(true);
   }
@@ -240,6 +249,10 @@ export function ProductsAdminClient() {
       const parsedCategoryId = Number(form.categoryId);
       const cleanedImageUrls = form.imageUrls
         .map((url) => url.trim())
+        .filter(Boolean)
+        .slice(0, 5);
+      const normalizedOriginalImageUrls = (form.originalImageUrls ?? [])
+        .map((url) => String(url ?? "").trim())
         .filter(Boolean)
         .slice(0, 5);
 
@@ -280,10 +293,31 @@ export function ProductsAdminClient() {
         body.attributes = parsedAttributes;
       }
 
-      body.imageUrls = cleanedImageUrls;
-      body.categoryId = Number.isFinite(parsedCategoryId) && parsedCategoryId > 0 ? parsedCategoryId : null;
-
       if (form.id) body.id = form.id;
+      if (form.variantId) body.variantId = form.variantId;
+
+      if (!form.id) {
+        body.imageUrls = cleanedImageUrls;
+        body.categoryId = Number.isFinite(parsedCategoryId) && parsedCategoryId > 0 ? parsedCategoryId : null;
+      } else {
+        const normalizedCurrentCategoryId =
+          Number.isFinite(parsedCategoryId) && parsedCategoryId > 0 ? String(parsedCategoryId) : "";
+        const normalizedOriginalCategoryId = form.originalCategoryId ?? "";
+        const hasCategoryChanged = normalizedCurrentCategoryId !== normalizedOriginalCategoryId;
+
+        const hasImagesChanged =
+          cleanedImageUrls.length !== normalizedOriginalImageUrls.length ||
+          cleanedImageUrls.some((url, index) => url !== normalizedOriginalImageUrls[index]);
+
+        if (hasImagesChanged) {
+          body.imageUrls = cleanedImageUrls;
+        }
+
+        if (hasCategoryChanged) {
+          body.categoryId =
+            Number.isFinite(parsedCategoryId) && parsedCategoryId > 0 ? parsedCategoryId : null;
+        }
+      }
 
       const res = await fetch(url, {
         method,

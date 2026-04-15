@@ -321,6 +321,7 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const {
       id,
+      variantId,
       name,
       slug,
       description,
@@ -334,6 +335,7 @@ export async function PATCH(req: NextRequest) {
       categoryId,
     }: {
       id: number;
+      variantId?: number;
       name?: string;
       slug?: string;
       description?: string | null;
@@ -347,7 +349,7 @@ export async function PATCH(req: NextRequest) {
       categoryId?: number | null;
     } = body;
 
-    if (!id) {
+    if (!id || !Number.isFinite(id)) {
       return NextResponse.json(
         { error: "Product ID is required" },
         { status: 400 },
@@ -363,15 +365,21 @@ export async function PATCH(req: NextRequest) {
 
     const supabase = getSupabaseAdmin();
 
-    const { data: product, error } = await supabase
-      .from("products")
-      .update(updateData)
-      .eq("id", id)
-      .select()
-      .single();
+    let product: Record<string, unknown> = { id };
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (Object.keys(updateData).length > 0) {
+      const { data: updatedProduct, error: productError } = await supabase
+        .from("products")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (productError) {
+        return NextResponse.json({ error: productError.message }, { status: 500 });
+      }
+
+      product = (updatedProduct as Record<string, unknown>) ?? { id };
     }
 
     const variantUpdates: Record<string, unknown> = {};
@@ -388,26 +396,12 @@ export async function PATCH(req: NextRequest) {
     if (attributes !== undefined) variantUpdates.attributes = attributes;
 
     if (Object.keys(variantUpdates).length > 0) {
-      const { data: firstVariant, error: firstVariantErr } = await supabase
-        .from("product_variants")
-        .select("id")
-        .eq("product_id", id)
-        .order("id", { ascending: true })
-        .limit(1)
-        .maybeSingle();
-
-      if (firstVariantErr) {
-        return NextResponse.json(
-          { error: firstVariantErr.message },
-          { status: 500 },
-        );
-      }
-
-      if (firstVariant?.id) {
+      if (typeof variantId === "number" && Number.isFinite(variantId) && variantId > 0) {
         const { error: variantUpdateErr } = await supabase
           .from("product_variants")
           .update(variantUpdates)
-          .eq("id", firstVariant.id);
+          .eq("id", variantId)
+          .eq("product_id", id);
 
         if (variantUpdateErr) {
           return NextResponse.json(
@@ -415,75 +409,115 @@ export async function PATCH(req: NextRequest) {
             { status: 500 },
           );
         }
-      }
-    }
+      } else {
+        const { data: firstVariant, error: firstVariantErr } = await supabase
+          .from("product_variants")
+          .select("id")
+          .eq("product_id", id)
+          .order("id", { ascending: true })
+          .limit(1)
+          .maybeSingle();
 
-    if (imageUrls !== undefined) {
-      const cleanedImageUrls = (imageUrls ?? [])
-        .map((url) => String(url ?? "").trim())
-        .filter(Boolean)
-        .slice(0, 5);
-
-      const { error: deleteImageErr } = await supabase
-        .from("product_images")
-        .delete()
-        .eq("product_id", id);
-
-      if (deleteImageErr) {
-        return NextResponse.json(
-          { error: deleteImageErr.message },
-          { status: 500 },
-        );
-      }
-
-      if (cleanedImageUrls.length > 0) {
-        const imageRows = cleanedImageUrls.map((url, index) => ({
-          product_id: id,
-          url,
-          alt: name ?? null,
-          sort_order: index,
-        }));
-
-        const { error: imageInsertErr } = await supabase
-          .from("product_images")
-          .insert(imageRows);
-
-        if (imageInsertErr) {
+        if (firstVariantErr) {
           return NextResponse.json(
-            { error: imageInsertErr.message },
+            { error: firstVariantErr.message },
             { status: 500 },
           );
         }
+
+        if (firstVariant?.id) {
+          const { error: variantUpdateErr } = await supabase
+            .from("product_variants")
+            .update(variantUpdates)
+            .eq("id", firstVariant.id);
+
+          if (variantUpdateErr) {
+            return NextResponse.json(
+              { error: variantUpdateErr.message },
+              { status: 500 },
+            );
+          }
+        }
       }
+    }
+
+    const relationMutations: Array<Promise<{ error: string | null }>> = [];
+
+    if (imageUrls !== undefined) {
+      relationMutations.push(
+        (async () => {
+          const cleanedImageUrls = (imageUrls ?? [])
+            .map((url) => String(url ?? "").trim())
+            .filter(Boolean)
+            .slice(0, 5);
+
+          const { error: deleteImageErr } = await supabase
+            .from("product_images")
+            .delete()
+            .eq("product_id", id);
+
+          if (deleteImageErr) {
+            return { error: deleteImageErr.message };
+          }
+
+          if (cleanedImageUrls.length > 0) {
+            const imageRows = cleanedImageUrls.map((url, index) => ({
+              product_id: id,
+              url,
+              alt: name ?? null,
+              sort_order: index,
+            }));
+
+            const { error: imageInsertErr } = await supabase
+              .from("product_images")
+              .insert(imageRows);
+
+            if (imageInsertErr) {
+              return { error: imageInsertErr.message };
+            }
+          }
+
+          return { error: null };
+        })(),
+      );
     }
 
     if (categoryId !== undefined) {
-      const { error: deleteCategoryErr } = await supabase
-        .from("product_categories")
-        .delete()
-        .eq("product_id", id);
+      relationMutations.push(
+        (async () => {
+          const { error: deleteCategoryErr } = await supabase
+            .from("product_categories")
+            .delete()
+            .eq("product_id", id);
 
-      if (deleteCategoryErr) {
-        return NextResponse.json(
-          { error: deleteCategoryErr.message },
-          { status: 500 },
-        );
-      }
+          if (deleteCategoryErr) {
+            return { error: deleteCategoryErr.message };
+          }
 
-      if (typeof categoryId === "number" && Number.isFinite(categoryId) && categoryId > 0) {
-        const { error: categoryInsertErr } = await supabase
-          .from("product_categories")
-          .insert({
-            product_id: id,
-            category_id: categoryId,
-          });
+          if (typeof categoryId === "number" && Number.isFinite(categoryId) && categoryId > 0) {
+            const { error: categoryInsertErr } = await supabase
+              .from("product_categories")
+              .insert({
+                product_id: id,
+                category_id: categoryId,
+              });
 
-        if (categoryInsertErr) {
-          return NextResponse.json(
-            { error: categoryInsertErr.message },
-            { status: 500 },
-          );
-        }
+            if (categoryInsertErr) {
+              return { error: categoryInsertErr.message };
+            }
+          }
+
+          return { error: null };
+        })(),
+      );
+    }
+
+    if (relationMutations.length > 0) {
+      const relationResults = await Promise.all(relationMutations);
+      const failedRelation = relationResults.find((result) => result.error);
+
+      if (failedRelation?.error) {
+        return NextResponse.json({ error: failedRelation.error }, { status: 500 });
       }
     }
 

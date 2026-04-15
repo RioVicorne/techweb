@@ -36,18 +36,21 @@ create index if not exists product_reviews_rating_idx on public.product_reviews 
 alter table public.product_reviews enable row level security;
 
 -- Public có thể đọc reviews đã được duyệt
-create policy "Public can read approved reviews" on public.product_reviews 
-  for select 
+drop policy if exists "Public can read approved reviews" on public.product_reviews;
+create policy "Public can read approved reviews" on public.product_reviews
+  for select
   using (status = 'APPROVED');
 
 -- User có thể tạo review (cần đăng nhập hoặc guest)
-create policy "Anyone can create reviews" on public.product_reviews 
-  for insert 
+drop policy if exists "Anyone can create reviews" on public.product_reviews;
+create policy "Anyone can create reviews" on public.product_reviews
+  for insert
   with check (true);
 
 -- User chỉ được sửa review của mình
-create policy "Users can update own reviews" on public.product_reviews 
-  for update 
+drop policy if exists "Users can update own reviews" on public.product_reviews;
+create policy "Users can update own reviews" on public.product_reviews
+  for update
   using (auth.uid() = user_id);
 
 -- Admin có thể quản lý tất cả reviews (dùng service role key bypass RLS)

@@ -30,3 +30,6 @@ yarn-error.log*
 # env
 .env
 .env*.local
+
+# supabase cli
+supabase/.temp/

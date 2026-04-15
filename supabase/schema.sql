@@ -84,6 +84,8 @@ create table if not exists public.product_variants (
   updated_at timestamptz default now()
 );
 
+create index if not exists product_variants_product_id_idx on public.product_variants (product_id);
+
 alter table public.product_variants enable row level security;
 create policy "Public can read active variants" on public.product_variants for select using (is_active = true);
 
@@ -98,6 +100,8 @@ create table if not exists public.product_images (
   alt text null,
   sort_order int null default 0
 );
+
+create index if not exists product_images_product_id_idx on public.product_images (product_id);
 
 alter table public.product_images enable row level security;
 create policy "Public can read product images" on public.product_images for select using (true);
