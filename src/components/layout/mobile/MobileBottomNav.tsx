@@ -36,11 +36,7 @@ const ITEMS: NavItem[] = [
 ];
 
 function isHiddenOn(pathname: string) {
-  return (
-    pathname.startsWith("/checkout") ||
-    pathname.startsWith("/product") ||
-    pathname.startsWith("/admin")
-  );
+  return pathname.startsWith("/checkout") || pathname.startsWith("/admin");
 }
 
 export function MobileBottomNav() {
@@ -106,7 +102,7 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 lg:hidden"
       aria-label="Bottom navigation"
       style={{
         background:

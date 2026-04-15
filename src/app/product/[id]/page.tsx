@@ -17,7 +17,11 @@ export default async function ProductPage({
   return (
     <div className="min-h-screen">
       <ShopHeader />
-      <ProductDetailClient product={product} productId={productDetail.id} />
+      <ProductDetailClient
+        product={product}
+        productId={productDetail.id}
+        imageUrls={productDetail.images.map((image) => image.url)}
+      />
     </div>
   );
 }

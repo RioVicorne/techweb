@@ -73,7 +73,7 @@ export default async function RootLayout({
         style={themeStyle}
       >
         <CartProvider>
-          <div className="min-h-dvh pb-24 md:pb-0">{children}</div>
+          <div className="min-h-dvh pb-24 lg:pb-0">{children}</div>
           <MobileBottomNav />
         </CartProvider>
       </body>

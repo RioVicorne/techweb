@@ -19,7 +19,15 @@ type RelatedProduct = {
   img: string;
 };
 
-export function ProductDetailClient({ product, productId }: { product: Product; productId: number }) {
+export function ProductDetailClient({
+  product,
+  productId,
+  imageUrls = [],
+}: {
+  product: Product;
+  productId: number;
+  imageUrls?: string[];
+}) {
   const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([]);
   const [loadingRelated, setLoadingRelated] = useState(true);
   const [isSpecsOpen, setIsSpecsOpen] = useState(false);
@@ -88,7 +96,10 @@ export function ProductDetailClient({ product, productId }: { product: Product; 
         <section className="mb-8 grid gap-6 md:grid-cols-2">
           {/* Images */}
           <div className="relative overflow-hidden rounded-3xl">
-            <ProductHeroCarousel images={[product.img]} alt={product.title} />
+            <ProductHeroCarousel
+              images={imageUrls.length > 0 ? imageUrls : [product.img]}
+              alt={product.title}
+            />
             <div className="absolute left-4 top-4 flex items-center gap-2">
               <span
                 className="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest"

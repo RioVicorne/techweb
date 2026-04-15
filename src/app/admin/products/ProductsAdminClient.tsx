@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 type ProductVariant = {
@@ -93,6 +94,39 @@ function parseNumericText(value: string): number {
   const normalized = normalizeNumericText(value);
   if (!normalized) return Number.NaN;
   return Number(normalized);
+}
+
+function isLikelyDirectImageUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+
+    const pathname = url.pathname.toLowerCase();
+    if (/\.(html?|php|aspx?)$/.test(pathname)) return false;
+
+    const extensionMatch = pathname.match(/\.([a-z0-9]+)$/i);
+    if (extensionMatch) {
+      return /^(png|jpe?g|webp|avif|gif|svg|bmp|jfif|heic|heif)$/i.test(
+        extensionMatch[1] ?? "",
+      );
+    }
+
+    const formatHint =
+      url.searchParams.get("format") ??
+      url.searchParams.get("fm") ??
+      url.searchParams.get("ext") ??
+      "";
+
+    if (formatHint) {
+      return /^(png|jpe?g|webp|avif|gif|svg|bmp|jfif|heic|heif)$/i.test(
+        formatHint,
+      );
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
 }
 
 function slugify(text: string): string {
@@ -251,6 +285,10 @@ export function ProductsAdminClient() {
         .map((url) => url.trim())
         .filter(Boolean)
         .slice(0, 5);
+      const invalidImageUrl = cleanedImageUrls.find((url) => !isLikelyDirectImageUrl(url));
+      if (invalidImageUrl) {
+        throw new Error(`URL ảnh không hợp lệ hoặc không phải ảnh trực tiếp: ${invalidImageUrl}`);
+      }
       const normalizedOriginalImageUrls = (form.originalImageUrls ?? [])
         .map((url) => String(url ?? "").trim())
         .filter(Boolean)
@@ -556,10 +594,13 @@ export function ProductsAdminClient() {
                         <td className="px-5 py-4">
                           <div className="flex min-w-[320px] items-center gap-4">
                             {p.images.length > 0 && p.images[0].url ? (
-                              <img
+                              <Image
                                 src={p.images[0].url}
                                 alt={p.images[0].alt ?? p.name}
+                                width={56}
+                                height={56}
                                 className="h-14 w-14 shrink-0 rounded-xl object-cover"
+                                unoptimized
                               />
                             ) : (
                               <div

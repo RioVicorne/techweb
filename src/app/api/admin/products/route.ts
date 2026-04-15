@@ -4,6 +4,39 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 const MAX_LIMIT = 300;
 
+function isLikelyDirectImageUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+
+    const pathname = url.pathname.toLowerCase();
+    if (/\.(html?|php|aspx?)$/.test(pathname)) return false;
+
+    const extensionMatch = pathname.match(/\.([a-z0-9]+)$/i);
+    if (extensionMatch) {
+      return /^(png|jpe?g|webp|avif|gif|svg|bmp|jfif|heic|heif)$/i.test(
+        extensionMatch[1] ?? "",
+      );
+    }
+
+    const formatHint =
+      url.searchParams.get("format") ??
+      url.searchParams.get("fm") ??
+      url.searchParams.get("ext") ??
+      "";
+
+    if (formatHint) {
+      return /^(png|jpe?g|webp|avif|gif|svg|bmp|jfif|heic|heif)$/i.test(
+        formatHint,
+      );
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(req: Request) {
   const gate = await requireAdmin(req);
   if (!gate.ok) return gate.response;
@@ -266,6 +299,14 @@ export async function POST(req: NextRequest) {
       .map((url) => String(url ?? "").trim())
       .filter(Boolean)
       .slice(0, 5);
+    const invalidImageUrl = cleanedImageUrls.find((url) => !isLikelyDirectImageUrl(url));
+
+    if (invalidImageUrl) {
+      return NextResponse.json(
+        { error: `URL ảnh không hợp lệ hoặc không phải ảnh trực tiếp: ${invalidImageUrl}` },
+        { status: 400 },
+      );
+    }
 
     if (cleanedImageUrls.length > 0) {
       const imageRows = cleanedImageUrls.map((url, index) => ({
@@ -450,6 +491,16 @@ export async function PATCH(req: NextRequest) {
             .map((url) => String(url ?? "").trim())
             .filter(Boolean)
             .slice(0, 5);
+
+          const invalidImageUrl = cleanedImageUrls.find(
+            (url) => !isLikelyDirectImageUrl(url),
+          );
+
+          if (invalidImageUrl) {
+            return {
+              error: `URL ảnh không hợp lệ hoặc không phải ảnh trực tiếp: ${invalidImageUrl}`,
+            };
+          }
 
           const { error: deleteImageErr } = await supabase
             .from("product_images")
