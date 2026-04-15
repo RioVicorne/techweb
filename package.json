@@ -9,7 +9,18 @@
     "dev": "node ./node_modules/next/dist/bin/next dev --turbopack",
     "build": "rm -rf .next && node ./node_modules/next/dist/bin/next build",
     "start": "node ./node_modules/next/dist/bin/next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:start": "npx supabase start",
+    "db:stop": "npx supabase stop",
+    "db:reset": "npx supabase db reset",
+    "db:link": "npx supabase link --project-ref gekzzymflsatrofgockg",
+    "db:status": "npx supabase link status --project-ref gekzzymflsatrofgockg",
+    "db:push": "npx supabase db push",
+    "db:push:prod": "sh -c 'if [ -z \"$SUPABASE_DB_PASSWORD\" ]; then echo \"Missing SUPABASE_DB_PASSWORD\"; exit 1; fi; npx supabase db push'",
+    "db:push:prod:dry": "sh -c 'if [ -z \"$SUPABASE_DB_PASSWORD\" ]; then echo \"Missing SUPABASE_DB_PASSWORD\"; exit 1; fi; npx supabase db push --dry-run'",
+    "db:pull": "npx supabase db pull",
+    "db:migration:list": "npx supabase migration list",
+    "db:migration:new": "npx supabase migration new"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",

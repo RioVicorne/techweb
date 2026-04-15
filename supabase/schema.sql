@@ -5,20 +5,109 @@ create extension if not exists pgcrypto;
 
 -- ============================================================
 -- BẢNG: profiles
--- Mở rộng thông tin Supabase Auth user
+-- Hồ sơ người dùng + thông tin giao hàng mặc định
 -- ============================================================
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   full_name text null,
   phone text null,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  email text null,
+  avatar_url text null,
+  birthday date null,
+  shipping_address jsonb not null default '{}'::jsonb,
+  address_line text null,
+  ward text null,
+  district text null,
+  city text null,
+  province text null,
+  postal_code text null,
+  country_code text not null default 'VN',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  last_seen_at timestamptz null,
+  constraint profiles_shipping_address_object_chk
+    check (jsonb_typeof(shipping_address) = 'object')
 );
+
+create index if not exists profiles_email_idx on public.profiles (lower(email)) where email is not null;
+create index if not exists profiles_phone_idx on public.profiles (phone) where phone is not null;
 
 alter table public.profiles enable row level security;
 create policy "Users can view own profile"   on public.profiles for select using (auth.uid() = id);
 create policy "Users can update own profile" on public.profiles for update using (auth.uid() = id) with check (auth.uid() = id);
 create policy "Users can insert own profile" on public.profiles for insert with check (auth.uid() = id);
+
+create or replace function public.handle_profiles_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists set_profiles_updated_at on public.profiles;
+create trigger set_profiles_updated_at
+before update on public.profiles
+for each row
+execute function public.handle_profiles_updated_at();
+
+create or replace function public.handle_new_user_profile()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+declare
+  raw_meta jsonb;
+  raw_shipping jsonb;
+begin
+  raw_meta := coalesce(new.raw_user_meta_data, '{}'::jsonb);
+  raw_shipping := coalesce(raw_meta -> 'shipping_address', '{}'::jsonb);
+
+  insert into public.profiles (
+    id,
+    full_name,
+    phone,
+    email,
+    shipping_address,
+    created_at,
+    updated_at
+  )
+  values (
+    new.id,
+    nullif(coalesce(raw_meta ->> 'full_name', raw_meta ->> 'name', ''), ''),
+    nullif(coalesce(raw_meta ->> 'phone', ''), ''),
+    new.email,
+    case
+      when jsonb_typeof(raw_shipping) = 'object' then raw_shipping
+      else '{}'::jsonb
+    end,
+    now(),
+    now()
+  )
+  on conflict (id) do update
+  set
+    full_name = coalesce(excluded.full_name, public.profiles.full_name),
+    phone = coalesce(excluded.phone, public.profiles.phone),
+    email = coalesce(excluded.email, public.profiles.email),
+    shipping_address = case
+      when public.profiles.shipping_address is null or public.profiles.shipping_address = '{}'::jsonb
+        then excluded.shipping_address
+      else public.profiles.shipping_address
+    end,
+    updated_at = now();
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created_profile on auth.users;
+create trigger on_auth_user_created_profile
+after insert on auth.users
+for each row
+execute function public.handle_new_user_profile();
 
 -- ============================================================
 -- BẢNG: categories

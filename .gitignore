@@ -33,3 +33,13 @@ yarn-error.log*
 
 # supabase cli
 supabase/.temp/
+
+# ai/coding assistant local artifacts
+.agents/
+.claude/
+.continue/
+.cursor/
+skills-lock.json
+
+# typescript incremental build cache
+*.tsbuildinfo
