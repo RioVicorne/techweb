@@ -164,6 +164,7 @@ export function LoginClient() {
       : "";
   const typedAfterAccent =
     typedHeroText.length > accentEnd ? typedHeroText.slice(accentEnd) : "";
+  const isSignup = mode === "signup";
 
   const switchMode = useCallback(
     (
@@ -249,10 +250,12 @@ export function LoginClient() {
           "radial-gradient(circle at 20% 30%, rgba(133, 173, 255, 0.05) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(255, 108, 144, 0.05) 0%, transparent 40%)",
       }}
     >
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 overflow-hidden rounded-[2rem] border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)] md:grid-cols-2">
+      <div className="relative mx-auto grid w-full max-w-6xl grid-cols-1 overflow-hidden rounded-[2rem] border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)] md:grid-cols-2">
         {/* Left (Desktop only) */}
         <div
-          className="relative hidden flex-col justify-between overflow-hidden p-12 md:flex"
+          className={`relative hidden flex-col justify-between overflow-hidden p-12 md:flex md:transform-gpu md:transition-transform md:duration-700 md:ease-[cubic-bezier(0.22,1,0.36,1)] ${
+            isSignup ? "md:translate-x-full" : "md:translate-x-0"
+          }`}
           style={{
             background: "var(--stitch-color-surface-container-low)",
           }}
@@ -365,7 +368,9 @@ export function LoginClient() {
 
         {/* Right */}
         <div
-          className="relative flex flex-col justify-center overflow-hidden p-8 md:p-16"
+          className={`relative flex flex-col justify-center overflow-hidden p-8 md:p-16 md:transform-gpu md:transition-transform md:duration-700 md:ease-[cubic-bezier(0.22,1,0.36,1)] ${
+            isSignup ? "md:-translate-x-full" : "md:translate-x-0"
+          }`}
           style={{
             background: "rgba(24, 24, 43, 0.7)",
             backdropFilter: "blur(20px)",
