@@ -124,108 +124,130 @@ export function AccountClient() {
       if (!cancelled) {
         setFullName(String(meta.full_name ?? meta.name ?? ""));
         setPhone(String(meta.phone ?? ""));
-
-        const normalize = (s: string) =>
-          s
-            .trim()
-            .toLowerCase()
-            .replaceAll("thành phố", "")
-            .replaceAll("tỉnh", "")
-            .replaceAll("quận", "")
-            .replaceAll("huyện", "")
-            .replaceAll("thị xã", "")
-            .replaceAll("phường", "")
-            .replaceAll("xã", "")
-            .replaceAll("thị trấn", "")
-            .replaceAll(/\s+/g, " ")
-            .trim();
-
-        const provinces = pcVN.getProvinces() as Array<{ code: string; name: string }>;
-        const addr = meta.shipping_address as
-          | Partial<{
-              province_code: string;
-              district_code: string;
-              ward_code: string;
-              province: string;
-              district: string;
-              ward: string;
-              street: string;
-            }>
-          | undefined;
-
-        const provinceCode =
-          String(addr?.province_code ?? "") ||
-          (() => {
-            const byName = String(addr?.province ?? "");
-            if (!byName) return "";
-            const n = normalize(byName);
-            const hit =
-              provinces.find((p) => normalize(p.name) === n) ??
-              provinces.find((p) => normalize(p.name).includes(n) || n.includes(normalize(p.name)));
-            return hit?.code ?? "";
-          })();
-
-        const districts = provinceCode
-          ? ((pcVN.getDistrictsByProvinceCode(provinceCode) as Array<{ code: string; name: string }>) ?? [])
-          : [];
-
-        const districtCode =
-          String(addr?.district_code ?? "") ||
-          (() => {
-            const byName = String(addr?.district ?? "");
-            if (!byName || !districts.length) return "";
-            const n = normalize(byName);
-            const hit =
-              districts.find((d) => normalize(d.name) === n) ??
-              districts.find((d) => normalize(d.name).includes(n) || n.includes(normalize(d.name)));
-            return hit?.code ?? "";
-          })();
-
-        const wards = districtCode
-          ? ((pcVN.getWardsByDistrictCode(districtCode) as Array<{ code: string; name: string }>) ?? [])
-          : [];
-
-        const wardCode =
-          String(addr?.ward_code ?? "") ||
-          (() => {
-            const byName = String(addr?.ward ?? "");
-            if (!byName || !wards.length) return "";
-            const n = normalize(byName);
-            const hit =
-              wards.find((w) => normalize(w.name) === n) ??
-              wards.find((w) => normalize(w.name).includes(n) || n.includes(normalize(w.name)));
-            return hit?.code ?? "";
-          })();
-
-        setShippingAddress({
-          provinceCode,
-          districtCode,
-          wardCode,
-          street: String(addr?.street ?? ""),
-        });
       }
       try {
-        const [ordersRes, purchasesRes, suggestedRes, countsRes] = await Promise.all([
-          fetch("/api/account/orders", { method: "GET", headers: { authorization: `Bearer ${token}` } }),
-          fetch("/api/account/purchases", { method: "GET", headers: { authorization: `Bearer ${token}` } }),
-          fetch("/api/catalog/products", { method: "GET" }),
-          fetch("/api/account/order-status-counts", { method: "GET", headers: { authorization: `Bearer ${token}` } }),
-        ]);
+        const overviewRes = await fetch("/api/account/overview", {
+          method: "GET",
+          headers: { authorization: `Bearer ${token}` },
+        });
 
-        const ordersJson = (await ordersRes.json()) as { orders?: OrderRow[] };
-        const purchasesJson = (await purchasesRes.json()) as { purchases?: PurchaseRow[] };
-        const suggestedJson = (await suggestedRes.json()) as { products?: SuggestedProduct[] };
-        const countsJson = (await countsRes.json()) as { counts?: Record<string, number> };
+        const overviewJson = (await overviewRes.json()) as {
+          orders?: OrderRow[];
+          counts?: Record<string, number>;
+          purchases?: PurchaseRow[];
+        };
+
+        const purchasesArr = Array.isArray(overviewJson.purchases) ? overviewJson.purchases : [];
+
+        let suggestedArr: SuggestedProduct[] = [];
+        if (purchasesArr.length === 0) {
+          const suggestedRes = await fetch("/api/catalog/products", { method: "GET" });
+          const suggestedJson = (await suggestedRes.json()) as { products?: SuggestedProduct[] };
+          suggestedArr = Array.isArray(suggestedJson.products) ? suggestedJson.products.slice(0, 6) : [];
+        }
 
         if (!cancelled) {
-          setOrders(Array.isArray(ordersJson.orders) ? ordersJson.orders : []);
-          setPurchases(Array.isArray(purchasesJson.purchases) ? purchasesJson.purchases : []);
-          setSuggested(Array.isArray(suggestedJson.products) ? suggestedJson.products.slice(0, 6) : []);
-          setStatusCounts(countsJson.counts && typeof countsJson.counts === "object" ? countsJson.counts : {});
+          setOrders(Array.isArray(overviewJson.orders) ? overviewJson.orders : []);
+          setPurchases(purchasesArr);
+          setSuggested(suggestedArr);
+          setStatusCounts(
+            overviewJson.counts && typeof overviewJson.counts === "object" ? overviewJson.counts : {},
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
       }
+
+      // Defer the (potentially heavy) address normalization/mapping work off the route transition path.
+      setTimeout(() => {
+        if (cancelled) return;
+        try {
+          const normalize = (s: string) =>
+            s
+              .trim()
+              .toLowerCase()
+              .replaceAll("thành phố", "")
+              .replaceAll("tỉnh", "")
+              .replaceAll("quận", "")
+              .replaceAll("huyện", "")
+              .replaceAll("thị xã", "")
+              .replaceAll("phường", "")
+              .replaceAll("xã", "")
+              .replaceAll("thị trấn", "")
+              .replaceAll(/\s+/g, " ")
+              .trim();
+
+          const provinces = pcVN.getProvinces() as Array<{ code: string; name: string }>;
+          const addr = meta.shipping_address as
+            | Partial<{
+                province_code: string;
+                district_code: string;
+                ward_code: string;
+                province: string;
+                district: string;
+                ward: string;
+                street: string;
+              }>
+            | undefined;
+
+          const provinceCode =
+            String(addr?.province_code ?? "") ||
+            (() => {
+              const byName = String(addr?.province ?? "");
+              if (!byName) return "";
+              const n = normalize(byName);
+              const hit =
+                provinces.find((p) => normalize(p.name) === n) ??
+                provinces.find(
+                  (p) => normalize(p.name).includes(n) || n.includes(normalize(p.name)),
+                );
+              return hit?.code ?? "";
+            })();
+
+          const districts = provinceCode
+            ? ((pcVN.getDistrictsByProvinceCode(provinceCode) as Array<{ code: string; name: string }>) ?? [])
+            : [];
+
+          const districtCode =
+            String(addr?.district_code ?? "") ||
+            (() => {
+              const byName = String(addr?.district ?? "");
+              if (!byName || !districts.length) return "";
+              const n = normalize(byName);
+              const hit =
+                districts.find((d) => normalize(d.name) === n) ??
+                districts.find(
+                  (d) => normalize(d.name).includes(n) || n.includes(normalize(d.name)),
+                );
+              return hit?.code ?? "";
+            })();
+
+          const wards = districtCode
+            ? ((pcVN.getWardsByDistrictCode(districtCode) as Array<{ code: string; name: string }>) ?? [])
+            : [];
+
+          const wardCode =
+            String(addr?.ward_code ?? "") ||
+            (() => {
+              const byName = String(addr?.ward ?? "");
+              if (!byName || !wards.length) return "";
+              const n = normalize(byName);
+              const hit =
+                wards.find((w) => normalize(w.name) === n) ??
+                wards.find((w) => normalize(w.name).includes(n) || n.includes(normalize(w.name)));
+              return hit?.code ?? "";
+            })();
+
+          setShippingAddress({
+            provinceCode,
+            districtCode,
+            wardCode,
+            street: String(addr?.street ?? ""),
+          });
+        } catch {
+          // best-effort; ignore mapping errors
+        }
+      }, 0);
     }
     run();
     return () => {

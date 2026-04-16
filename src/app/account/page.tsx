@@ -1,11 +1,9 @@
-import { ShopHeader } from "@/components/features/shop/shared/ShopHeader";
 import { AccountClient } from "@/app/account/AccountClient";
 import { Suspense } from "react";
 
 export default function AccountPage() {
   return (
     <div className="min-h-screen">
-      <ShopHeader />
       <Suspense
         fallback={
           <main className="mx-auto max-w-screen-2xl px-6 pb-20 pt-28 md:px-12">

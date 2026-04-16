@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { ShopHeader } from "@/components/features/shop/shared/ShopHeader";
 import { ProductDetailClient } from "@/components/features/product/ProductDetailClient";
 import { getCatalogProductBySlug, getProductDetailBySlug } from "@/lib/catalog";
 
@@ -16,7 +15,6 @@ export default async function ProductPage({
 
   return (
     <div className="min-h-screen">
-      <ShopHeader />
       <ProductDetailClient
         product={product}
         productId={productDetail.id}

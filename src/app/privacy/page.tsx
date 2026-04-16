@@ -1,10 +1,8 @@
 import Link from "next/link";
-import { ShopHeader } from "@/components/features/shop/shared/ShopHeader";
 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen">
-      <ShopHeader />
       <main className="mx-auto max-w-2xl px-6 pb-16 pt-24">
       <Link href="/" className="mb-8 inline-flex text-sm font-bold text-[var(--stitch-color-primary)]">
         ← Về trang chủ

@@ -199,6 +199,9 @@ export function ShopHeader() {
     };
   }, []);
 
+  const hidden = pathname.startsWith("/admin");
+  if (hidden) return null;
+
   return (
     <header
       className="fixed top-0 z-50 w-full shadow-[0_0_20px_rgba(133,173,255,0.1)] backdrop-blur-xl"
@@ -211,6 +214,7 @@ export function ShopHeader() {
         <div className="flex items-center gap-8 lg:gap-12">
           <Link
             href="/"
+            prefetch
             className="font-black italic tracking-tighter transition-all duration-300 hover:scale-105 active:scale-95"
             style={{
               fontFamily: "var(--stitch-font-headline)",
@@ -230,6 +234,7 @@ export function ShopHeader() {
           >
             <Link
               href="/"
+              prefetch
               className={`rounded-md pb-1 font-medium transition-colors duration-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)] ${
                 pathname === "/" ? "border-b-2 font-bold text-white" : "text-slate-400"
               }`}
@@ -261,6 +266,7 @@ export function ShopHeader() {
                 <Link
                   key={tab.label}
                   href={tab.href}
+                  prefetch
                   className={`rounded-md pb-1 font-medium transition-colors duration-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)] ${
                     active ? "border-b-2 font-bold text-white" : "text-slate-400"
                   }`}
@@ -305,6 +311,7 @@ export function ShopHeader() {
           <div className="flex items-center gap-3">
             <Link
               href="/checkout"
+              prefetch
               className="relative flex h-10 w-10 min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
               style={{
                 background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
