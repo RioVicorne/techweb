@@ -640,7 +640,7 @@ export function AccountClient() {
                     <button
                       key={t.key}
                       type="button"
-                      className="relative min-w-0 rounded-2xl p-0 text-center transition active:scale-[0.99] sm:rounded-2xl sm:border sm:p-3"
+                      className="relative min-w-0 rounded-2xl p-0 text-center transition active:scale-[0.99] sm:flex sm:h-full sm:flex-col sm:items-center sm:rounded-2xl sm:border sm:p-3"
                       style={{
                         background: "transparent",
                         borderColor:
@@ -666,7 +666,7 @@ export function AccountClient() {
                         </div>
                       </div>
 
-                      <div className="hidden sm:block">
+                      <div className="hidden sm:flex sm:h-full sm:flex-col">
                         <div
                           className="relative mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl"
                           style={{
@@ -689,7 +689,7 @@ export function AccountClient() {
                           ) : null}
                         </div>
                         <div
-                          className="text-[11px] font-black leading-tight"
+                          className="mt-auto text-[11px] font-black leading-tight"
                           style={{ color: "var(--stitch-color-on-surface)" }}
                         >
                           {t.label}

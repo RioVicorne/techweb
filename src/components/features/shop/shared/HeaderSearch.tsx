@@ -92,7 +92,7 @@ export function HeaderSearch({
         <input
           type="search"
           placeholder="Tìm sản phẩm..."
-          className="w-44 rounded-full border-none py-2 pl-9 pr-3 text-sm outline-none transition-all focus:ring-2 focus:ring-[var(--stitch-color-secondary)]"
+          className="w-44 rounded-full border border-transparent py-2 pl-9 pr-3 text-sm outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-[var(--stitch-color-primary)]"
           style={{
             background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
             color: "var(--stitch-color-on-surface)",
@@ -128,7 +128,7 @@ export function HeaderSearch({
         <input
           type="search"
           placeholder="Tìm sản phẩm..."
-          className="w-52 rounded-full border-none py-2 pl-4 pr-12 text-sm outline-none transition-all focus:ring-2 focus:ring-[var(--stitch-color-secondary)]"
+          className="w-52 rounded-full border border-transparent py-2 pl-4 pr-12 text-sm outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-[var(--stitch-color-primary)]"
           style={{
             background: "var(--stitch-color-surface-container)",
             color: "var(--stitch-color-on-surface)",
