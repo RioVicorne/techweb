@@ -64,7 +64,7 @@ export function HomeFooter() {
           <ul className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
             <li>
               <Link
-                href="/#contact"
+                href="/contact"
                 className="inline-block rounded transition hover:translate-x-1 hover:text-pink-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
               >
                 Hỗ trợ

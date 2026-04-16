@@ -33,3 +33,71 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari and Opera */
 }
+
+.led-rgb-border {
+  position: relative;
+  border: 2px solid transparent;
+  isolation: isolate;
+  background: var(--stitch-color-surface-container);
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+  box-shadow:
+    0 0 10px color-mix(in srgb, #ff2d95 45%, transparent),
+    0 0 18px color-mix(in srgb, #2dd4ff 35%, transparent),
+    0 0 28px color-mix(in srgb, #7c5cff 22%, transparent);
+}
+
+@media (hover: hover) {
+  .led-rgb-border:hover {
+    transform: translateY(-4px) scale(1.005);
+    box-shadow:
+      0 0 14px color-mix(in srgb, #ff2d95 60%, transparent),
+      0 0 24px color-mix(in srgb, #2dd4ff 50%, transparent),
+      0 0 36px color-mix(in srgb, #7c5cff 36%, transparent);
+  }
+}
+
+.led-rgb-border:active {
+  transform: translateY(-1px) scale(1.002);
+}
+
+.led-rgb-border::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--led-angle),
+    #ff2d55,
+    #ff7a00,
+    #ffe600,
+    #2bff88,
+    #00e5ff,
+    #466bff,
+    #a24dff,
+    #ff2da6,
+    #ff2d55
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: led-rgb-rotate 2.2s linear infinite;
+  z-index: -1;
+}
+
+@property --led-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes led-rgb-rotate {
+  to {
+    --led-angle: 360deg;
+  }
+}

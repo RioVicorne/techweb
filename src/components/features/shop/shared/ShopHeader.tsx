@@ -259,7 +259,7 @@ export function ShopHeader() {
                 match: (p: string) => p.startsWith("/category") || p.startsWith("/product"),
               },
               { href: "/orders", label: "Đơn hàng", match: (p: string) => p.startsWith("/orders") },
-              { href: "/#contact", label: "Liên hệ", match: () => false },
+              { href: "/contact", label: "Liên hệ", match: (p: string) => p.startsWith("/contact") },
             ].map((tab) => {
               const active = tab.match(pathname);
               return (

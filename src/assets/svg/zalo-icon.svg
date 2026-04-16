@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <circle cx="64" cy="64" r="64" fill="#101A49" />
+  <rect x="26" y="26" width="76" height="76" rx="18" fill="#14A8FF" />
+  <path d="M38 45c0-5.523 4.477-10 10-10h42c5.523 0 10 4.477 10 10v38c0 5.523-4.477 10-10 10H48c-5.523 0-10-4.477-10-10V45Z" fill="#109BEA" />
+  <path d="M48 92.5h22.5L58 81.5H48v11Z" fill="#0C8AD3" />
+  <text x="64" y="71" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="700" fill="#0A63AF">
+    Zalo
+  </text>
+  <circle cx="71.5" cy="62" r="3.2" fill="#16B8FF" />
+  <circle cx="90" cy="62" r="3.2" fill="#16B8FF" />
+</svg>

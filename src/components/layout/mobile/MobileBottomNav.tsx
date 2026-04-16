@@ -26,7 +26,12 @@ const ITEMS: NavItem[] = [
     icon: "grid_view",
     match: (p) => p.startsWith("/category"),
   },
-  { href: "/#contact", label: "Liên hệ", icon: "call" },
+  {
+    href: "/contact",
+    label: "Liên hệ",
+    icon: "call",
+    match: (p) => p.startsWith("/contact"),
+  },
   {
     href: "/account",
     label: "Tài khoản",
@@ -54,6 +59,7 @@ export function MobileBottomNav() {
   const activeTabIndex = useMemo(() => {
     if (pathname === "/") return 0;
     if (pathname.startsWith("/category")) return 1;
+    if (pathname.startsWith("/contact")) return 2;
     if (pathname.startsWith("/account")) return 3;
     return -1;
   }, [pathname]);
