@@ -101,3 +101,87 @@ body {
     --led-angle: 360deg;
   }
 }
+
+.login-shape {
+  will-change: transform, opacity;
+}
+
+.login-shape-a {
+  animation: login-shape-a-float 9s ease-in-out infinite;
+}
+
+.login-shape-b {
+  animation: login-shape-b-float 7s ease-in-out infinite;
+}
+
+.login-shape-c {
+  animation: login-shape-c-float 10s ease-in-out infinite;
+}
+
+.login-shape-d {
+  animation: login-shape-d-float 11s ease-in-out infinite;
+}
+
+.login-shape-e {
+  animation: login-shape-e-float 8s ease-in-out infinite;
+}
+
+@keyframes login-shape-a-float {
+  0%,
+  100% {
+    transform: rotate(12deg) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: rotate(16deg) translate3d(10px, -10px, 0);
+  }
+}
+
+@keyframes login-shape-b-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate3d(-8px, 10px, 0) scale(1.04);
+    opacity: 0.75;
+  }
+}
+
+@keyframes login-shape-c-float {
+  0%,
+  100% {
+    transform: rotate(45deg) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: rotate(35deg) translate3d(6px, -12px, 0);
+  }
+}
+
+@keyframes login-shape-d-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(12px, -6px, 0) scale(1.02);
+  }
+}
+
+@keyframes login-shape-e-float {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(calc(-50% + 6px), calc(-50% - 6px)) rotate(12deg);
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-shape {
+    animation: none !important;
+  }
+}

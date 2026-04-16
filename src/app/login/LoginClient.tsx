@@ -7,6 +7,25 @@ import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
 type Mode = "login" | "signup";
 
+function toVietnameseAuthError(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("invalid login credentials")) {
+    return "Email hoặc mật khẩu không đúng.";
+  }
+  if (normalized.includes("email not confirmed")) {
+    return "Email chưa được xác nhận. Vui lòng kiểm tra hộp thư để xác thực tài khoản.";
+  }
+  if (normalized.includes("user already registered")) {
+    return "Email này đã được đăng ký.";
+  }
+  if (normalized.includes("password should be at least")) {
+    return "Mật khẩu chưa đủ độ dài tối thiểu.";
+  }
+
+  return message;
+}
+
 export function LoginClient() {
   const router = useRouter();
   const sp = useSearchParams();
@@ -60,7 +79,11 @@ export function LoginClient() {
       );
       setMode("login");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Đăng nhập thất bại");
+      setError(
+        err instanceof Error
+          ? toVietnameseAuthError(err.message)
+          : "Đăng nhập thất bại",
+      );
     } finally {
       setBusy(false);
     }
@@ -80,16 +103,13 @@ export function LoginClient() {
           className="relative hidden flex-col justify-between overflow-hidden p-12 md:flex"
           style={{ background: "var(--stitch-color-surface-container-low)" }}
         >
-          <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0 opacity-30">
             <div className="absolute inset-0 bg-gradient-to-br from-[color:var(--stitch-color-primary)]/20 via-transparent to-[color:var(--stitch-color-secondary)]/10" />
-            <div
-              className="h-full w-full opacity-10"
-              style={{
-                backgroundImage:
-                  "radial-gradient(circle, #85adff 1px, transparent 1px)",
-                backgroundSize: "30px 30px",
-              }}
-            />
+            <div className="login-shape login-shape-a absolute -left-10 top-12 h-44 w-44 rotate-12 rounded-[2.5rem] border border-[color:var(--stitch-color-primary)]/35 bg-[color:var(--stitch-color-primary)]/10" />
+            <div className="login-shape login-shape-b absolute right-8 top-20 h-32 w-32 rounded-full border-2 border-[color:var(--stitch-color-secondary)]/45" />
+            <div className="login-shape login-shape-c absolute bottom-24 left-20 h-24 w-24 rotate-45 rounded-2xl border border-[color:var(--stitch-color-tertiary)]/50 bg-[color:var(--stitch-color-tertiary)]/10" />
+            <div className="login-shape login-shape-d absolute bottom-14 right-16 h-48 w-48 rounded-[3rem] border border-[color:var(--stitch-color-primary)]/20" />
+            <div className="login-shape login-shape-e absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-white/30" />
           </div>
 
           <div className="relative z-10">
@@ -139,35 +159,49 @@ export function LoginClient() {
             </p>
           </div>
 
-          <div className="relative z-10 flex gap-4">
-            <div className="flex -space-x-3">
-              {[
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuD2MSvS0jcZxl3TwbrDOPnomEEG-abvtWjBgiyvNkwdSNuHny2x_yUoteUvjZR_Qo3dqLKIHwN2i1lLlOxzKsv7RfLWKeCwmuhVc4l3XyMtQXCunN7EWNTWI5VnAPds2uHDVpiRDv-8DFjNUz4dFApTH2xIJhstRRT-RjkO6rJXbg_nr4Wu7tcexONw5iwDxNrDrqmXAHhy_S5b3-1iKF6OKug_LpBrzTGgzdnFe2Nh0RTO78Im8x-a9L2OufHYs7hSUSV7MlQ8WYGA",
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuDdjs8Ak4NEXbTgvqCSFEI_TR2CNvbkpHsXlUOFU21AErloZT4BePBulr8rL47CjPwb1vO2gRHCOBnycY87CgyyavPBX_xUn6P09jZzYVx02gZlUqCYcPF84GMpfNgTBAVUaKrJqHUKT3zXaJBzyaMsPe3RCQ-0OsERCc5g79CJEV4h7oWOnRZozA_kpNPOKtsN1cascODfP6MzfJHmRBH32SQ4C2yO6y6uAJlayrprKeriWHhf22usNpE2i11LBuAiEADU_JfL5AtW",
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuCaEVqJLrtcX1gjw2n7kQb0DVnaXcwBlpakLLJi4y8QoGZkpyC-LZZmLwNTN4N993FAZT4FCN8xXbd7N8ne7Eb_OTxmO8g4aBrEC3ZvMXtTniuffSBqTXvVjkXrdL9yjYu-L57H4S57L7PzBqukcWLwnWxaJXnRHZnmqh_z05JZWqhe_GI9a1523fC02tWyia2W1LCmb4JRr-15nIgFKZcSUUwJllheTy4inmmb1VAFN7hayETCbujfvqe-2WhcmV5iTNEX9x9aBPaJ",
-              ].map((src, i) => (
-                <div
-                  key={src}
-                  className="h-10 w-10 overflow-hidden rounded-full border-2"
-                  style={{
-                    borderColor: "var(--stitch-color-surface-container-low)",
-                  }}
-                  aria-label={`Member ${i + 1}`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    alt=""
-                    src={src}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-            <div className="text-sm font-medium">
-              <p className="text-white">50k+ Thành viên</p>
-              <p style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                Luôn kết nối cùng cộng đồng
-              </p>
+          <div
+            className="relative z-10 rounded-2xl border p-4"
+            style={{
+              borderColor:
+                "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 24%, transparent)",
+              background:
+                "color-mix(in srgb, var(--stitch-color-surface-container-high) 70%, transparent)",
+            }}
+          >
+            <p
+              className="text-xs font-bold uppercase tracking-[0.2em]"
+              style={{ color: "var(--stitch-color-on-surface-variant)" }}
+            >
+              Trạng thái nền tảng
+            </p>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-xl border px-2 py-3" style={{ borderColor: "var(--stitch-color-outline-variant)" }}>
+                <span className="material-symbols-outlined text-xl" style={{ color: "var(--stitch-color-primary)" }}>
+                  shield_lock
+                </span>
+                <p className="mt-1 text-[11px] font-semibold text-white">Bảo mật</p>
+                <p className="text-[10px]" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                  SSL 256-bit
+                </p>
+              </div>
+              <div className="rounded-xl border px-2 py-3" style={{ borderColor: "var(--stitch-color-outline-variant)" }}>
+                <span className="material-symbols-outlined text-xl" style={{ color: "var(--stitch-color-primary)" }}>
+                  speed
+                </span>
+                <p className="mt-1 text-[11px] font-semibold text-white">Hiệu năng</p>
+                <p className="text-[10px]" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                  Tối ưu realtime
+                </p>
+              </div>
+              <div className="rounded-xl border px-2 py-3" style={{ borderColor: "var(--stitch-color-outline-variant)" }}>
+                <span className="material-symbols-outlined text-xl" style={{ color: "var(--stitch-color-primary)" }}>
+                  support_agent
+                </span>
+                <p className="mt-1 text-[11px] font-semibold text-white">Hỗ trợ</p>
+                <p className="text-[10px]" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
+                  24/7 liên tục
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -198,6 +232,12 @@ export function LoginClient() {
           </div>
 
           <form className="space-y-6" onSubmit={onSubmit}>
+            {error ? (
+              <p className="px-1 text-sm font-medium text-red-400">
+                {error}
+              </p>
+            ) : null}
+
             <div>
               <label
                 className="mb-2 ml-1 block text-xs font-bold uppercase tracking-widest"
@@ -215,9 +255,10 @@ export function LoginClient() {
                   </span>
                 </div>
                 <input
-                  className="w-full rounded-xl border-none py-4 pl-12 pr-4 text-white placeholder:text-[color:var(--stitch-color-outline-variant)] outline-none transition-all focus:ring-2 focus:ring-[color:var(--stitch-color-primary)]/50"
+                  className="w-full rounded-xl border py-4 pl-12 pr-4 text-white placeholder:text-[color:var(--stitch-color-outline-variant)] outline-none transition-all focus:ring-2 focus:ring-[color:var(--stitch-color-primary)]/50"
                   style={{
                     background: "var(--stitch-color-surface-container-high)",
+                    borderColor: error ? "#ef4444" : "transparent",
                   }}
                   placeholder="Email"
                   type="email"
@@ -251,9 +292,10 @@ export function LoginClient() {
                   <span className="material-symbols-outlined">lock_open</span>
                 </div>
                 <input
-                  className="w-full rounded-xl border-none py-4 pl-12 pr-12 text-white placeholder:text-[color:var(--stitch-color-outline-variant)] outline-none transition-all focus:ring-2 focus:ring-[color:var(--stitch-color-primary)]/50"
+                  className="w-full rounded-xl border py-4 pl-12 pr-12 text-white placeholder:text-[color:var(--stitch-color-outline-variant)] outline-none transition-all focus:ring-2 focus:ring-[color:var(--stitch-color-primary)]/50"
                   style={{
                     background: "var(--stitch-color-surface-container-high)",
+                    borderColor: error ? "#ef4444" : "transparent",
                   }}
                   placeholder="••••••••"
                   type={showPw ? "text" : "password"}
@@ -294,18 +336,6 @@ export function LoginClient() {
               </label>
             </div>
 
-            {error ? (
-              <div
-                className="rounded-xl border px-4 py-3 text-sm"
-                style={{
-                  borderColor:
-                    "color-mix(in srgb, var(--stitch-color-error) 35%, transparent)",
-                  color: "var(--stitch-color-on-surface)",
-                }}
-              >
-                {error}
-              </div>
-            ) : null}
             {notice ? (
               <div
                 className="rounded-xl border px-4 py-3 text-sm"

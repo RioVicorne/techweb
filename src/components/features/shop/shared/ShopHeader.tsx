@@ -199,7 +199,7 @@ export function ShopHeader() {
     };
   }, []);
 
-  const hidden = pathname.startsWith("/admin");
+  const hidden = pathname.startsWith("/admin") || pathname.startsWith("/login");
   if (hidden) return null;
 
   return (
