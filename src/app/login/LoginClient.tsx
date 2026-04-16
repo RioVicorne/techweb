@@ -164,9 +164,9 @@ export function LoginClient() {
               ))}
             </div>
             <div className="text-sm font-medium">
-              <p className="text-white">50k+ Members</p>
+              <p className="text-white">50k+ Thành viên</p>
               <p style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                Live in the pulse
+                Luôn kết nối cùng cộng đồng
               </p>
             </div>
           </div>
@@ -185,15 +185,15 @@ export function LoginClient() {
               className="mb-2 text-3xl font-bold text-white"
               style={{ fontFamily: "var(--stitch-font-headline)" }}
             >
-              {mode === "login" ? "Welcome Back" : "Create Account"}
+              {mode === "login" ? "Chào mừng quay lại" : "Tạo tài khoản"}
             </h2>
             <p
               className="font-medium"
               style={{ color: "var(--stitch-color-on-surface-variant)" }}
             >
               {mode === "login"
-                ? "Enter your credentials to synchronize."
-                : "Create an account to continue checkout."}
+                ? "Nhập thông tin để đăng nhập và đồng bộ tài khoản"
+                : "Tạo tài khoản để tiếp tục thanh toán."}
             </p>
           </div>
 
@@ -203,7 +203,7 @@ export function LoginClient() {
                 className="mb-2 ml-1 block text-xs font-bold uppercase tracking-widest"
                 style={{ color: "var(--stitch-color-on-surface-variant)" }}
               >
-                Identity
+                Tài khoản
               </label>
               <div className="group relative">
                 <div
@@ -234,7 +234,7 @@ export function LoginClient() {
                   className="block text-xs font-bold uppercase tracking-widest"
                   style={{ color: "var(--stitch-color-on-surface-variant)" }}
                 >
-                  Access Key
+                  Mật khẩu
                 </label>
                 <span
                   className="text-xs font-bold uppercase tracking-widest"
@@ -290,7 +290,7 @@ export function LoginClient() {
                 className="cursor-pointer select-none text-sm font-medium"
                 style={{ color: "var(--stitch-color-on-surface-variant)" }}
               >
-                Maintain Active Session
+                Duy trì đăng nhập
               </label>
             </div>
 
@@ -331,7 +331,7 @@ export function LoginClient() {
               disabled={busy}
             >
               <span>
-                {mode === "login" ? "INITIALIZE LOGIN" : "CREATE ACCOUNT"}
+                {mode === "login" ? "ĐĂNG NHẬP" : "TẠO TÀI KHOẢN"}
               </span>
               <span className="material-symbols-outlined">
                 {mode === "login" ? "login" : "person_add"}
@@ -345,14 +345,14 @@ export function LoginClient() {
                 className="font-medium"
                 style={{ color: "var(--stitch-color-on-surface-variant)" }}
               >
-                New to the network?{" "}
+                Chưa có tài khoản?{" "}
                 <button
                   type="button"
                   className="ml-1 font-bold underline underline-offset-4"
                   style={{ color: "var(--stitch-color-primary)" }}
                   onClick={() => setMode("signup")}
                 >
-                  Request Uplink (Sign Up)
+                  Đăng ký ngay
                 </button>
               </p>
             ) : (
@@ -360,14 +360,14 @@ export function LoginClient() {
                 className="font-medium"
                 style={{ color: "var(--stitch-color-on-surface-variant)" }}
               >
-                Already have an account?{" "}
+                Đã có tài khoản?{" "}
                 <button
                   type="button"
                   className="ml-1 font-bold underline underline-offset-4"
                   style={{ color: "var(--stitch-color-primary)" }}
                   onClick={() => setMode("login")}
                 >
-                  Login
+                  Đăng nhập
                 </button>
               </p>
             )}
@@ -378,7 +378,7 @@ export function LoginClient() {
             style={{ color: "var(--stitch-color-on-surface-variant)" }}
           >
             <Link href="/" className="font-bold hover:underline">
-              Back to store
+              Quay lại cửa hàng
             </Link>
           </div>
         </div>
