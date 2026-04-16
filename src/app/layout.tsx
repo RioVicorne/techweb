@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter, Manrope, Plus_Jakarta_Sans, Space_Grotesk } f
 import "./globals.css";
 import { CartProvider } from "@/context/cart-context";
 import { MobileBottomNav } from "@/components/layout/mobile/MobileBottomNav";
+import { ShopHeader } from "@/components/features/shop/shared/ShopHeader";
 import {
   getAppStitchThemeStyle,
   getStitchProjectTitle,
@@ -73,6 +74,7 @@ export default async function RootLayout({
         style={themeStyle}
       >
         <CartProvider>
+          <ShopHeader />
           <div className="min-h-dvh pb-24 lg:pb-0">{children}</div>
           <MobileBottomNav />
         </CartProvider>

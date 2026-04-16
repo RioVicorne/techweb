@@ -51,6 +51,13 @@ export function MobileBottomNav() {
     [pathname],
   );
 
+  const activeTabIndex = useMemo(() => {
+    if (pathname === "/") return 0;
+    if (pathname.startsWith("/category")) return 1;
+    if (pathname.startsWith("/account")) return 3;
+    return -1;
+  }, [pathname]);
+
   useEffect(() => {
     setCategoryOpen(false);
   }, [pathname]);
@@ -114,26 +121,40 @@ export function MobileBottomNav() {
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      <div className="mx-auto grid max-w-screen-md grid-cols-4 px-2 py-2">
+      <div className="relative mx-auto grid max-w-screen-md grid-cols-4 px-2 py-2">
+        {activeTabIndex >= 0 ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute bottom-2 top-2 rounded-2xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            style={{
+              left: "0.5rem",
+              width: "calc((100% - 1rem) / 4)",
+              transform: `translateX(calc(${activeTabIndex} * 100%))`,
+              background:
+                "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 22%, transparent)",
+            }}
+          />
+        ) : null}
+
         {ITEMS.map((it) => {
           const active = it.match ? it.match(pathname) : false;
           const showBadge = it.badge === "cart" && itemCount > 0;
-          const tabScale = active ? "scale-[1.03]" : "scale-100";
-          const tabOpacity = active ? "opacity-100" : "opacity-80";
+          const tabTransition =
+            "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform";
+          const tabStateClass = active
+            ? "scale-[1.03] opacity-100"
+            : "scale-100 opacity-80";
 
           if (it.href === "/category") {
             return (
-              <div key={it.label} className="relative" ref={categoryWrapRef}>
+              <div key={it.label} className="relative z-10" ref={categoryWrapRef}>
                 <button
                   type="button"
-                  className={`relative flex w-full flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition ${categoryActive ? "scale-[1.03] opacity-100" : "opacity-80"} active:scale-[0.98]`}
+                  className={`group relative flex w-full flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${categoryActive ? "scale-[1.03] opacity-100" : "opacity-80"} active:scale-[0.98]`}
                   style={{
                     color: categoryActive
                       ? "var(--stitch-color-primary)"
                       : "var(--stitch-color-on-surface-variant)",
-                    background: categoryActive
-                      ? "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 22%, transparent)"
-                      : "transparent",
                   }}
                   aria-current={categoryActive ? "page" : undefined}
                   aria-haspopup="menu"
@@ -226,14 +247,12 @@ export function MobileBottomNav() {
             <Link
               key={it.label}
               href={it.href}
-              className={`relative flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition ${tabScale} ${tabOpacity} active:scale-[0.98]`}
+              prefetch
+              className={`relative z-10 flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 ${tabTransition} ${tabStateClass} active:scale-[0.98]`}
               style={{
                 color: active
                   ? "var(--stitch-color-primary)"
                   : "var(--stitch-color-on-surface-variant)",
-                background: active
-                  ? "color-mix(in srgb, var(--stitch-color-primary-container, var(--stitch-color-primary)) 22%, transparent)"
-                  : "transparent",
               }}
               aria-current={active ? "page" : undefined}
             >

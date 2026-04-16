@@ -85,15 +85,17 @@ export function OrdersClient() {
           router.replace(`/login?returnTo=${encodeURIComponent("/orders")}`);
           return;
         }
-        const [ordersRes, countsRes] = await Promise.all([
-          fetch("/api/account/orders", { method: "GET", headers: { authorization: `Bearer ${token}` } }),
-          fetch("/api/account/order-status-counts", { method: "GET", headers: { authorization: `Bearer ${token}` } }),
-        ]);
-        const ordersJson = (await ordersRes.json()) as { orders?: OrderRow[] };
-        const countsJson = (await countsRes.json()) as { counts?: Record<string, number> };
+        const res = await fetch("/api/account/orders-summary", {
+          method: "GET",
+          headers: { authorization: `Bearer ${token}` },
+        });
+        const json = (await res.json()) as {
+          orders?: OrderRow[];
+          counts?: Record<string, number>;
+        };
         if (!cancelled) {
-          setOrders(Array.isArray(ordersJson.orders) ? ordersJson.orders : []);
-          setCounts(countsJson.counts && typeof countsJson.counts === "object" ? countsJson.counts : {});
+          setOrders(Array.isArray(json.orders) ? json.orders : []);
+          setCounts(json.counts && typeof json.counts === "object" ? json.counts : {});
         }
       } finally {
         if (!cancelled) setLoading(false);

@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { ShopHeader } from "@/components/features/shop/shared/ShopHeader";
 import { QrPaymentClient } from "./QrPaymentClient";
 
 export const metadata: Metadata = {
@@ -11,7 +10,6 @@ export const metadata: Metadata = {
 export default function QrPaymentPage() {
   return (
     <div className="min-h-screen">
-      <ShopHeader />
       <Suspense
         fallback={
           <main className="mx-auto max-w-screen-lg px-6 pb-20 pt-28 md:px-12">
