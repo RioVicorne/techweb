@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
 type Mode = "login" | "signup";
@@ -35,11 +35,151 @@ export function LoginClient() {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [remember, setRemember] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const heroText = "ENGINEERED FOR VELOCITY.";
+  const accentWord = "VELOCITY";
+  const [typedLength, setTypedLength] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showCaret, setShowCaret] = useState(true);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const typingDelayMs = 120;
+  const deletingDelayMs = 70;
+  const pauseAfterTypedMs = 5000;
+  const pauseBeforeRetypeMs = 450;
+
+  const playTick = useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    const AudioCtx = window.AudioContext;
+    if (!AudioCtx) return;
+
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioCtx();
+    }
+
+    const ctx = audioContextRef.current;
+    if (ctx.state !== "running") return;
+
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    oscillator.type = "square";
+    oscillator.frequency.setValueAtTime(1300, ctx.currentTime);
+
+    gainNode.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.018, ctx.currentTime + 0.004);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    oscillator.start();
+    oscillator.stop(ctx.currentTime + 0.055);
+  }, []);
+
+  const unlockAudio = useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    const AudioCtx = window.AudioContext;
+    if (!AudioCtx) return;
+
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioCtx();
+    }
+
+    void audioContextRef.current.resume();
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const atEnd = typedLength >= heroText.length;
+      const atStart = typedLength <= 0;
+
+      if (!isDeleting && atEnd) {
+        setIsDeleting(true);
+        return;
+      }
+
+      if (isDeleting && atStart) {
+        setIsDeleting(false);
+        return;
+      }
+
+      setTypedLength((prev) => prev + (isDeleting ? -1 : 1));
+      playTick();
+    },
+    !isDeleting && typedLength >= heroText.length
+      ? pauseAfterTypedMs
+      : isDeleting && typedLength <= 0
+        ? pauseBeforeRetypeMs
+        : isDeleting
+          ? deletingDelayMs
+          : typingDelayMs);
+
+    return () => window.clearTimeout(timer);
+  }, [heroText.length, isDeleting, playTick, typedLength]);
+
+  useEffect(() => {
+    window.addEventListener("pointerdown", unlockAudio);
+    window.addEventListener("keydown", unlockAudio);
+
+    return () => {
+      window.removeEventListener("pointerdown", unlockAudio);
+      window.removeEventListener("keydown", unlockAudio);
+    };
+  }, [unlockAudio]);
+
+  useEffect(() => {
+    const caretTimer = setInterval(() => {
+      setShowCaret((prev) => !prev);
+    }, 500);
+
+    return () => clearInterval(caretTimer);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (audioContextRef.current) {
+        void audioContextRef.current.close();
+      }
+    };
+  }, []);
+
+  const typedHeroText = heroText.slice(0, typedLength);
+  const accentStart = heroText.indexOf(accentWord);
+  const accentEnd = accentStart + accentWord.length;
+  const typedBeforeAccent = typedHeroText.slice(
+    0,
+    Math.min(typedHeroText.length, accentStart),
+  );
+  const typedAccent =
+    typedHeroText.length > accentStart
+      ? typedHeroText.slice(accentStart, Math.min(typedHeroText.length, accentEnd))
+      : "";
+  const typedAfterAccent =
+    typedHeroText.length > accentEnd ? typedHeroText.slice(accentEnd) : "";
+
+  const switchMode = useCallback(
+    (
+      nextMode: Mode,
+      options?: { keepNotice?: boolean; allowWhileBusy?: boolean },
+    ) => {
+      if (nextMode === mode) return;
+      if (busy && !options?.allowWhileBusy) return;
+      setError(null);
+      if (!options?.keepNotice) {
+        setNotice(null);
+      }
+      setMode(nextMode);
+    },
+    [busy, mode],
+  );
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +189,18 @@ export function LoginClient() {
     if (!em || !password) {
       setError("Vui lòng nhập email và mật khẩu.");
       return;
+    }
+
+    if (mode === "signup") {
+      if (!confirmPassword) {
+        setError("Vui lòng nhập xác nhận mật khẩu.");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setError("Mật khẩu xác nhận không khớp.");
+        return;
+      }
     }
 
     setBusy(true);
@@ -77,7 +229,7 @@ export function LoginClient() {
       setNotice(
         "Tạo tài khoản thành công. Nếu bật email confirm, hãy kiểm tra inbox rồi đăng nhập.",
       );
-      setMode("login");
+      switchMode("login", { keepNotice: true, allowWhileBusy: true });
     } catch (err) {
       setError(
         err instanceof Error
@@ -101,7 +253,9 @@ export function LoginClient() {
         {/* Left (Desktop only) */}
         <div
           className="relative hidden flex-col justify-between overflow-hidden p-12 md:flex"
-          style={{ background: "var(--stitch-color-surface-container-low)" }}
+          style={{
+            background: "var(--stitch-color-surface-container-low)",
+          }}
         >
           <div className="absolute inset-0 opacity-30">
             <div className="absolute inset-0 bg-gradient-to-br from-[color:var(--stitch-color-primary)]/20 via-transparent to-[color:var(--stitch-color-secondary)]/10" />
@@ -139,16 +293,19 @@ export function LoginClient() {
               className="mb-6 text-5xl font-bold leading-tight"
               style={{ fontFamily: "var(--stitch-font-headline)" }}
             >
-              ENGINEERED FOR{" "}
-              <span
-                style={{
-                  color: "var(--stitch-color-primary)",
-                  fontStyle: "italic",
-                }}
-              >
-                VELOCITY
-              </span>
-              .
+              <span>{typedBeforeAccent}</span>
+              {typedAccent ? (
+                <span
+                  style={{
+                    color: "var(--stitch-color-primary)",
+                    fontStyle: "italic",
+                  }}
+                >
+                  {typedAccent}
+                </span>
+              ) : null}
+              <span>{typedAfterAccent}</span>
+              {showCaret ? <span className="ml-1 text-white/80">|</span> : null}
             </h1>
             <p
               className="max-w-md text-lg font-medium"
@@ -208,30 +365,31 @@ export function LoginClient() {
 
         {/* Right */}
         <div
-          className="flex flex-col justify-center p-8 md:p-16"
+          className="relative flex flex-col justify-center overflow-hidden p-8 md:p-16"
           style={{
             background: "rgba(24, 24, 43, 0.7)",
             backdropFilter: "blur(20px)",
           }}
         >
-          <div className="mb-10">
-            <h2
-              className="mb-2 text-3xl font-bold text-white"
-              style={{ fontFamily: "var(--stitch-font-headline)" }}
-            >
-              {mode === "login" ? "Chào mừng quay lại" : "Tạo tài khoản"}
-            </h2>
-            <p
-              className="font-medium"
-              style={{ color: "var(--stitch-color-on-surface-variant)" }}
-            >
-              {mode === "login"
-                ? "Nhập thông tin để đăng nhập và đồng bộ tài khoản"
-                : "Tạo tài khoản để tiếp tục thanh toán."}
-            </p>
-          </div>
+          <div className="relative z-10">
+            <div className="mb-10">
+              <h2
+                className="mb-2 text-3xl font-bold text-white"
+                style={{ fontFamily: "var(--stitch-font-headline)" }}
+              >
+                {mode === "login" ? "Chào mừng quay lại" : "Tạo tài khoản"}
+              </h2>
+              <p
+                className="font-medium"
+                style={{ color: "var(--stitch-color-on-surface-variant)" }}
+              >
+                {mode === "login"
+                  ? "Nhập thông tin để đăng nhập và đồng bộ tài khoản"
+                  : "Tạo tài khoản để tiếp tục thanh toán."}
+              </p>
+            </div>
 
-          <form className="space-y-6" onSubmit={onSubmit}>
+            <form className="space-y-6" onSubmit={onSubmit}>
             {error ? (
               <p className="px-1 text-sm font-medium text-red-400">
                 {error}
@@ -319,6 +477,48 @@ export function LoginClient() {
               </div>
             </div>
 
+            {mode === "signup" ? (
+              <div>
+                <label
+                  className="mb-2 ml-1 block text-xs font-bold uppercase tracking-widest"
+                  style={{ color: "var(--stitch-color-on-surface-variant)" }}
+                >
+                  Xác nhận mật khẩu
+                </label>
+                <div className="group relative">
+                  <div
+                    className="pointer-events-none absolute inset-y-0 left-4 flex items-center transition-colors"
+                    style={{ color: "var(--stitch-color-outline)" }}
+                  >
+                    <span className="material-symbols-outlined">lock</span>
+                  </div>
+                  <input
+                    className="w-full rounded-xl border py-4 pl-12 pr-12 text-white placeholder:text-[color:var(--stitch-color-outline-variant)] outline-none transition-all focus:ring-2 focus:ring-[color:var(--stitch-color-primary)]/50"
+                    style={{
+                      background: "var(--stitch-color-surface-container-high)",
+                      borderColor: error ? "#ef4444" : "transparent",
+                    }}
+                    placeholder="••••••••"
+                    type={showConfirmPw ? "text" : "password"}
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  <button
+                    className="absolute inset-y-0 right-4 flex items-center transition-colors"
+                    type="button"
+                    onClick={() => setShowConfirmPw((v) => !v)}
+                    style={{ color: "var(--stitch-color-outline)" }}
+                    aria-label={showConfirmPw ? "Ẩn xác nhận mật khẩu" : "Hiện xác nhận mật khẩu"}
+                  >
+                    <span className="material-symbols-outlined">
+                      {showConfirmPw ? "visibility" : "visibility_off"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
             <div className="flex items-center gap-2 px-1">
               <input
                 id="remember"
@@ -380,7 +580,7 @@ export function LoginClient() {
                   type="button"
                   className="ml-1 font-bold underline underline-offset-4"
                   style={{ color: "var(--stitch-color-primary)" }}
-                  onClick={() => setMode("signup")}
+                  onClick={() => switchMode("signup")}
                 >
                   Đăng ký ngay
                 </button>
@@ -395,7 +595,7 @@ export function LoginClient() {
                   type="button"
                   className="ml-1 font-bold underline underline-offset-4"
                   style={{ color: "var(--stitch-color-primary)" }}
-                  onClick={() => setMode("login")}
+                  onClick={() => switchMode("login")}
                 >
                   Đăng nhập
                 </button>
@@ -411,8 +611,10 @@ export function LoginClient() {
               Quay lại cửa hàng
             </Link>
           </div>
+          </div>
         </div>
       </div>
+
     </div>
   );
 }
