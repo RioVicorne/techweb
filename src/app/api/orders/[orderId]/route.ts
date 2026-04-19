@@ -1,23 +1,45 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { getSupabaseServerAuth } from "@/lib/supabase/server-auth";
 import { formatVndDisplay } from "@/data/products";
 import type { CartLine } from "@/context/cart-context";
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ orderId: string }> },
 ) {
   try {
+    const authHeader = req.headers.get("authorization") || "";
+    const token = authHeader.toLowerCase().startsWith("bearer ")
+      ? authHeader.slice("bearer ".length).trim()
+      : "";
+
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const authClient = getSupabaseServerAuth();
+    const { data: userData, error: userErr } = await authClient.auth.getUser(token);
+    if (userErr || !userData.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { orderId } = await params;
     if (!orderId) return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
+
     const supabase = getSupabaseAdmin();
     const { data: order, error } = await supabase
       .from("orders")
-      .select("id,order_code,created_at,subtotal,shipping_fee,total,full_name,phone,address_line,city,grid_code,note,payment_method,payment_status,qr_code_url")
+      .select("id,order_code,user_id,created_at,subtotal,shipping_fee,total,full_name,phone,address_line,city,email,note,payment_method,payment_status,qr_code_url")
       .eq("order_code", orderId)
       .maybeSingle();
+
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    if (order.user_id !== userData.user.id) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
 
     const { data: items, error: itemsErr } = await supabase
       .from("order_items")
@@ -39,7 +61,6 @@ export async function GET(
       };
     });
 
-    // Return legacy shape expected by SuccessClient for now.
     return NextResponse.json(
       {
         order: {
@@ -51,7 +72,7 @@ export async function GET(
           customer: {
             name: String(order.full_name ?? ""),
             phone: String(order.phone ?? ""),
-            email: String(order.grid_code ?? ""),
+            email: String(order.email ?? ""),
             address: `${String(order.address_line ?? "")}${order.city ? `, ${String(order.city)}` : ""}`,
             note: order.note ? String(order.note) : undefined,
           },
@@ -70,4 +91,3 @@ export async function GET(
     );
   }
 }
-

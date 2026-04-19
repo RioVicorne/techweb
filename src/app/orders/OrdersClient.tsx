@@ -117,7 +117,17 @@ export function OrdersClient() {
       }
       setDetailLoading(true);
       try {
-        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, { method: "GET" });
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token || "";
+        if (!token) {
+          if (!cancelled) setDetail(null);
+          return;
+        }
+
+        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
+          method: "GET",
+          headers: { authorization: `Bearer ${token}` },
+        });
         const json = (await res.json()) as { order?: unknown };
         if (!res.ok || !json.order) {
           if (!cancelled) setDetail(null);
@@ -132,7 +142,7 @@ export function OrdersClient() {
     return () => {
       cancelled = true;
     };
-  }, [orderId, activeTab]);
+  }, [orderId, activeTab, supabase]);
 
   return (
     <main className="mx-auto max-w-screen-2xl px-6 pb-20 pt-28 md:px-12">

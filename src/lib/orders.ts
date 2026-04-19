@@ -32,9 +32,17 @@ function safeParseJson(raw: string | null): unknown {
   }
 }
 
+function randomHex(bytes: number): string {
+  const arr = new Uint8Array(bytes);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 export function createOrderId() {
-  // short, readable, unique enough for demo/local checkout flows
-  return `RS${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+  const uuid = typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID().replaceAll("-", "")
+    : randomHex(16);
+  return `RS${uuid.slice(0, 16).toUpperCase()}`;
 }
 
 export function saveOrder(order: Order) {
@@ -51,4 +59,3 @@ export function getOrder(orderId: string): Order | null {
   const hit = (existing as Order[]).find((o) => o && typeof o === "object" && (o as Order).id === orderId);
   return hit ?? null;
 }
-

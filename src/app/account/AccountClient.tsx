@@ -264,7 +264,17 @@ export function AccountClient() {
       }
       setSelectedOrderLoading(true);
       try {
-        const res = await fetch(`/api/orders/${encodeURIComponent(selectedOrderId)}`, { method: "GET" });
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token || "";
+        if (!token) {
+          if (!cancelled) setSelectedOrder(null);
+          return;
+        }
+
+        const res = await fetch(`/api/orders/${encodeURIComponent(selectedOrderId)}`, {
+          method: "GET",
+          headers: { authorization: `Bearer ${token}` },
+        });
         const json = (await res.json()) as { order?: unknown };
         if (!res.ok || !json.order) {
           if (!cancelled) setSelectedOrder(null);
@@ -303,7 +313,7 @@ export function AccountClient() {
     return () => {
       cancelled = true;
     };
-  }, [selectedOrderId]);
+  }, [selectedOrderId, supabase]);
 
   const provinces = useMemo(() => pcVN.getProvinces() as Array<{ code: string; name: string }>, []);
 

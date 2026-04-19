@@ -3,6 +3,12 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getSupabaseServerAuth } from "@/lib/supabase/server-auth";
 import type { CartLine } from "@/context/cart-context";
 import { createOrderId } from "@/lib/orders";
+import { checkRateLimit, getRequestIp } from "@/lib/rate-limit";
+
+const ORDER_CREATE_LIMIT = {
+  maxRequests: 20,
+  windowMs: 5 * 60 * 1000,
+};
 
 /** Config for VietQR / bank transfer */
 const BANK = {
@@ -48,6 +54,8 @@ type CreateOrderBody = {
 };
 
 export async function POST(req: Request) {
+  const ip = getRequestIp(req);
+
   try {
     const authHeader = req.headers.get("authorization") || "";
     const token = authHeader.toLowerCase().startsWith("bearer ")
@@ -56,10 +64,30 @@ export async function POST(req: Request) {
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
     const authClient = getSupabaseServerAuth();
     const { data: userData, error: userErr } = await authClient.auth.getUser(token);
     if (userErr || !userData.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const limit = checkRateLimit(
+      `orders-create:${ip}:${userData.user.id}`,
+      ORDER_CREATE_LIMIT.maxRequests,
+      ORDER_CREATE_LIMIT.windowMs,
+    );
+
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: "Too many order requests. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(limit.retryAfterSec),
+            "X-RateLimit-Remaining": String(limit.remaining),
+          },
+        },
+      );
     }
 
     const body = (await req.json()) as Partial<CreateOrderBody>;
@@ -96,36 +124,6 @@ export async function POST(req: Request) {
     const paymentMethodDb = paymentMethod === "BANK" ? "BANK" : paymentMethod === "MOMO" ? "MOMO" : "COD";
 
     const supabase = getSupabaseAdmin();
-    // RioShop schema stores order header + order items separately.
-    const { data: inserted, error: orderErr } = await supabase
-      .from("orders")
-      .insert({
-        order_code: orderId,
-        user_id: userData.user.id,
-        status: "PENDING_CONFIRMATION",
-        currency: "đ",
-        subtotal: Math.round(subtotalVnd),
-        shipping_fee: Math.round(shippingVnd),
-        discount: 0,
-        total: Math.round(totalVnd),
-        full_name: c.name,
-        // Now nullable in schema
-        phone: c.phone || null,
-        address_line: c.address,
-        city: null,
-        email: c.email || null,
-        note: c.note || null,
-        delivery_method: "STANDARD",
-        // Payment fields
-        payment_method: paymentMethodDb,
-        payment_status: paymentStatus,
-        qr_code_url: qrCodeUrl,
-      })
-      .select("id,order_code,created_at,qr_code_url")
-      .single();
-    if (orderErr || !inserted) {
-      return NextResponse.json({ error: orderErr?.message || "Failed to create order" }, { status: 500 });
-    }
 
     // Lookup product IDs (bigint) from slugs for proper FK linkage in order_items.
     const slugs = [...new Set(body.lines.map((l) => l.productId))];
@@ -137,8 +135,7 @@ export async function POST(req: Request) {
       (productRows ?? []).map((p) => [p.slug, p.id as number]),
     );
 
-    const orderItems = body.lines.map((l) => ({
-      order_id: inserted.id,
+    const orderItemsInput = body.lines.map((l) => ({
       product_id: slugToId[l.productId] ?? null,
       variant_id: null,
       product_name_snapshot: l.title,
@@ -150,13 +147,39 @@ export async function POST(req: Request) {
       line_total: Math.round((Number(l.priceVnd) || 0) * Math.max(1, Math.floor(Number(l.qty) || 1))),
     }));
 
-    const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
-    if (itemsErr) {
-      // Keep order header; surface error so dev can diagnose.
-      return NextResponse.json({ error: itemsErr.message }, { status: 500 });
+    const { data: insertedOrderCode, error: rpcErr } = await supabase.rpc(
+      "create_order_with_items",
+      {
+        p_order_code: orderId,
+        p_user_id: userData.user.id,
+        p_status: "PENDING_CONFIRMATION",
+        p_currency: "đ",
+        p_subtotal: Math.round(subtotalVnd),
+        p_shipping_fee: Math.round(shippingVnd),
+        p_discount: 0,
+        p_total: Math.round(totalVnd),
+        p_full_name: c.name,
+        p_phone: c.phone || null,
+        p_address_line: c.address,
+        p_city: null,
+        p_email: c.email || null,
+        p_note: c.note || null,
+        p_delivery_method: "STANDARD",
+        p_payment_method: paymentMethodDb,
+        p_payment_status: paymentStatus,
+        p_qr_code_url: qrCodeUrl,
+        p_items: orderItemsInput,
+      },
+    );
+
+    if (rpcErr || !insertedOrderCode) {
+      return NextResponse.json(
+        { error: rpcErr?.message || "Failed to create order" },
+        { status: 500 },
+      );
     }
 
-    return NextResponse.json({ orderId, qrCodeUrl, moMoDeepLink }, { status: 200 });
+    return NextResponse.json({ orderId: insertedOrderCode, qrCodeUrl, moMoDeepLink }, { status: 200 });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Unknown error" },
@@ -164,4 +187,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

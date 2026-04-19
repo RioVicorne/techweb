@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
 type OrderInfo = {
   id: string;
@@ -22,6 +23,7 @@ export function MomoPaymentClient() {
   const router = useRouter();
   const params = useSearchParams();
   const orderId = params.get("orderId") || "";
+  const supabase = useMemo(() => getSupabaseBrowser(), []);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +39,14 @@ export function MomoPaymentClient() {
     let cancelled = false;
     async function loadOrder() {
       try {
-        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, { method: "GET" });
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token || "";
+        if (!token) throw new Error("Bạn cần đăng nhập để xem đơn hàng");
+
+        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
+          method: "GET",
+          headers: { authorization: `Bearer ${token}` },
+        });
         const json = (await res.json()) as { order?: OrderInfo };
         if (!res.ok || !json.order) throw new Error("Không tìm thấy đơn hàng");
         if (cancelled) return;
@@ -58,7 +67,7 @@ export function MomoPaymentClient() {
     return () => {
       cancelled = true;
     };
-  }, [orderId, router]);
+  }, [orderId, router, supabase]);
 
   if (loading) {
     return (

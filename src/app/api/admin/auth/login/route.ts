@@ -3,13 +3,40 @@ import {
   credentialsAreConfigured,
   verifyAdminPassword,
 } from "@/lib/admin-credentials";
-import { adminSessionCookieOptions, getAdminSessionSecret, signAdminSession, ADMIN_SESSION_COOKIE } from "@/lib/admin-session";
+import { ADMIN_SESSION_COOKIE, adminSessionCookieOptions, getAdminSessionSecret, signAdminSession } from "@/lib/admin-session";
+import { checkRateLimit, getRequestIp } from "@/lib/rate-limit";
+
+const ADMIN_LOGIN_LIMIT = {
+  maxRequests: 8,
+  windowMs: 5 * 60 * 1000,
+};
 
 export async function POST(req: Request) {
+  const ip = getRequestIp(req);
+
   try {
     const body = (await req.json()) as { email?: string; password?: string };
-    const email = String(body.email ?? "");
+    const email = String(body.email ?? "").trim();
     const password = String(body.password ?? "");
+
+    const limit = checkRateLimit(
+      `admin-login:${ip}:${email.toLowerCase()}`,
+      ADMIN_LOGIN_LIMIT.maxRequests,
+      ADMIN_LOGIN_LIMIT.windowMs,
+    );
+
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: "Too many login attempts. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(limit.retryAfterSec),
+            "X-RateLimit-Remaining": String(limit.remaining),
+          },
+        },
+      );
+    }
 
     if (!credentialsAreConfigured()) {
       return NextResponse.json(

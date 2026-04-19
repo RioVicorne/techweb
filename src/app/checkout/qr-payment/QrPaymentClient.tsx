@@ -46,7 +46,16 @@ export function QrPaymentClient() {
   const [confirmSuccessText, setConfirmSuccessText] = useState<string | null>(null);
 
   async function loadOrderStatus(targetOrderId: string): Promise<string | null> {
-    const res = await fetch(`/api/orders/${encodeURIComponent(targetOrderId)}`, { method: "GET" });
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token || "";
+    if (!token) {
+      throw new Error("Bạn cần đăng nhập để xem đơn hàng");
+    }
+
+    const res = await fetch(`/api/orders/${encodeURIComponent(targetOrderId)}`, {
+      method: "GET",
+      headers: { authorization: `Bearer ${token}` },
+    });
     const json = (await res.json()) as OrderLookupResponse;
     if (!res.ok || !json.order) {
       throw new Error("Không tìm thấy đơn hàng");

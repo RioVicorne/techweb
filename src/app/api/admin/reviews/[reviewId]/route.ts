@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin-auth";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 type UpdateBody = {
   status: "APPROVED" | "REJECTED";
 };
 
-export async function GET() {
+export async function GET(req: Request) {
+  const gate = await requireAdmin(req);
+  if (!gate.ok) return gate.response;
+
   try {
     const supabase = getSupabaseAdmin();
     const { data: reviews, error } = await supabase
@@ -31,6 +35,9 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ reviewId: string }> },
 ) {
+  const gate = await requireAdmin(req);
+  if (!gate.ok) return gate.response;
+
   try {
     const { reviewId } = await params;
     const reviewIdNum = Number(reviewId);

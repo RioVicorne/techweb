@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { formatVndDisplay } from "@/data/products";
 import { getOrder, type Order } from "@/lib/orders";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
 type ServerOrderRow = {
   id: string;
@@ -17,6 +18,7 @@ type ServerOrderRow = {
 
 export function OrderDetailClient({ orderId }: { orderId: string }) {
   const localOrder = useMemo(() => (orderId ? getOrder(orderId) : null), [orderId]);
+  const supabase = useMemo(() => getSupabaseBrowser(), []);
   const [serverOrder, setServerOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(() => Boolean(orderId) && !localOrder);
 
@@ -26,7 +28,14 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
       if (!orderId) return;
       setLoading(true);
       try {
-        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, { method: "GET" });
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token || "";
+        if (!token) return;
+
+        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
+          method: "GET",
+          headers: { authorization: `Bearer ${token}` },
+        });
         const json = (await res.json()) as { order?: unknown };
         if (!res.ok || !json.order) return;
         const o = json.order as Partial<ServerOrderRow>;
@@ -59,7 +68,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [orderId]);
+  }, [orderId, supabase]);
 
   const order = serverOrder ?? localOrder;
 

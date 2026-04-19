@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { checkRateLimit, getRequestIp } from "@/lib/rate-limit";
 
 type ReviewBody = {
   rating: number;
@@ -7,6 +8,11 @@ type ReviewBody = {
   comment: string;
   reviewerName: string;
   reviewerEmail?: string;
+};
+
+const REVIEW_SUBMIT_LIMIT = {
+  maxRequests: 6,
+  windowMs: 10 * 60 * 1000,
 };
 
 export async function GET(
@@ -23,7 +29,6 @@ export async function GET(
 
     const supabase = getSupabaseAdmin();
 
-    // Fetch approved reviews for this product
     const { data: reviews, error: reviewsError } = await supabase
       .from("product_reviews")
       .select("*")
@@ -35,7 +40,6 @@ export async function GET(
       return NextResponse.json({ error: reviewsError.message }, { status: 500 });
     }
 
-    // Fetch rating stats
     const { data: statsData, error: statsError } = await supabase.rpc(
       "get_product_rating_stats",
       { p_product_id: productIdNum },
@@ -79,10 +83,29 @@ export async function POST(
       return NextResponse.json({ error: "Invalid productId" }, { status: 400 });
     }
 
+    const ip = getRequestIp(req);
+    const limit = checkRateLimit(
+      `reviews-submit:${ip}:${productIdNum}`,
+      REVIEW_SUBMIT_LIMIT.maxRequests,
+      REVIEW_SUBMIT_LIMIT.windowMs,
+    );
+
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: "Too many review submissions. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(limit.retryAfterSec),
+            "X-RateLimit-Remaining": String(limit.remaining),
+          },
+        },
+      );
+    }
+
     const body = (await req.json()) as Partial<ReviewBody>;
     const { rating, title, comment, reviewerName, reviewerEmail } = body;
 
-    // Validation
     if (!rating || rating < 1 || rating > 5) {
       return NextResponse.json(
         { error: "Rating must be between 1 and 5" },
@@ -96,7 +119,6 @@ export async function POST(
       return NextResponse.json({ error: "Reviewer name is required" }, { status: 400 });
     }
 
-    // Verify product exists
     const supabase = getSupabaseAdmin();
     const { data: product } = await supabase
       .from("products")
