@@ -166,6 +166,174 @@ function parseSpecsTextToAttributes(
   return Object.fromEntries(entries);
 }
 
+type BulkImportMode = "skip" | "upsert";
+
+type CsvImportSummary = {
+  total: number;
+  imported: number;
+  failed: number;
+  skipped: number;
+  updated: number;
+  created: number;
+  importMode: BulkImportMode;
+  errors: string[];
+};
+
+function normalizeCsvKey(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+function parseCsvRows(text: string): string[][] {
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let currentCell = "";
+  let inQuotes = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index] ?? "";
+    const nextChar = text[index + 1] ?? "";
+
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        currentCell += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === "," && !inQuotes) {
+      currentRow.push(currentCell.trim());
+      currentCell = "";
+      continue;
+    }
+
+    if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && nextChar === "\n") {
+        index += 1;
+      }
+      currentRow.push(currentCell.trim());
+      const isEmptyRow = currentRow.every((cell) => cell.trim() === "");
+      if (!isEmptyRow) rows.push(currentRow);
+      currentRow = [];
+      currentCell = "";
+      continue;
+    }
+
+    currentCell += char;
+  }
+
+  currentRow.push(currentCell.trim());
+  const isTrailingEmptyRow = currentRow.every((cell) => cell.trim() === "");
+  if (!isTrailingEmptyRow) rows.push(currentRow);
+
+  return rows;
+}
+
+function parseCsvToRecords(text: string): Array<Record<string, string>> {
+  const rows = parseCsvRows(text);
+  if (rows.length < 2) return [];
+
+  const headers = rows[0].map((header) => normalizeCsvKey(header.trim()));
+
+  return rows
+    .slice(1)
+    .filter((row) => row.some((cell) => cell.trim() !== ""))
+    .map((row) => {
+      const record: Record<string, string> = {};
+      headers.forEach((header, index) => {
+        if (!header) return;
+        record[header] = (row[index] ?? "").trim();
+      });
+      return record;
+    });
+}
+
+function pickCsvValue(record: Record<string, string>, aliases: string[]): string {
+  for (const alias of aliases) {
+    const value = record[normalizeCsvKey(alias)];
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+  return "";
+}
+
+function parsePipeList(value: string): string[] {
+  return value
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+}
+
+function parseInlineSpecsToAttributes(specText: string): Record<string, string> | null {
+  const entries = specText
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => {
+      const separatorIndex = item.indexOf(":");
+      if (separatorIndex <= 0) return null;
+      const key = item.slice(0, separatorIndex).trim();
+      const value = item.slice(separatorIndex + 1).trim();
+      if (!key || !value) return null;
+      return [key, value] as const;
+    })
+    .filter((entry): entry is readonly [string, string] => entry !== null);
+
+  if (entries.length === 0) return null;
+  return Object.fromEntries(entries);
+}
+
+function normalizeImportStatus(value: string): "active" | "draft" | "archived" {
+  const normalized = normalizeCsvKey(value);
+  if (["active", "dangban", "publised", "published"].includes(normalized)) {
+    return "active";
+  }
+  if (["archived", "an", "hidden"].includes(normalized)) {
+    return "archived";
+  }
+  return "draft";
+}
+
+function getCsvTemplateContent(): string {
+  return [
+    [
+      "name",
+      "slug",
+      "brand",
+      "description",
+      "status",
+      "sku",
+      "price",
+      "compare_at_price",
+      "category",
+      "image_urls",
+      "specs",
+    ].join(","),
+    [
+      "Sonic Blast V3 Headset",
+      "sonic-blast-v3-headset",
+      "RioShop",
+      'Tai nghe gaming không dây độ trễ thấp',
+      "active",
+      "SBV3-001",
+      "3200000",
+      "3900000",
+      "gaming-gear",
+      "https://example.com/headset-1.jpg|https://example.com/headset-2.jpg",
+      'Latency: 0.1ms|Battery: 90h|Sensor: 30K DPI',
+    ].join(","),
+  ].join("\n");
+}
+
 export function ProductsAdminClient() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<CatalogCategoryOption[]>([]);
@@ -176,6 +344,9 @@ export function ProductsAdminClient() {
   const [submitting, setSubmitting] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ id: number; name: string } | null>(null);
+  const [importingCsv, setImportingCsv] = useState(false);
+  const [csvImportMode, setCsvImportMode] = useState<BulkImportMode>("skip");
+  const [csvSummary, setCsvSummary] = useState<CsvImportSummary | null>(null);
 
   async function fetchProducts() {
     setLoading(true);
@@ -399,6 +570,165 @@ export function ProductsAdminClient() {
     }
   }
 
+  function downloadCsvTemplate() {
+    const blob = new Blob([getCsvTemplateContent()], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = "rioshop-products-template.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
+  }
+
+  async function handleCsvImport(file: File) {
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      alert("Vui lòng chọn file .csv");
+      return;
+    }
+
+    setImportingCsv(true);
+    setCsvSummary(null);
+
+    try {
+      const csvText = await file.text();
+      const records = parseCsvToRecords(csvText);
+
+      if (records.length === 0) {
+        throw new Error("File CSV không có dữ liệu hợp lệ");
+      }
+
+      const categoryMap = new Map<string, number>();
+      categories.forEach((category) => {
+        categoryMap.set(normalizeCsvKey(category.slug), category.id);
+        categoryMap.set(normalizeCsvKey(category.name), category.id);
+      });
+
+      const productsPayload = records.map((record, index) => {
+        const name = pickCsvValue(record, ["name", "ten", "product_name"]);
+        const slugValue = pickCsvValue(record, ["slug", "duong_dan"]);
+        const sku = pickCsvValue(record, ["sku", "ma_sku", "ma_hang"]);
+        const priceValue = pickCsvValue(record, ["price", "gia", "gia_ban"]);
+
+        if (!name) {
+          throw new Error(`Dòng ${index + 2}: thiếu tên sản phẩm`);
+        }
+
+        if (!sku) {
+          throw new Error(`Dòng ${index + 2}: thiếu SKU`);
+        }
+
+        const parsedPrice = parseNumericText(priceValue);
+        if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+          throw new Error(`Dòng ${index + 2}: giá bán không hợp lệ`);
+        }
+
+        const compareAtValue = pickCsvValue(record, [
+          "compare_at_price",
+          "compareatprice",
+          "gia_goc",
+        ]);
+        const parsedCompareAt = compareAtValue
+          ? parseNumericText(compareAtValue)
+          : Number.NaN;
+
+        if (compareAtValue && (!Number.isFinite(parsedCompareAt) || parsedCompareAt < 0)) {
+          throw new Error(`Dòng ${index + 2}: giá gốc không hợp lệ`);
+        }
+
+        const categoryRaw = pickCsvValue(record, [
+          "category",
+          "category_slug",
+          "category_name",
+          "danh_muc",
+        ]);
+        const categoryId = categoryRaw
+          ? categoryMap.get(normalizeCsvKey(categoryRaw)) ?? null
+          : null;
+
+        const imageUrls = parsePipeList(
+          pickCsvValue(record, ["image_urls", "images", "anh", "image"]),
+        );
+        const invalidImageUrl = imageUrls.find((url) => !isLikelyDirectImageUrl(url));
+        if (invalidImageUrl) {
+          throw new Error(`Dòng ${index + 2}: URL ảnh không hợp lệ (${invalidImageUrl})`);
+        }
+
+        const specs = parseInlineSpecsToAttributes(
+          pickCsvValue(record, ["specs", "attributes", "thong_so"]),
+        );
+
+        return {
+          name,
+          slug: slugValue || slugify(name),
+          description: pickCsvValue(record, ["description", "mo_ta", "desc"]) || null,
+          brand: pickCsvValue(record, ["brand", "thuong_hieu"]) || null,
+          status: normalizeImportStatus(pickCsvValue(record, ["status", "trang_thai"])),
+          sku,
+          price: parsedPrice,
+          compareAtPrice: Number.isFinite(parsedCompareAt) ? parsedCompareAt : undefined,
+          attributes: specs ?? undefined,
+          imageUrls,
+          categoryId,
+        };
+      });
+
+      const response = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ products: productsPayload, importMode: csvImportMode }),
+      });
+
+      const result = (await response.json()) as {
+        imported?: number;
+        failed?: number;
+        total?: number;
+        skipped?: number;
+        updated?: number;
+        created?: number;
+        importMode?: BulkImportMode;
+        errors?: string[];
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Import CSV thất bại");
+      }
+
+      setCsvSummary({
+        total: Number(result.total ?? productsPayload.length),
+        imported: Number(result.imported ?? 0),
+        failed: Number(result.failed ?? 0),
+        skipped: Number(result.skipped ?? 0),
+        updated: Number(result.updated ?? 0),
+        created: Number(result.created ?? 0),
+        importMode: result.importMode === "upsert" ? "upsert" : "skip",
+        errors: Array.isArray(result.errors) ? result.errors.slice(0, 20) : [],
+      });
+
+      await fetchProducts();
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Lỗi không xác định khi import CSV";
+      setCsvSummary({
+        total: 0,
+        imported: 0,
+        failed: 0,
+        skipped: 0,
+        updated: 0,
+        created: 0,
+        importMode: csvImportMode,
+        errors: [message],
+      });
+      alert(message);
+    } finally {
+      setImportingCsv(false);
+    }
+  }
+
   function handleNameChange(value: string) {
     setForm((prev) => ({
       ...prev,
@@ -478,7 +808,7 @@ export function ProductsAdminClient() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1
             className="text-2xl font-bold"
@@ -493,16 +823,131 @@ export function ProductsAdminClient() {
             Tổng cộng {products.length} sản phẩm
           </p>
         </div>
-        <button
-          type="button"
-          onClick={openAdd}
-          className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
-          style={{ background: "var(--stitch-color-primary, #6366f1)" }}
-        >
-          <span className="material-symbols-outlined text-[20px]">add</span>
-          Thêm sản phẩm
-        </button>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={downloadCsvTemplate}
+            className="inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-bold transition hover:opacity-90"
+            style={{
+              borderColor:
+                "color-mix(in srgb, var(--stitch-color-outline-variant) 55%, transparent)",
+              color: "var(--stitch-color-on-surface)",
+            }}
+          >
+            <span className="material-symbols-outlined text-[20px]">download</span>
+            Tải CSV mẫu
+          </button>
+
+          <label
+            className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm"
+            style={{
+              borderColor:
+                "color-mix(in srgb, var(--stitch-color-outline-variant) 55%, transparent)",
+              color: "var(--stitch-color-on-surface-variant)",
+            }}
+          >
+            Chế độ
+            <select
+              value={csvImportMode}
+              onChange={(event) => setCsvImportMode(event.target.value as BulkImportMode)}
+              disabled={importingCsv}
+              className="rounded-lg border px-2 py-1 text-xs font-semibold"
+              style={{
+                borderColor:
+                  "color-mix(in srgb, var(--stitch-color-outline-variant) 55%, transparent)",
+                color: "var(--stitch-color-on-surface)",
+                background: "var(--stitch-color-surface)",
+              }}
+            >
+              <option value="skip">Bỏ qua nếu trùng slug</option>
+              <option value="upsert">Cập nhật nếu trùng slug</option>
+            </select>
+          </label>
+
+          <label
+            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-bold transition hover:opacity-90"
+            style={{
+              borderColor:
+                "color-mix(in srgb, var(--stitch-color-outline-variant) 55%, transparent)",
+              color: "var(--stitch-color-on-surface)",
+            }}
+          >
+            <span className="material-symbols-outlined text-[20px]">upload</span>
+            {importingCsv ? "Đang import..." : "Import CSV"}
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              disabled={importingCsv}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) {
+                  void handleCsvImport(file);
+                }
+                event.currentTarget.value = "";
+              }}
+            />
+          </label>
+
+          <button
+            type="button"
+            onClick={openAdd}
+            className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+            style={{ background: "var(--stitch-color-primary, #6366f1)" }}
+          >
+            <span className="material-symbols-outlined text-[20px]">add</span>
+            Thêm sản phẩm
+          </button>
+        </div>
       </div>
+
+      <div
+        className="mb-4 rounded-xl border px-4 py-3 text-xs"
+        style={{
+          borderColor:
+            "color-mix(in srgb, var(--stitch-color-outline-variant) 40%, transparent)",
+          color: "var(--stitch-color-on-surface-variant)",
+          background: "var(--stitch-color-surface-container-low)",
+        }}
+      >
+        CSV columns: name, slug, brand, description, status, sku, price,
+        compare_at_price, category, image_urls, specs.
+        <br />
+        Nhiều ảnh hoặc specs thì phân tách bằng ký tự |.
+        <br />
+        Chế độ import: <strong>Skip</strong> sẽ bỏ qua slug trùng, <strong>Upsert</strong> sẽ cập nhật sản phẩm đã có cùng slug.
+      </div>
+
+      {csvSummary && (
+        <div
+          className="mb-4 rounded-xl border p-4 text-sm"
+          style={{
+            borderColor:
+              csvSummary.failed > 0
+                ? "var(--stitch-color-warning, #f59e0b)"
+                : "var(--stitch-color-primary, #22c55e)",
+            color: "var(--stitch-color-on-surface)",
+            background:
+              csvSummary.failed > 0
+                ? "color-mix(in srgb, var(--stitch-color-warning) 12%, transparent)"
+                : "color-mix(in srgb, var(--stitch-color-primary) 10%, transparent)",
+          }}
+        >
+          <p className="font-semibold">
+            Import CSV ({csvSummary.importMode === "upsert" ? "upsert" : "skip"}): {csvSummary.imported}/{csvSummary.total} thành công,
+            tạo mới {csvSummary.created}, cập nhật {csvSummary.updated}, bỏ qua {csvSummary.skipped}
+            {csvSummary.failed > 0 ? `, lỗi ${csvSummary.failed}` : ""}
+          </p>
+          {csvSummary.errors.length > 0 && (
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-xs">
+              {csvSummary.errors.slice(0, 8).map((item, index) => (
+                <li key={`${item}-${index}`}>{item}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {error && (
         <div

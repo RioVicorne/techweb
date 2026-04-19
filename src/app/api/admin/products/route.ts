@@ -38,6 +38,374 @@ function isLikelyDirectImageUrl(value: string): boolean {
   }
 }
 
+type CreateProductInput = {
+  name: string;
+  slug: string;
+  description?: string | null;
+  brand?: string | null;
+  status?: string;
+  variants?: Array<{
+    sku: string;
+    name?: string;
+    price: number;
+    compareAtPrice?: number;
+    isActive?: boolean;
+    attributes?: Record<string, unknown>;
+  }>;
+  sku?: string;
+  price?: number;
+  compareAtPrice?: number;
+  attributes?: Record<string, unknown>;
+  imageUrls?: string[];
+  categoryId?: number | null;
+};
+
+type BulkImportMode = "create" | "skip" | "upsert";
+
+type BulkUpsertResult = {
+  status: "created" | "updated";
+  product: { id: number; name: string; slug: string };
+};
+
+async function createProductWithRelations(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  payload: CreateProductInput,
+): Promise<{ id: number; name: string; slug: string }> {
+  const {
+    name,
+    slug,
+    description,
+    brand,
+    status,
+    variants,
+    sku,
+    price,
+    compareAtPrice,
+    attributes,
+    imageUrls,
+    categoryId,
+  } = payload;
+
+  if (!name || !slug) {
+    throw new Error("Name and slug are required");
+  }
+
+  const { data: product, error: productError } = await supabase
+    .from("products")
+    .insert({
+      name,
+      slug,
+      description: description ?? null,
+      brand: brand ?? null,
+      status: status ?? "draft",
+    })
+    .select()
+    .single();
+
+  if (productError) {
+    throw new Error(productError.message);
+  }
+
+  const productId = (product as { id: number }).id;
+
+  const normalizedVariants: Array<{
+    sku: string;
+    name?: string;
+    price: number;
+    compareAtPrice?: number;
+    isActive?: boolean;
+    attributes?: Record<string, unknown>;
+  }> =
+    variants && variants.length > 0
+      ? variants
+      : sku && typeof price === "number" && Number.isFinite(price)
+        ? [
+            {
+              sku,
+              name: undefined,
+              price,
+              compareAtPrice,
+              attributes,
+              isActive: true,
+            },
+          ]
+        : [];
+
+  if (normalizedVariants.length > 0) {
+    const variantRows = normalizedVariants.map((variant) => ({
+      product_id: productId,
+      sku: variant.sku,
+      name: variant.name ?? null,
+      price: variant.price,
+      compare_at_price: variant.compareAtPrice ?? null,
+      is_active: variant.isActive ?? true,
+      attributes: variant.attributes ?? null,
+    }));
+
+    const { error: variantError } = await supabase
+      .from("product_variants")
+      .insert(variantRows);
+
+    if (variantError) {
+      throw new Error(variantError.message);
+    }
+  }
+
+  const cleanedImageUrls = (imageUrls ?? [])
+    .map((url) => String(url ?? "").trim())
+    .filter(Boolean)
+    .slice(0, 5);
+
+  const invalidImageUrl = cleanedImageUrls.find((url) => !isLikelyDirectImageUrl(url));
+  if (invalidImageUrl) {
+    throw new Error(`URL ảnh không hợp lệ hoặc không phải ảnh trực tiếp: ${invalidImageUrl}`);
+  }
+
+  if (cleanedImageUrls.length > 0) {
+    const imageRows = cleanedImageUrls.map((url, index) => ({
+      product_id: productId,
+      url,
+      alt: name,
+      sort_order: index,
+    }));
+
+    const { error: imageError } = await supabase
+      .from("product_images")
+      .insert(imageRows);
+
+    if (imageError) {
+      throw new Error(imageError.message);
+    }
+  }
+
+  if (typeof categoryId === "number" && Number.isFinite(categoryId) && categoryId > 0) {
+    const { error: categoryError } = await supabase
+      .from("product_categories")
+      .insert({
+        product_id: productId,
+        category_id: categoryId,
+      });
+
+    if (categoryError) {
+      throw new Error(categoryError.message);
+    }
+  }
+
+  return {
+    id: productId,
+    name,
+    slug,
+  };
+}
+
+function normalizeBulkImportMode(value: unknown): BulkImportMode {
+  if (value === "skip" || value === "upsert") {
+    return value;
+  }
+
+  return "create";
+}
+
+async function findProductBySlug(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  slug: string,
+): Promise<{ id: number; name: string; slug: string } | null> {
+  const { data, error } = await supabase
+    .from("products")
+    .select("id,name,slug")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data?.id) {
+    return null;
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    slug: data.slug,
+  };
+}
+
+async function updateProductWithRelations(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  productId: number,
+  payload: CreateProductInput,
+): Promise<{ id: number; name: string; slug: string }> {
+  const {
+    name,
+    slug,
+    description,
+    brand,
+    status,
+    variants,
+    sku,
+    price,
+    compareAtPrice,
+    attributes,
+    imageUrls,
+    categoryId,
+  } = payload;
+
+  if (!name || !slug) {
+    throw new Error("Name and slug are required");
+  }
+
+  const { error: productUpdateError } = await supabase
+    .from("products")
+    .update({
+      name,
+      slug,
+      description: description ?? null,
+      brand: brand ?? null,
+      status: status ?? "draft",
+    })
+    .eq("id", productId);
+
+  if (productUpdateError) {
+    throw new Error(productUpdateError.message);
+  }
+
+  const normalizedVariants: Array<{
+    sku: string;
+    name?: string;
+    price: number;
+    compareAtPrice?: number;
+    isActive?: boolean;
+    attributes?: Record<string, unknown>;
+  }> =
+    variants && variants.length > 0
+      ? variants
+      : sku && typeof price === "number" && Number.isFinite(price)
+        ? [
+            {
+              sku,
+              name: undefined,
+              price,
+              compareAtPrice,
+              attributes,
+              isActive: true,
+            },
+          ]
+        : [];
+
+  if (normalizedVariants.length > 0) {
+    const primaryVariant = normalizedVariants[0];
+
+    const { data: existingVariant, error: existingVariantError } = await supabase
+      .from("product_variants")
+      .select("id")
+      .eq("product_id", productId)
+      .order("id", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingVariantError) {
+      throw new Error(existingVariantError.message);
+    }
+
+    const variantRow = {
+      sku: primaryVariant.sku,
+      name: primaryVariant.name ?? null,
+      price: primaryVariant.price,
+      compare_at_price: primaryVariant.compareAtPrice ?? null,
+      is_active: primaryVariant.isActive ?? true,
+      attributes: primaryVariant.attributes ?? null,
+    };
+
+    if (existingVariant?.id) {
+      const { error: variantUpdateError } = await supabase
+        .from("product_variants")
+        .update(variantRow)
+        .eq("id", existingVariant.id)
+        .eq("product_id", productId);
+
+      if (variantUpdateError) {
+        throw new Error(variantUpdateError.message);
+      }
+    } else {
+      const { error: variantInsertError } = await supabase
+        .from("product_variants")
+        .insert({
+          product_id: productId,
+          ...variantRow,
+        });
+
+      if (variantInsertError) {
+        throw new Error(variantInsertError.message);
+      }
+    }
+  }
+
+  const cleanedImageUrls = (imageUrls ?? [])
+    .map((url) => String(url ?? "").trim())
+    .filter(Boolean)
+    .slice(0, 5);
+
+  const invalidImageUrl = cleanedImageUrls.find((url) => !isLikelyDirectImageUrl(url));
+  if (invalidImageUrl) {
+    throw new Error(`URL ảnh không hợp lệ hoặc không phải ảnh trực tiếp: ${invalidImageUrl}`);
+  }
+
+  const { error: deleteImageError } = await supabase
+    .from("product_images")
+    .delete()
+    .eq("product_id", productId);
+
+  if (deleteImageError) {
+    throw new Error(deleteImageError.message);
+  }
+
+  if (cleanedImageUrls.length > 0) {
+    const imageRows = cleanedImageUrls.map((url, index) => ({
+      product_id: productId,
+      url,
+      alt: name,
+      sort_order: index,
+    }));
+
+    const { error: insertImageError } = await supabase
+      .from("product_images")
+      .insert(imageRows);
+
+    if (insertImageError) {
+      throw new Error(insertImageError.message);
+    }
+  }
+
+  const { error: deleteCategoryError } = await supabase
+    .from("product_categories")
+    .delete()
+    .eq("product_id", productId);
+
+  if (deleteCategoryError) {
+    throw new Error(deleteCategoryError.message);
+  }
+
+  if (typeof categoryId === "number" && Number.isFinite(categoryId) && categoryId > 0) {
+    const { error: insertCategoryError } = await supabase
+      .from("product_categories")
+      .insert({
+        product_id: productId,
+        category_id: categoryId,
+      });
+
+    if (insertCategoryError) {
+      throw new Error(insertCategoryError.message);
+    }
+  }
+
+  return {
+    id: productId,
+    name,
+    slug,
+  };
+}
+
 export async function GET(req: Request) {
   const gate = await requireAdmin(req);
   if (!gate.ok) return gate.response;
@@ -184,174 +552,108 @@ export async function POST(req: NextRequest) {
   if (!gate.ok) return gate.response;
 
   try {
-    const body = await req.json();
-    const {
-      name,
-      slug,
-      description,
-      brand,
-      status,
-      variants,
-      sku,
-      price,
-      compareAtPrice,
-      attributes,
-      imageUrls,
-      categoryId,
-    }: {
-      name: string;
-      slug: string;
-      description?: string;
-      brand?: string;
-      status?: string;
-      variants?: Array<{
-        sku: string;
-        name?: string;
-        price: number;
-        compareAtPrice?: number;
-        isActive?: boolean;
-        attributes?: Record<string, unknown>;
-      }>;
-      sku?: string;
-      price?: number;
-      compareAtPrice?: number;
-      attributes?: Record<string, unknown>;
-      imageUrls?: string[];
-      categoryId?: number | null;
-    } = body;
-
-    if (!name || !slug) {
-      return NextResponse.json(
-        { error: "Name and slug are required" },
-        { status: 400 },
-      );
-    }
+    const body = (await req.json()) as CreateProductInput & {
+      products?: CreateProductInput[];
+      importMode?: BulkImportMode;
+    };
 
     const supabase = getSupabaseAdmin();
 
-    const { data: product, error: productError } = await supabase
-      .from("products")
-      .insert({
-        name,
-        slug,
-        description: description ?? null,
-        brand: brand ?? null,
-        status: status ?? "draft",
-      })
-      .select()
-      .single();
+    if (Array.isArray(body.products)) {
+      if (body.products.length === 0) {
+        return NextResponse.json({ error: "Danh sách sản phẩm import đang trống" }, { status: 400 });
+      }
 
-    if (productError) {
+      const maxBulkSize = 200;
+      if (body.products.length > maxBulkSize) {
+        return NextResponse.json(
+          { error: `Tối đa ${maxBulkSize} sản phẩm mỗi lần import` },
+          { status: 400 },
+        );
+      }
+
+      const importMode = normalizeBulkImportMode(body.importMode);
+      const errors: string[] = [];
+      let imported = 0;
+      let skipped = 0;
+      let updated = 0;
+      let created = 0;
+
+      for (const [index, item] of body.products.entries()) {
+        try {
+          const slug = String(item.slug ?? "").trim();
+          if (!slug) {
+            throw new Error("Slug là bắt buộc khi import");
+          }
+
+          const existing = await findProductBySlug(supabase, slug);
+
+          if (existing) {
+            if (importMode === "skip") {
+              skipped += 1;
+              continue;
+            }
+
+            if (importMode === "create") {
+              throw new Error(`Slug đã tồn tại: ${slug}`);
+            }
+
+            const upsertResult: BulkUpsertResult = {
+              status: "updated",
+              product: await updateProductWithRelations(supabase, existing.id, item),
+            };
+
+            imported += 1;
+            if (upsertResult.status === "updated") {
+              updated += 1;
+            } else {
+              created += 1;
+            }
+            continue;
+          }
+
+          const createdProduct = await createProductWithRelations(supabase, item);
+          const upsertResult: BulkUpsertResult = {
+            status: "created",
+            product: createdProduct,
+          };
+
+          imported += 1;
+          if (upsertResult.status === "created") {
+            created += 1;
+          } else {
+            updated += 1;
+          }
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Server error";
+          errors.push(`Dòng ${index + 1}: ${message}`);
+        }
+      }
+
+      revalidateTag("catalog:products");
+      revalidateTag("catalog:categories");
+
       return NextResponse.json(
-        { error: productError.message },
-        { status: 500 },
+        {
+          total: body.products.length,
+          importMode,
+          imported,
+          skipped,
+          updated,
+          created,
+          failed: body.products.length - imported - skipped,
+          errors,
+        },
+        { status: imported > 0 || skipped > 0 ? 200 : 400 },
       );
     }
 
-    const productId = (product as { id: number }).id;
-
-    const normalizedVariants: Array<{
-      sku: string;
-      name?: string;
-      price: number;
-      compareAtPrice?: number;
-      isActive?: boolean;
-      attributes?: Record<string, unknown>;
-    }> =
-      variants && variants.length > 0
-        ? variants
-        : sku && typeof price === "number" && Number.isFinite(price)
-          ? [
-              {
-                sku,
-                name: undefined,
-                price,
-                compareAtPrice,
-                attributes,
-                isActive: true,
-              },
-            ]
-          : [];
-
-    if (normalizedVariants.length > 0) {
-      const variantRows = normalizedVariants.map((v) => ({
-        product_id: productId,
-        sku: v.sku,
-        name: v.name ?? null,
-        price: v.price,
-        compare_at_price: v.compareAtPrice ?? null,
-        is_active: v.isActive ?? true,
-        attributes: v.attributes ?? null,
-      }));
-
-      const { error: variantError } = await supabase
-        .from("product_variants")
-        .insert(variantRows);
-
-      if (variantError) {
-        return NextResponse.json(
-          { error: variantError.message },
-          { status: 500 },
-        );
-      }
-    }
-
-    const cleanedImageUrls = (imageUrls ?? [])
-      .map((url) => String(url ?? "").trim())
-      .filter(Boolean)
-      .slice(0, 5);
-    const invalidImageUrl = cleanedImageUrls.find((url) => !isLikelyDirectImageUrl(url));
-
-    if (invalidImageUrl) {
-      return NextResponse.json(
-        { error: `URL ảnh không hợp lệ hoặc không phải ảnh trực tiếp: ${invalidImageUrl}` },
-        { status: 400 },
-      );
-    }
-
-    if (cleanedImageUrls.length > 0) {
-      const imageRows = cleanedImageUrls.map((url, index) => ({
-        product_id: productId,
-        url,
-        alt: name,
-        sort_order: index,
-      }));
-
-      const { error: imageError } = await supabase
-        .from("product_images")
-        .insert(imageRows);
-
-      if (imageError) {
-        return NextResponse.json(
-          { error: imageError.message },
-          { status: 500 },
-        );
-      }
-    }
-
-    if (typeof categoryId === "number" && Number.isFinite(categoryId) && categoryId > 0) {
-      const { error: categoryError } = await supabase
-        .from("product_categories")
-        .insert({
-          product_id: productId,
-          category_id: categoryId,
-        });
-
-      if (categoryError) {
-        return NextResponse.json(
-          { error: categoryError.message },
-          { status: 500 },
-        );
-      }
-    }
+    const created = await createProductWithRelations(supabase, body);
 
     revalidateTag("catalog:products");
     revalidateTag("catalog:categories");
 
-    return NextResponse.json(
-      { product: { id: productId, name, slug } },
-      { status: 201 },
-    );
+    return NextResponse.json({ product: created }, { status: 201 });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Server error";
     return NextResponse.json({ error: msg }, { status: 500 });
