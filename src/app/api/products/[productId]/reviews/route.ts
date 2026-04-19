@@ -84,7 +84,7 @@ export async function POST(
     }
 
     const ip = getRequestIp(req);
-    const limit = checkRateLimit(
+    const limit = await checkRateLimit(
       `reviews-submit:${ip}:${productIdNum}`,
       REVIEW_SUBMIT_LIMIT.maxRequests,
       REVIEW_SUBMIT_LIMIT.windowMs,

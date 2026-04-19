@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { formatVndDisplay } from "@/data/products";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
@@ -45,7 +45,7 @@ export function QrPaymentClient() {
   const [confirmingPayment, setConfirmingPayment] = useState(false);
   const [confirmSuccessText, setConfirmSuccessText] = useState<string | null>(null);
 
-  async function loadOrderStatus(targetOrderId: string): Promise<string | null> {
+  const loadOrderStatus = useCallback(async (targetOrderId: string): Promise<string | null> => {
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token || "";
     if (!token) {
@@ -67,7 +67,7 @@ export function QrPaymentClient() {
     setQrCodeUrl(json.order.qr_code_url);
 
     return json.order.payment_status;
-  }
+  }, [supabase]);
 
   useEffect(() => {
     if (!orderId) return;
@@ -95,7 +95,7 @@ export function QrPaymentClient() {
     return () => {
       cancelled = true;
     };
-  }, [orderId, router]);
+  }, [orderId, router, loadOrderStatus]);
 
   // Supabase Realtime subscription for payment status updates
   useEffect(() => {

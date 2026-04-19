@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const email = String(body.email ?? "").trim();
     const password = String(body.password ?? "");
 
-    const limit = checkRateLimit(
+    const limit = await checkRateLimit(
       `admin-login:${ip}:${email.toLowerCase()}`,
       ADMIN_LOGIN_LIMIT.maxRequests,
       ADMIN_LOGIN_LIMIT.windowMs,
