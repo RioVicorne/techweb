@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
 import { ORDER_STATUS_TABS, orderStatusTabColor, orderRowStatusLabel } from "@/lib/order-status-tabs";
 import { formatVndDisplay } from "@/data/products";
-import * as pcVN from "pc-vn";
 
 type OrderRow = {
   order_code: string;
@@ -84,6 +83,32 @@ type CacheEntry<T> = {
 const ACCOUNT_OVERVIEW_CACHE_TTL_MS = 15_000;
 const ACCOUNT_ORDER_DETAIL_CACHE_TTL_MS = 15_000;
 const SUGGESTED_PRODUCTS_CACHE_TTL_MS = 60_000;
+
+type LocationOption = { code: string; name: string };
+type VnAddressDataset = {
+  provinces: LocationOption[];
+  getDistrictsByProvinceCode: (provinceCode: string) => LocationOption[];
+  getWardsByDistrictCode: (districtCode: string) => LocationOption[];
+};
+
+let vnAddressDataPromise: Promise<VnAddressDataset> | null = null;
+
+async function loadVnAddressDataset(): Promise<VnAddressDataset> {
+  if (!vnAddressDataPromise) {
+    vnAddressDataPromise = import("pc-vn").then((mod) => {
+      const dataset = mod.default ?? mod;
+      return {
+        provinces: dataset.getProvinces() as LocationOption[],
+        getDistrictsByProvinceCode: (provinceCode: string) =>
+          (dataset.getDistrictsByProvinceCode(provinceCode) as LocationOption[]) ?? [],
+        getWardsByDistrictCode: (districtCode: string) =>
+          (dataset.getWardsByDistrictCode(districtCode) as LocationOption[]) ?? [],
+      };
+    });
+  }
+
+  return vnAddressDataPromise;
+}
 
 const overviewCache = new Map<string, CacheEntry<AccountOverviewValue>>();
 const overviewInFlight = new Map<string, Promise<AccountOverviewValue>>();
@@ -257,6 +282,7 @@ export function AccountClient() {
     wardCode: "",
     street: "",
   });
+  const [vnAddressData, setVnAddressData] = useState<VnAddressDataset | null>(null);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -340,92 +366,97 @@ export function AccountClient() {
       // Defer the (potentially heavy) address normalization/mapping work off the route transition path.
       setTimeout(() => {
         if (cancelled) return;
-        try {
-          const normalize = (s: string) =>
-            s
-              .trim()
-              .toLowerCase()
-              .replaceAll("thành phố", "")
-              .replaceAll("tỉnh", "")
-              .replaceAll("quận", "")
-              .replaceAll("huyện", "")
-              .replaceAll("thị xã", "")
-              .replaceAll("phường", "")
-              .replaceAll("xã", "")
-              .replaceAll("thị trấn", "")
-              .replaceAll(/\s+/g, " ")
-              .trim();
 
-          const provinces = pcVN.getProvinces() as Array<{ code: string; name: string }>;
-          const addr = meta.shipping_address as
-            | Partial<{
-                province_code: string;
-                district_code: string;
-                ward_code: string;
-                province: string;
-                district: string;
-                ward: string;
-                street: string;
-              }>
-            | undefined;
+        void (async () => {
+          try {
+            const dataset = await loadVnAddressDataset();
+            if (cancelled) return;
+            setVnAddressData(dataset);
 
-          const provinceCode =
-            String(addr?.province_code ?? "") ||
-            (() => {
-              const byName = String(addr?.province ?? "");
-              if (!byName) return "";
-              const n = normalize(byName);
-              const hit =
-                provinces.find((p) => normalize(p.name) === n) ??
-                provinces.find(
-                  (p) => normalize(p.name).includes(n) || n.includes(normalize(p.name)),
-                );
-              return hit?.code ?? "";
-            })();
+            const normalize = (s: string) =>
+              s
+                .trim()
+                .toLowerCase()
+                .replaceAll("thành phố", "")
+                .replaceAll("tỉnh", "")
+                .replaceAll("quận", "")
+                .replaceAll("huyện", "")
+                .replaceAll("thị xã", "")
+                .replaceAll("phường", "")
+                .replaceAll("xã", "")
+                .replaceAll("thị trấn", "")
+                .replaceAll(/\s+/g, " ")
+                .trim();
 
-          const districts = provinceCode
-            ? ((pcVN.getDistrictsByProvinceCode(provinceCode) as Array<{ code: string; name: string }>) ?? [])
-            : [];
+            const provinces = dataset.provinces;
+            const addr = meta.shipping_address as
+              | Partial<{
+                  province_code: string;
+                  district_code: string;
+                  ward_code: string;
+                  province: string;
+                  district: string;
+                  ward: string;
+                  street: string;
+                }>
+              | undefined;
 
-          const districtCode =
-            String(addr?.district_code ?? "") ||
-            (() => {
-              const byName = String(addr?.district ?? "");
-              if (!byName || !districts.length) return "";
-              const n = normalize(byName);
-              const hit =
-                districts.find((d) => normalize(d.name) === n) ??
-                districts.find(
-                  (d) => normalize(d.name).includes(n) || n.includes(normalize(d.name)),
-                );
-              return hit?.code ?? "";
-            })();
+            const provinceCode =
+              String(addr?.province_code ?? "") ||
+              (() => {
+                const byName = String(addr?.province ?? "");
+                if (!byName) return "";
+                const n = normalize(byName);
+                const hit =
+                  provinces.find((p) => normalize(p.name) === n) ??
+                  provinces.find(
+                    (p) => normalize(p.name).includes(n) || n.includes(normalize(p.name)),
+                  );
+                return hit?.code ?? "";
+              })();
 
-          const wards = districtCode
-            ? ((pcVN.getWardsByDistrictCode(districtCode) as Array<{ code: string; name: string }>) ?? [])
-            : [];
+            const districts = provinceCode ? dataset.getDistrictsByProvinceCode(provinceCode) : [];
 
-          const wardCode =
-            String(addr?.ward_code ?? "") ||
-            (() => {
-              const byName = String(addr?.ward ?? "");
-              if (!byName || !wards.length) return "";
-              const n = normalize(byName);
-              const hit =
-                wards.find((w) => normalize(w.name) === n) ??
-                wards.find((w) => normalize(w.name).includes(n) || n.includes(normalize(w.name)));
-              return hit?.code ?? "";
-            })();
+            const districtCode =
+              String(addr?.district_code ?? "") ||
+              (() => {
+                const byName = String(addr?.district ?? "");
+                if (!byName || !districts.length) return "";
+                const n = normalize(byName);
+                const hit =
+                  districts.find((d) => normalize(d.name) === n) ??
+                  districts.find(
+                    (d) => normalize(d.name).includes(n) || n.includes(normalize(d.name)),
+                  );
+                return hit?.code ?? "";
+              })();
 
-          setShippingAddress({
-            provinceCode,
-            districtCode,
-            wardCode,
-            street: String(addr?.street ?? ""),
-          });
-        } catch {
-          // best-effort; ignore mapping errors
-        }
+            const wards = districtCode ? dataset.getWardsByDistrictCode(districtCode) : [];
+
+            const wardCode =
+              String(addr?.ward_code ?? "") ||
+              (() => {
+                const byName = String(addr?.ward ?? "");
+                if (!byName || !wards.length) return "";
+                const n = normalize(byName);
+                const hit =
+                  wards.find((w) => normalize(w.name) === n) ??
+                  wards.find((w) => normalize(w.name).includes(n) || n.includes(normalize(w.name)));
+                return hit?.code ?? "";
+              })();
+
+            if (!cancelled) {
+              setShippingAddress({
+                provinceCode,
+                districtCode,
+                wardCode,
+                street: String(addr?.street ?? ""),
+              });
+            }
+          } catch {
+            // best-effort; ignore mapping errors
+          }
+        })();
       }, 0);
     }
     run();
@@ -465,7 +496,7 @@ export function AccountClient() {
     };
   }, [selectedOrderId, supabase]);
 
-  const provinces = useMemo(() => pcVN.getProvinces() as Array<{ code: string; name: string }>, []);
+  const provinces = useMemo(() => vnAddressData?.provinces ?? [], [vnAddressData]);
 
   const selectedProvince = useMemo(
     () => provinces.find((p) => p.code === shippingAddress.provinceCode) ?? null,
@@ -473,9 +504,9 @@ export function AccountClient() {
   );
 
   const districts = useMemo(() => {
-    if (!shippingAddress.provinceCode) return [];
-    return pcVN.getDistrictsByProvinceCode(shippingAddress.provinceCode) as Array<{ code: string; name: string }>;
-  }, [shippingAddress.provinceCode]);
+    if (!vnAddressData || !shippingAddress.provinceCode) return [];
+    return vnAddressData.getDistrictsByProvinceCode(shippingAddress.provinceCode);
+  }, [vnAddressData, shippingAddress.provinceCode]);
 
   const selectedDistrict = useMemo(
     () => districts.find((d) => d.code === shippingAddress.districtCode) ?? null,
@@ -483,9 +514,9 @@ export function AccountClient() {
   );
 
   const wards = useMemo(() => {
-    if (!shippingAddress.districtCode) return [];
-    return pcVN.getWardsByDistrictCode(shippingAddress.districtCode) as Array<{ code: string; name: string }>;
-  }, [shippingAddress.districtCode]);
+    if (!vnAddressData || !shippingAddress.districtCode) return [];
+    return vnAddressData.getWardsByDistrictCode(shippingAddress.districtCode);
+  }, [vnAddressData, shippingAddress.districtCode]);
 
   const selectedWard = useMemo(
     () => wards.find((w) => w.code === shippingAddress.wardCode) ?? null,
@@ -1030,6 +1061,7 @@ export function AccountClient() {
                       <select
                         className="w-full appearance-none rounded-xl px-4 py-3 pr-10 text-sm font-bold text-white outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)] disabled:opacity-60"
                         value={shippingAddress.provinceCode}
+                        disabled={!vnAddressData}
                         onChange={(e) =>
                           setShippingAddress((a) => ({
                             ...a,
@@ -1046,7 +1078,7 @@ export function AccountClient() {
                         }}
                       >
                         <option value="">
-                          Chọn Tỉnh / Thành phố
+                          {vnAddressData ? "Chọn Tỉnh / Thành phố" : "Đang tải danh sách Tỉnh / Thành phố..."}
                         </option>
                         {provinces.map((p) => (
                           <option key={p.code} value={p.code}>
@@ -1075,7 +1107,7 @@ export function AccountClient() {
                         onChange={(e) =>
                           setShippingAddress((a) => ({ ...a, districtCode: e.target.value, wardCode: "" }))
                         }
-                        disabled={!shippingAddress.provinceCode}
+                        disabled={!vnAddressData || !shippingAddress.provinceCode}
                         style={{
                           background:
                             "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
@@ -1084,7 +1116,11 @@ export function AccountClient() {
                         }}
                       >
                         <option value="">
-                          {shippingAddress.provinceCode ? "Chọn Quận / Huyện" : "Chọn Tỉnh/TP trước"}
+                          {!vnAddressData
+                            ? "Đang tải danh sách Quận / Huyện..."
+                            : shippingAddress.provinceCode
+                              ? "Chọn Quận / Huyện"
+                              : "Chọn Tỉnh/TP trước"}
                         </option>
                         {districts.map((d) => (
                           <option key={d.code} value={d.code}>
@@ -1111,7 +1147,7 @@ export function AccountClient() {
                         className="w-full appearance-none rounded-xl px-4 py-3 pr-10 text-sm font-bold text-white outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)] disabled:opacity-60"
                         value={shippingAddress.wardCode}
                         onChange={(e) => setShippingAddress((a) => ({ ...a, wardCode: e.target.value }))}
-                        disabled={!shippingAddress.districtCode}
+                        disabled={!vnAddressData || !shippingAddress.districtCode}
                         style={{
                           background:
                             "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
@@ -1120,7 +1156,11 @@ export function AccountClient() {
                         }}
                       >
                         <option value="">
-                          {shippingAddress.districtCode ? "Chọn Phường / Xã" : "Chọn Quận/Huyện trước"}
+                          {!vnAddressData
+                            ? "Đang tải danh sách Phường / Xã..."
+                            : shippingAddress.districtCode
+                              ? "Chọn Phường / Xã"
+                              : "Chọn Quận/Huyện trước"}
                         </option>
                         {wards.map((w) => (
                           <option key={w.code} value={w.code}>
