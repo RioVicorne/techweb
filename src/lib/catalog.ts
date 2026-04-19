@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { formatVndDisplay } from "@/data/products";
 
@@ -73,68 +74,101 @@ type DbCategoryRow = {
   hero_gradient: string | null;
 };
 
-export async function getCatalogProducts(): Promise<CatalogProduct[]> {
-  const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
-    .from("products")
-    .select("slug,name,default_variant_id,product_variants(id,price),product_images(url,sort_order)")
-    .order("created_at", { ascending: false })
-    .limit(24);
+const getCatalogProductsCached = unstable_cache(
+  async (): Promise<CatalogProduct[]> => {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("products")
+      .select("slug,name,default_variant_id,product_variants(id,price),product_images(url,sort_order)")
+      .order("created_at", { ascending: false })
+      .limit(24);
 
-  if (error) throw new Error(error.message);
-  const rows = (data ?? []) as unknown as DbProductRow[];
-  return rows
-    .filter((r) => typeof r.slug === "string" && r.slug)
-    .map(mapToUiProduct);
+    if (error) throw new Error(error.message);
+    const rows = (data ?? []) as unknown as DbProductRow[];
+    return rows
+      .filter((r) => typeof r.slug === "string" && r.slug)
+      .map(mapToUiProduct);
+  },
+  ["catalog-products"],
+  {
+    revalidate: 300,
+    tags: ["catalog:products"],
+  },
+);
+
+const getCatalogCategoriesCached = unstable_cache(
+  async (): Promise<CatalogCategory[]> => {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("categories")
+      .select("id,slug,name,parent_id,is_active,sort_order,hero_headline,hero_sub,hero_gradient")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true });
+
+    if (error) throw new Error(error.message);
+    const rows = (data ?? []) as unknown as DbCategoryRow[];
+    return rows
+      .filter((r) => typeof r.slug === "string" && r.slug && typeof r.name === "string" && r.name)
+      .map((r) => ({
+        id: Number(r.id),
+        slug: r.slug,
+        name: r.name,
+        parentId: r.parent_id ?? null,
+        heroHeadline: r.hero_headline ?? null,
+        heroSub: r.hero_sub ?? null,
+        heroGradient: r.hero_gradient ?? null,
+      }));
+  },
+  ["catalog-categories"],
+  {
+    revalidate: 300,
+    tags: ["catalog:categories"],
+  },
+);
+
+export async function getCatalogProducts(): Promise<CatalogProduct[]> {
+  return getCatalogProductsCached();
 }
 
 export async function getCatalogCategories(): Promise<CatalogCategory[]> {
-  const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
-    .from("categories")
-    .select("id,slug,name,parent_id,is_active,sort_order,hero_headline,hero_sub,hero_gradient")
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true })
-    .order("name", { ascending: true });
-
-  if (error) throw new Error(error.message);
-  const rows = (data ?? []) as unknown as DbCategoryRow[];
-  return rows
-    .filter((r) => typeof r.slug === "string" && r.slug && typeof r.name === "string" && r.name)
-    .map((r) => ({
-      id: Number(r.id),
-      slug: r.slug,
-      name: r.name,
-      parentId: r.parent_id ?? null,
-      heroHeadline: r.hero_headline ?? null,
-      heroSub: r.hero_sub ?? null,
-      heroGradient: r.hero_gradient ?? null,
-    }));
+  return getCatalogCategoriesCached();
 }
+
+const getCatalogProductsByCategorySlugCached = unstable_cache(
+  async (categorySlug: string): Promise<CatalogProduct[]> => {
+    const s = categorySlug.trim().toLowerCase();
+    if (!s) return getCatalogProducts();
+
+    const supabase = getSupabaseAdmin();
+    // Fetch products where product_categories.category_id belongs to the category with slug = s
+    // This relies on FK relations present in Supabase (PostgREST).
+    const { data, error } = await supabase
+      .from("products")
+      .select(
+        "slug,name,default_variant_id,product_variants(id,price),product_images(url,sort_order),product_categories!inner(category_id,categories!inner(slug))",
+      )
+      .eq("product_categories.categories.slug", s)
+      .order("created_at", { ascending: false })
+      .limit(24);
+
+    if (error) throw new Error(error.message);
+    const rows = (data ?? []) as unknown as DbProductRow[];
+    return rows
+      .filter((r) => typeof r.slug === "string" && r.slug)
+      .map(mapToUiProduct);
+  },
+  ["catalog-products-by-category"],
+  {
+    revalidate: 300,
+    tags: ["catalog:products", "catalog:categories"],
+  },
+);
 
 export async function getCatalogProductsByCategorySlug(
   categorySlug: string,
 ): Promise<CatalogProduct[]> {
-  const s = categorySlug.trim().toLowerCase();
-  if (!s) return getCatalogProducts();
-
-  const supabase = getSupabaseAdmin();
-  // Fetch products where product_categories.category_id belongs to the category with slug = s
-  // This relies on FK relations present in Supabase (PostgREST).
-  const { data, error } = await supabase
-    .from("products")
-    .select(
-      "slug,name,default_variant_id,product_variants(id,price),product_images(url,sort_order),product_categories!inner(category_id,categories!inner(slug))",
-    )
-    .eq("product_categories.categories.slug", s)
-    .order("created_at", { ascending: false })
-    .limit(24);
-
-  if (error) throw new Error(error.message);
-  const rows = (data ?? []) as unknown as DbProductRow[];
-  return rows
-    .filter((r) => typeof r.slug === "string" && r.slug)
-    .map(mapToUiProduct);
+  return getCatalogProductsByCategorySlugCached(categorySlug);
 }
 
 export async function getCatalogProductBySlug(slug: string): Promise<CatalogProduct | null> {

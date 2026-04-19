@@ -5,6 +5,8 @@ import { splitHomeProductSections } from "@/components/features/home/shared/home
 import { getCatalogCategories, getCatalogProducts } from "@/lib/catalog";
 import { NAV_CATEGORY_MENU_MAX } from "@/lib/nav-category-fallback";
 
+export const revalidate = 300;
+
 export default async function Home() {
   const [products, categoriesRaw] = await Promise.all([getCatalogProducts(), getCatalogCategories()]);
   const homeCategories = categoriesRaw.slice(0, NAV_CATEGORY_MENU_MAX).map((c) => ({ slug: c.slug, name: c.name }));

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
 type Mode = "login" | "signup";
@@ -47,54 +47,10 @@ export function LoginClient() {
   const [typedLength, setTypedLength] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showCaret, setShowCaret] = useState(true);
-  const audioContextRef = useRef<AudioContext | null>(null);
   const typingDelayMs = 120;
   const deletingDelayMs = 70;
   const pauseAfterTypedMs = 5000;
   const pauseBeforeRetypeMs = 450;
-
-  const playTick = useCallback(() => {
-    if (typeof window === "undefined") return;
-
-    const AudioCtx = window.AudioContext;
-    if (!AudioCtx) return;
-
-    if (!audioContextRef.current) {
-      audioContextRef.current = new AudioCtx();
-    }
-
-    const ctx = audioContextRef.current;
-    if (ctx.state !== "running") return;
-
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-
-    oscillator.type = "square";
-    oscillator.frequency.setValueAtTime(1300, ctx.currentTime);
-
-    gainNode.gain.setValueAtTime(0.0001, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.018, ctx.currentTime + 0.004);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
-
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
-
-    oscillator.start();
-    oscillator.stop(ctx.currentTime + 0.055);
-  }, []);
-
-  const unlockAudio = useCallback(() => {
-    if (typeof window === "undefined") return;
-
-    const AudioCtx = window.AudioContext;
-    if (!AudioCtx) return;
-
-    if (!audioContextRef.current) {
-      audioContextRef.current = new AudioCtx();
-    }
-
-    void audioContextRef.current.resume();
-  }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -112,7 +68,6 @@ export function LoginClient() {
       }
 
       setTypedLength((prev) => prev + (isDeleting ? -1 : 1));
-      playTick();
     },
     !isDeleting && typedLength >= heroText.length
       ? pauseAfterTypedMs
@@ -123,17 +78,7 @@ export function LoginClient() {
           : typingDelayMs);
 
     return () => window.clearTimeout(timer);
-  }, [heroText.length, isDeleting, playTick, typedLength]);
-
-  useEffect(() => {
-    window.addEventListener("pointerdown", unlockAudio);
-    window.addEventListener("keydown", unlockAudio);
-
-    return () => {
-      window.removeEventListener("pointerdown", unlockAudio);
-      window.removeEventListener("keydown", unlockAudio);
-    };
-  }, [unlockAudio]);
+  }, [heroText.length, isDeleting, typedLength]);
 
   useEffect(() => {
     const caretTimer = setInterval(() => {
@@ -141,14 +86,6 @@ export function LoginClient() {
     }, 500);
 
     return () => clearInterval(caretTimer);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (audioContextRef.current) {
-        void audioContextRef.current.close();
-      }
-    };
   }, []);
 
   const typedHeroText = heroText.slice(0, typedLength);
@@ -244,7 +181,7 @@ export function LoginClient() {
 
   return (
     <div
-      className="min-h-dvh p-4"
+      className="flex min-h-[100dvh] items-center p-4 pt-24 lg:pt-4"
       style={{
         background:
           "radial-gradient(circle at 20% 30%, rgba(133, 173, 255, 0.05) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(255, 108, 144, 0.05) 0%, transparent 40%)",

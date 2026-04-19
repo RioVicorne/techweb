@@ -199,6 +199,10 @@ export function ShopHeader() {
     };
   }, []);
 
+  useEffect(() => {
+    router.prefetch("/");
+  }, [router]);
+
   const hidden = pathname.startsWith("/admin") || pathname.startsWith("/login");
   if (hidden) return null;
 

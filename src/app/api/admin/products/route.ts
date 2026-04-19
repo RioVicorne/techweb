@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
@@ -344,6 +345,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    revalidateTag("catalog:products");
+    revalidateTag("catalog:categories");
+
     return NextResponse.json(
       { product: { id: productId, name, slug } },
       { status: 201 },
@@ -572,6 +576,9 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
+    revalidateTag("catalog:products");
+    revalidateTag("catalog:categories");
+
     return NextResponse.json({ product }, { status: 200 });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Server error";
@@ -601,6 +608,9 @@ export async function DELETE(req: NextRequest) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    revalidateTag("catalog:products");
+    revalidateTag("catalog:categories");
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (e) {
