@@ -13,6 +13,14 @@ import {
 } from "@/lib/order-status-tabs";
 import { useLiveOrderTime } from "@/hooks/useLiveOrderTime";
 
+const ORDERS_CACHE_TTL_MS = 15_000;
+const ORDER_DETAIL_CACHE_TTL_MS = 15_000;
+
+type CacheEntry<T> = {
+  value: T;
+  expiresAt: number;
+};
+
 type OrderRow = {
   id?: string;
   order_code: string;
@@ -34,6 +42,115 @@ type OrderDetail = {
   shipping_vnd: number;
   total_vnd: number;
 };
+
+type OrdersSummaryCacheValue = {
+  orders: OrderRow[];
+  counts: Record<string, number>;
+};
+
+type OrderDetailCacheValue = {
+  order: OrderDetail | null;
+};
+
+const ordersSummaryCache = new Map<string, CacheEntry<OrdersSummaryCacheValue>>();
+const ordersSummaryInFlight = new Map<string, Promise<OrdersSummaryCacheValue>>();
+
+const orderDetailCache = new Map<string, CacheEntry<OrderDetailCacheValue>>();
+const orderDetailInFlight = new Map<string, Promise<OrderDetailCacheValue>>();
+
+function getCachedValue<T>(cache: Map<string, CacheEntry<T>>, key: string): T | null {
+  const hit = cache.get(key);
+  if (!hit) return null;
+  if (hit.expiresAt <= Date.now()) {
+    cache.delete(key);
+    return null;
+  }
+  return hit.value;
+}
+
+function setCachedValue<T>(cache: Map<string, CacheEntry<T>>, key: string, value: T, ttlMs: number): void {
+  cache.set(key, {
+    value,
+    expiresAt: Date.now() + ttlMs,
+  });
+}
+
+async function fetchOrdersSummary(token: string): Promise<OrdersSummaryCacheValue> {
+  const cacheKey = token;
+  const cached = getCachedValue(ordersSummaryCache, cacheKey);
+  if (cached) return cached;
+
+  const inFlight = ordersSummaryInFlight.get(cacheKey);
+  if (inFlight) return inFlight;
+
+  const req = (async () => {
+    const res = await fetch("/api/account/orders-summary", {
+      method: "GET",
+      headers: { authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to load orders summary (${res.status})`);
+    }
+
+    const json = (await res.json()) as {
+      orders?: OrderRow[];
+      counts?: Record<string, number>;
+    };
+
+    const value: OrdersSummaryCacheValue = {
+      orders: Array.isArray(json.orders) ? json.orders : [],
+      counts: json.counts && typeof json.counts === "object" ? json.counts : {},
+    };
+
+    setCachedValue(ordersSummaryCache, cacheKey, value, ORDERS_CACHE_TTL_MS);
+    return value;
+  })().finally(() => {
+    ordersSummaryInFlight.delete(cacheKey);
+  });
+
+  ordersSummaryInFlight.set(cacheKey, req);
+  return req;
+}
+
+async function fetchOrderDetail(token: string, orderId: string): Promise<OrderDetailCacheValue> {
+  const cacheKey = `${token}:${orderId}`;
+  const cached = getCachedValue(orderDetailCache, cacheKey);
+  if (cached) return cached;
+
+  const inFlight = orderDetailInFlight.get(cacheKey);
+  if (inFlight) return inFlight;
+
+  const req = (async () => {
+    const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
+      method: "GET",
+      headers: { authorization: `Bearer ${token}` },
+    });
+
+    if (res.status === 404) {
+      const value: OrderDetailCacheValue = { order: null };
+      setCachedValue(orderDetailCache, cacheKey, value, ORDER_DETAIL_CACHE_TTL_MS);
+      return value;
+    }
+
+    if (!res.ok) {
+      throw new Error(`Failed to load order detail (${res.status})`);
+    }
+
+    const json = (await res.json()) as { order?: unknown };
+    const value: OrderDetailCacheValue = {
+      order: json.order ? (json.order as OrderDetail) : null,
+    };
+
+    setCachedValue(orderDetailCache, cacheKey, value, ORDER_DETAIL_CACHE_TTL_MS);
+    return value;
+  })().finally(() => {
+    orderDetailInFlight.delete(cacheKey);
+  });
+
+  orderDetailInFlight.set(cacheKey, req);
+  return req;
+}
 
 function OrderCreatedAtLabel({ iso }: { iso: string }) {
   const label = useLiveOrderTime(iso);
@@ -85,23 +202,22 @@ export function OrdersClient() {
           router.replace(`/login?returnTo=${encodeURIComponent("/orders")}`);
           return;
         }
-        const res = await fetch("/api/account/orders-summary", {
-          method: "GET",
-          headers: { authorization: `Bearer ${token}` },
-        });
-        const json = (await res.json()) as {
-          orders?: OrderRow[];
-          counts?: Record<string, number>;
-        };
+
+        const summary = await fetchOrdersSummary(token);
         if (!cancelled) {
-          setOrders(Array.isArray(json.orders) ? json.orders : []);
-          setCounts(json.counts && typeof json.counts === "object" ? json.counts : {});
+          setOrders(summary.orders);
+          setCounts(summary.counts);
+        }
+      } catch {
+        if (!cancelled) {
+          setOrders([]);
+          setCounts({});
         }
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
-    run();
+    void run();
     return () => {
       cancelled = true;
     };
@@ -115,6 +231,7 @@ export function OrdersClient() {
         setDetailLoading(false);
         return;
       }
+
       setDetailLoading(true);
       try {
         const { data } = await supabase.auth.getSession();
@@ -124,21 +241,17 @@ export function OrdersClient() {
           return;
         }
 
-        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
-          method: "GET",
-          headers: { authorization: `Bearer ${token}` },
-        });
-        const json = (await res.json()) as { order?: unknown };
-        if (!res.ok || !json.order) {
-          if (!cancelled) setDetail(null);
-          return;
+        const detailResult = await fetchOrderDetail(token, orderId);
+        if (!cancelled) {
+          setDetail(detailResult.order);
         }
-        if (!cancelled) setDetail(json.order as OrderDetail);
+      } catch {
+        if (!cancelled) setDetail(null);
       } finally {
         if (!cancelled) setDetailLoading(false);
       }
     }
-    run();
+    void run();
     return () => {
       cancelled = true;
     };

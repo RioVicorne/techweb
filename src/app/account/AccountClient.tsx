@@ -62,6 +62,188 @@ type OrderDetail = {
   totalVnd: number;
 };
 
+type AccountOverviewValue = {
+  orders: OrderRow[];
+  counts: Record<string, number>;
+  purchases: PurchaseRow[];
+};
+
+type AccountOrderDetailValue = {
+  order: OrderDetail | null;
+};
+
+type SuggestedProductsValue = {
+  products: SuggestedProduct[];
+};
+
+type CacheEntry<T> = {
+  value: T;
+  expiresAt: number;
+};
+
+const ACCOUNT_OVERVIEW_CACHE_TTL_MS = 15_000;
+const ACCOUNT_ORDER_DETAIL_CACHE_TTL_MS = 15_000;
+const SUGGESTED_PRODUCTS_CACHE_TTL_MS = 60_000;
+
+const overviewCache = new Map<string, CacheEntry<AccountOverviewValue>>();
+const overviewInFlight = new Map<string, Promise<AccountOverviewValue>>();
+
+const orderDetailCache = new Map<string, CacheEntry<AccountOrderDetailValue>>();
+const orderDetailInFlight = new Map<string, Promise<AccountOrderDetailValue>>();
+
+const suggestedCache = new Map<string, CacheEntry<SuggestedProductsValue>>();
+const suggestedInFlight = new Map<string, Promise<SuggestedProductsValue>>();
+
+function getCachedValue<T>(cache: Map<string, CacheEntry<T>>, key: string): T | null {
+  const hit = cache.get(key);
+  if (!hit) return null;
+  if (hit.expiresAt <= Date.now()) {
+    cache.delete(key);
+    return null;
+  }
+  return hit.value;
+}
+
+function setCachedValue<T>(cache: Map<string, CacheEntry<T>>, key: string, value: T, ttlMs: number): void {
+  cache.set(key, {
+    value,
+    expiresAt: Date.now() + ttlMs,
+  });
+}
+
+async function fetchOverview(token: string): Promise<AccountOverviewValue> {
+  const cacheKey = token;
+  const cached = getCachedValue(overviewCache, cacheKey);
+  if (cached) return cached;
+
+  const inFlight = overviewInFlight.get(cacheKey);
+  if (inFlight) return inFlight;
+
+  const req = (async () => {
+    const overviewRes = await fetch("/api/account/overview", {
+      method: "GET",
+      headers: { authorization: `Bearer ${token}` },
+    });
+
+    if (!overviewRes.ok) {
+      throw new Error(`Failed to load account overview (${overviewRes.status})`);
+    }
+
+    const overviewJson = (await overviewRes.json()) as {
+      orders?: OrderRow[];
+      counts?: Record<string, number>;
+      purchases?: PurchaseRow[];
+    };
+
+    const value: AccountOverviewValue = {
+      orders: Array.isArray(overviewJson.orders) ? overviewJson.orders : [],
+      purchases: Array.isArray(overviewJson.purchases) ? overviewJson.purchases : [],
+      counts: overviewJson.counts && typeof overviewJson.counts === "object" ? overviewJson.counts : {},
+    };
+
+    setCachedValue(overviewCache, cacheKey, value, ACCOUNT_OVERVIEW_CACHE_TTL_MS);
+    return value;
+  })().finally(() => {
+    overviewInFlight.delete(cacheKey);
+  });
+
+  overviewInFlight.set(cacheKey, req);
+  return req;
+}
+
+async function fetchSuggestedProducts(): Promise<SuggestedProductsValue> {
+  const cacheKey = "products";
+  const cached = getCachedValue(suggestedCache, cacheKey);
+  if (cached) return cached;
+
+  const inFlight = suggestedInFlight.get(cacheKey);
+  if (inFlight) return inFlight;
+
+  const req = (async () => {
+    const suggestedRes = await fetch("/api/catalog/products", { method: "GET" });
+    if (!suggestedRes.ok) {
+      throw new Error(`Failed to load suggested products (${suggestedRes.status})`);
+    }
+
+    const suggestedJson = (await suggestedRes.json()) as { products?: SuggestedProduct[] };
+    const value: SuggestedProductsValue = {
+      products: Array.isArray(suggestedJson.products) ? suggestedJson.products.slice(0, 6) : [],
+    };
+
+    setCachedValue(suggestedCache, cacheKey, value, SUGGESTED_PRODUCTS_CACHE_TTL_MS);
+    return value;
+  })().finally(() => {
+    suggestedInFlight.delete(cacheKey);
+  });
+
+  suggestedInFlight.set(cacheKey, req);
+  return req;
+}
+
+async function fetchSelectedOrder(token: string, selectedOrderId: string): Promise<AccountOrderDetailValue> {
+  const cacheKey = `${token}:${selectedOrderId}`;
+  const cached = getCachedValue(orderDetailCache, cacheKey);
+  if (cached) return cached;
+
+  const inFlight = orderDetailInFlight.get(cacheKey);
+  if (inFlight) return inFlight;
+
+  const req = (async () => {
+    const res = await fetch(`/api/orders/${encodeURIComponent(selectedOrderId)}`, {
+      method: "GET",
+      headers: { authorization: `Bearer ${token}` },
+    });
+
+    if (res.status === 404) {
+      const value: AccountOrderDetailValue = { order: null };
+      setCachedValue(orderDetailCache, cacheKey, value, ACCOUNT_ORDER_DETAIL_CACHE_TTL_MS);
+      return value;
+    }
+
+    if (!res.ok) {
+      throw new Error(`Failed to load selected order (${res.status})`);
+    }
+
+    const json = (await res.json()) as { order?: unknown };
+    const o = json.order as Partial<ServerOrderRow> | undefined;
+
+    if (
+      !o?.id ||
+      !o.created_at ||
+      !o.customer ||
+      typeof o.subtotal_vnd !== "number" ||
+      typeof o.shipping_vnd !== "number" ||
+      typeof o.total_vnd !== "number"
+    ) {
+      const value: AccountOrderDetailValue = { order: null };
+      setCachedValue(orderDetailCache, cacheKey, value, ACCOUNT_ORDER_DETAIL_CACHE_TTL_MS);
+      return value;
+    }
+
+    const value: AccountOrderDetailValue = {
+      order: {
+        orderId: String(o.id),
+        createdAt: String(o.created_at),
+        customerName: String(o.customer.name ?? ""),
+        phone: String(o.customer.phone ?? ""),
+        email: String(o.customer.email ?? ""),
+        address: String(o.customer.address ?? ""),
+        subtotalVnd: Number(o.subtotal_vnd),
+        shippingVnd: Number(o.shipping_vnd),
+        totalVnd: Number(o.total_vnd),
+      },
+    };
+
+    setCachedValue(orderDetailCache, cacheKey, value, ACCOUNT_ORDER_DETAIL_CACHE_TTL_MS);
+    return value;
+  })().finally(() => {
+    orderDetailInFlight.delete(cacheKey);
+  });
+
+  orderDetailInFlight.set(cacheKey, req);
+  return req;
+}
+
 export function AccountClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -126,33 +308,30 @@ export function AccountClient() {
         setPhone(String(meta.phone ?? ""));
       }
       try {
-        const overviewRes = await fetch("/api/account/overview", {
-          method: "GET",
-          headers: { authorization: `Bearer ${token}` },
-        });
-
-        const overviewJson = (await overviewRes.json()) as {
-          orders?: OrderRow[];
-          counts?: Record<string, number>;
-          purchases?: PurchaseRow[];
-        };
-
-        const purchasesArr = Array.isArray(overviewJson.purchases) ? overviewJson.purchases : [];
+        const overview = await fetchOverview(token);
 
         let suggestedArr: SuggestedProduct[] = [];
-        if (purchasesArr.length === 0) {
-          const suggestedRes = await fetch("/api/catalog/products", { method: "GET" });
-          const suggestedJson = (await suggestedRes.json()) as { products?: SuggestedProduct[] };
-          suggestedArr = Array.isArray(suggestedJson.products) ? suggestedJson.products.slice(0, 6) : [];
+        if (overview.purchases.length === 0) {
+          try {
+            const suggested = await fetchSuggestedProducts();
+            suggestedArr = suggested.products;
+          } catch {
+            suggestedArr = [];
+          }
         }
 
         if (!cancelled) {
-          setOrders(Array.isArray(overviewJson.orders) ? overviewJson.orders : []);
-          setPurchases(purchasesArr);
+          setOrders(overview.orders);
+          setPurchases(overview.purchases);
           setSuggested(suggestedArr);
-          setStatusCounts(
-            overviewJson.counts && typeof overviewJson.counts === "object" ? overviewJson.counts : {},
-          );
+          setStatusCounts(overview.counts);
+        }
+      } catch {
+        if (!cancelled) {
+          setOrders([]);
+          setPurchases([]);
+          setSuggested([]);
+          setStatusCounts({});
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -262,6 +441,7 @@ export function AccountClient() {
         setSelectedOrder(null);
         return;
       }
+
       setSelectedOrderLoading(true);
       try {
         const { data } = await supabase.auth.getSession();
@@ -271,45 +451,15 @@ export function AccountClient() {
           return;
         }
 
-        const res = await fetch(`/api/orders/${encodeURIComponent(selectedOrderId)}`, {
-          method: "GET",
-          headers: { authorization: `Bearer ${token}` },
-        });
-        const json = (await res.json()) as { order?: unknown };
-        if (!res.ok || !json.order) {
-          if (!cancelled) setSelectedOrder(null);
-          return;
-        }
-        const o = json.order as Partial<ServerOrderRow>;
-        if (
-          !o.id ||
-          !o.created_at ||
-          !o.customer ||
-          typeof o.subtotal_vnd !== "number" ||
-          typeof o.shipping_vnd !== "number" ||
-          typeof o.total_vnd !== "number"
-        ) {
-          if (!cancelled) setSelectedOrder(null);
-          return;
-        }
-
-        const mapped: OrderDetail = {
-          orderId: String(o.id),
-          createdAt: String(o.created_at),
-          customerName: String(o.customer.name ?? ""),
-          phone: String(o.customer.phone ?? ""),
-          email: String(o.customer.email ?? ""),
-          address: String(o.customer.address ?? ""),
-          subtotalVnd: Number(o.subtotal_vnd),
-          shippingVnd: Number(o.shipping_vnd),
-          totalVnd: Number(o.total_vnd),
-        };
-        if (!cancelled) setSelectedOrder(mapped);
+        const selected = await fetchSelectedOrder(token, selectedOrderId);
+        if (!cancelled) setSelectedOrder(selected.order);
+      } catch {
+        if (!cancelled) setSelectedOrder(null);
       } finally {
         if (!cancelled) setSelectedOrderLoading(false);
       }
     }
-    run();
+    void run();
     return () => {
       cancelled = true;
     };
