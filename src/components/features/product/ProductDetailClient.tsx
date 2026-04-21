@@ -314,8 +314,14 @@ export function ProductDetailClient({
                 <Link
                   key={rp.id}
                   href={`/product/${rp.id}`}
-                  className="group overflow-hidden rounded-3xl transition hover:scale-[1.02] active:scale-[0.98]"
-                  style={{ background: "var(--stitch-color-surface-container)" }}
+                  className="group overflow-hidden rounded-3xl border transition hover:scale-[1.02] hover:border-[var(--stitch-color-primary)] active:scale-[0.98]"
+                  style={{
+                    background: "var(--stitch-color-surface-container-high)",
+                    borderColor:
+                      "color-mix(in srgb, var(--stitch-color-secondary) 34%, var(--stitch-color-outline))",
+                    boxShadow:
+                      "inset 0 0 0 1px color-mix(in srgb, var(--stitch-color-primary-container) 35%, transparent)",
+                  }}
                 >
                   <div className="relative aspect-square overflow-hidden">
                     <Image

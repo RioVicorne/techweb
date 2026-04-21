@@ -5,6 +5,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 const FALLBACK_IMAGE = "https://placehold.co/1200x800/png?text=RioShop";
 
+function isRenderableImageSource(value: string): boolean {
+  const src = value.trim();
+  if (!src) return false;
+  if (src.startsWith("data:image/")) return true;
+
+  try {
+    const url = new URL(src);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export function ProductHeroCarousel({
   images,
   alt,
@@ -15,17 +28,7 @@ export function ProductHeroCarousel({
   intervalMs?: number;
 }) {
   const slides = useMemo(() => {
-    const normalized = images
-      .filter(Boolean)
-      .map((src) => src.trim())
-      .filter((src) => {
-        try {
-          const url = new URL(src);
-          return url.protocol === "http:" || url.protocol === "https:";
-        } catch {
-          return false;
-        }
-      });
+    const normalized = images.filter(Boolean).map((src) => src.trim()).filter(isRenderableImageSource);
 
     return normalized.length > 0 ? normalized : [FALLBACK_IMAGE];
   }, [images]);
@@ -121,8 +124,11 @@ export function ProductHeroCarousel({
         </div>
 
         <div
-          className="pointer-events-none absolute inset-0 opacity-90"
-          style={{ background: "linear-gradient(to top, var(--stitch-color-surface) 0%, transparent 60%)" }}
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to top, color-mix(in srgb, var(--stitch-color-primary) 22%, transparent) 0%, transparent 58%)",
+          }}
         />
 
       </div>

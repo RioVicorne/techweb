@@ -15,11 +15,25 @@ type DbProductRow = {
 
 const FALLBACK_IMAGE = "https://placehold.co/800x800/png?text=RioShop";
 
+function isRenderableImageSource(value: string | null | undefined): value is string {
+  const src = value?.trim();
+  if (!src) return false;
+  if (src.startsWith("data:image/")) return true;
+
+  try {
+    const url = new URL(src);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 function pickImage(images: DbProductRow["product_images"]): string {
   const best =
     (images ?? [])
-      .filter((i) => typeof i?.url === "string" && i.url)
+      .filter((image) => isRenderableImageSource(image?.url))
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))[0]?.url ?? "";
+
   return best || FALLBACK_IMAGE;
 }
 

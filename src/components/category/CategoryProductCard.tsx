@@ -33,8 +33,11 @@ export function CategoryProductCard({ product: p }: Props) {
     <div
       className="group relative flex flex-col overflow-hidden rounded-3xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
       style={{
-        background: "var(--stitch-color-surface-container)",
-        border: "1px solid color-mix(in srgb, var(--stitch-color-on-surface) 8%, transparent)",
+        background: "var(--stitch-color-surface-container-high)",
+        border:
+          "1px solid color-mix(in srgb, var(--stitch-color-secondary) 34%, var(--stitch-color-outline))",
+        boxShadow:
+          "inset 0 0 0 1px color-mix(in srgb, var(--stitch-color-primary-container) 35%, transparent)",
       }}
     >
       {/* Badges */}
@@ -78,7 +81,7 @@ export function CategoryProductCard({ product: p }: Props) {
             className="absolute inset-0 bg-gradient-to-t via-transparent to-transparent"
             style={{
               background:
-                "linear-gradient(to top, color-mix(in srgb, var(--stitch-color-scrim, var(--stitch-color-on-surface)) 28%, transparent), transparent 55%)",
+                "linear-gradient(to top, color-mix(in srgb, var(--stitch-color-primary) 24%, transparent), transparent 55%)",
             }}
           />
         </div>
