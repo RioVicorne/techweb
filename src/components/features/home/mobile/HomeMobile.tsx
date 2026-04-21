@@ -34,7 +34,7 @@ export function HomeMobile({
             className="absolute inset-0 opacity-90"
             style={{
               background:
-                "linear-gradient(to top, var(--stitch-color-surface) 0%, transparent 58%)",
+                "linear-gradient(to top, color-mix(in srgb, var(--stitch-color-primary) 58%, transparent) 0%, transparent 62%)",
             }}
           />
           <div className="absolute bottom-6 left-5 right-5">
@@ -51,7 +51,7 @@ export function HomeMobile({
               CYBERPULSE | Kinetic Gear
             </span>
             <h1
-              className="mb-4 text-3xl font-bold italic leading-tight tracking-tighter text-[var(--stitch-color-on-surface)]"
+              className="mb-4 text-3xl font-bold italic leading-tight tracking-tighter text-[var(--stitch-color-on-primary)]"
               style={{ fontFamily: "var(--stitch-font-headline)" }}
             >
               OVERCLOCK YOUR REALITY
@@ -131,8 +131,14 @@ export function HomeMobile({
             {hotProducts.map((p) => (
               <div
                 key={p.id}
-                className="group relative overflow-hidden rounded-3xl p-4"
-                style={{ background: "var(--stitch-color-surface-container)" }}
+                className="group relative overflow-hidden rounded-3xl border p-4"
+                style={{
+                  background: "var(--stitch-color-surface-container-high)",
+                  borderColor:
+                    "color-mix(in srgb, var(--stitch-color-secondary) 34%, var(--stitch-color-outline))",
+                  boxShadow:
+                    "inset 0 0 0 1px color-mix(in srgb, var(--stitch-color-primary-container) 35%, transparent)",
+                }}
               >
                 <HomeProductCardBadges product={p} />
 
@@ -199,8 +205,14 @@ export function HomeMobile({
               <Link
                 key={p.id}
                 href={`/product/${p.id}`}
-                className="group relative overflow-hidden rounded-3xl p-4"
-                style={{ background: "var(--stitch-color-surface-container)" }}
+                className="group relative overflow-hidden rounded-3xl border p-4 transition-colors duration-300 hover:border-[var(--stitch-color-primary)]"
+                style={{
+                  background: "var(--stitch-color-surface-container-high)",
+                  borderColor:
+                    "color-mix(in srgb, var(--stitch-color-secondary) 34%, var(--stitch-color-outline))",
+                  boxShadow:
+                    "inset 0 0 0 1px color-mix(in srgb, var(--stitch-color-primary-container) 35%, transparent)",
+                }}
               >
                 <div
                   className="relative mb-4 h-24 overflow-hidden rounded-2xl"
