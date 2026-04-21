@@ -871,8 +871,8 @@ export function AccountClient() {
                           </span>
                           {n > 0 ? (
                             <span
-                              className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black text-[var(--stitch-color-on-surface)]"
-                              style={{ background: "var(--stitch-color-secondary)" }}
+                              className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black"
+                              style={{ background: c.fg, color: "#fff" }}
                               aria-label={`${n} đơn ${t.label}`}
                             >
                               {n > 99 ? "99+" : n}

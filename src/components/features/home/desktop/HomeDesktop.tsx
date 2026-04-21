@@ -28,17 +28,19 @@ export function HomeDesktop({
       <aside className="pointer-events-none fixed left-6 top-1/2 z-40 hidden -translate-y-1/2 xl:pointer-events-auto xl:flex xl:flex-col xl:gap-4">
         <Link
           href="/#hot-deals"
-          className="group flex h-64 w-12 flex-col items-center justify-center gap-8 rounded-full py-6 transition-all hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
+          className="group flex h-64 w-12 flex-col items-center justify-center gap-8 rounded-full border py-6 transition-all hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-outline)]"
           style={{
             background:
               "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
+            borderColor:
+              "color-mix(in srgb, var(--stitch-color-outline) 35%, transparent)",
           }}
           aria-label="Flash sale — xuống mục deal hot"
         >
           <span
             className="text-[10px] font-black uppercase tracking-[0.3em]"
             style={{
-              color: "var(--stitch-color-secondary)",
+              color: "var(--stitch-color-on-surface-variant)",
               writingMode: "vertical-rl",
             }}
           >
@@ -46,7 +48,7 @@ export function HomeDesktop({
           </span>
           <span
             className="material-symbols-outlined animate-pulse"
-            style={{ color: "var(--stitch-color-secondary)" }}
+            style={{ color: "var(--stitch-color-on-surface-variant)" }}
             aria-hidden
           >
             bolt
@@ -57,19 +59,19 @@ export function HomeDesktop({
       <aside className="pointer-events-none fixed right-6 top-1/2 z-40 hidden -translate-y-1/2 xl:pointer-events-auto xl:flex xl:flex-col xl:gap-4">
         <Link
           href="/#new-drops"
-          className="group flex h-64 w-12 flex-col items-center justify-center gap-8 rounded-full border py-6 transition-all hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-primary)]"
+          className="group flex h-64 w-12 flex-col items-center justify-center gap-8 rounded-full border py-6 transition-all hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-outline)]"
           style={{
             background:
               "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))",
             borderColor:
-              "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+              "color-mix(in srgb, var(--stitch-color-outline) 35%, transparent)",
           }}
           aria-label="Hàng mới — xuống mục New Drops"
         >
           <span
             className="text-[10px] font-black uppercase tracking-[0.3em]"
             style={{
-              color: "var(--stitch-color-primary)",
+              color: "var(--stitch-color-on-surface-variant)",
               writingMode: "vertical-rl",
             }}
           >
@@ -77,7 +79,7 @@ export function HomeDesktop({
           </span>
           <span
             className="material-symbols-outlined"
-            style={{ color: "var(--stitch-color-primary)" }}
+            style={{ color: "var(--stitch-color-on-surface-variant)" }}
             aria-hidden
           >
             rocket_launch
@@ -96,13 +98,6 @@ export function HomeDesktop({
               sizes="(max-width: 1024px) 100vw, 66vw"
               priority
               unoptimized
-            />
-            <div
-              className="absolute inset-0 opacity-90"
-              style={{
-                background:
-                  "linear-gradient(to top, color-mix(in srgb, var(--stitch-color-primary) 62%, transparent) 0%, transparent 62%)",
-              }}
             />
             <div className="absolute bottom-8 left-8 max-w-lg md:bottom-10 md:left-10">
               <span
@@ -160,11 +155,7 @@ export function HomeDesktop({
                 unoptimized
               />
               <div
-                className="absolute inset-0 flex flex-col justify-end bg-gradient-to-r p-6 md:p-8"
-                style={{
-                  background:
-                    "linear-gradient(to right, color-mix(in srgb, var(--stitch-color-primary) 42%, transparent), transparent)",
-                }}
+                className="absolute inset-0 flex flex-col justify-end p-6 md:p-8"
               >
                 <h2
                   className="mb-1 text-2xl font-bold text-[var(--stitch-color-on-primary)]"
@@ -191,11 +182,7 @@ export function HomeDesktop({
                 unoptimized
               />
               <div
-                className="absolute inset-0 flex flex-col justify-end bg-gradient-to-r p-6 md:p-8"
-                style={{
-                  background:
-                    "linear-gradient(to right, color-mix(in srgb, var(--stitch-color-primary) 42%, transparent), transparent)",
-                }}
+                className="absolute inset-0 flex flex-col justify-end p-6 md:p-8"
               >
                 <h2
                   className="mb-1 text-2xl font-bold text-[var(--stitch-color-on-primary)]"
