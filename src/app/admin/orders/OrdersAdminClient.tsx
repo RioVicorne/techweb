@@ -46,13 +46,13 @@ function paymentStatusLabel(s: string) {
 function paymentStatusColor(s: string) {
   switch (s) {
     case "PAID":
-      return "#10b981";
+      return "var(--stitch-color-success)";
     case "AWAITING_PAYMENT":
-      return "#f59e0b";
+      return "var(--stitch-color-warning)";
     case "REFUNDED":
-      return "#6b7280";
+      return "var(--stitch-color-on-surface-variant)";
     default:
-      return "#94a3b8";
+      return "var(--stitch-color-on-surface-variant)";
   }
 }
 
@@ -67,9 +67,11 @@ function PaymentMethodBadge({ method, status }: { method: string; status: string
       <span
         className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider whitespace-nowrap"
         style={{
-          background: "rgba(255,255,255,0.06)",
-          color: "rgba(255,255,255,0.55)",
-          border: "1px solid rgba(255,255,255,0.08)",
+          background:
+            "color-mix(in srgb, var(--stitch-color-surface-container-high) 70%, transparent)",
+          color: "var(--stitch-color-on-surface-variant)",
+          border:
+            "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 25%, transparent)",
         }}
       >
         {methodLabels[method] ?? method}
@@ -181,15 +183,18 @@ export function OrdersAdminClient() {
     <div
       className="overflow-x-auto rounded-3xl border shadow-xl"
       style={{
-        borderColor: "rgba(255,255,255,0.05)",
-        background: "rgba(255,255,255,0.02)",
+        borderColor:
+          "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 35%, transparent)",
+        background:
+          "color-mix(in srgb, var(--stitch-color-surface-container-low) 80%, transparent)",
       }}
     >
       <table className="w-full min-w-[900px] text-left text-sm border-collapse">
         <thead>
           <tr
             style={{
-              background: "rgba(255,255,255,0.03)",
+              background:
+                "color-mix(in srgb, var(--stitch-color-surface-container-high) 85%, transparent)",
             }}
           >
             <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] opacity-40">
@@ -206,7 +211,7 @@ export function OrdersAdminClient() {
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/[0.05]">
+        <tbody className="divide-y" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 20%, transparent)" }}>
           {orderList.length === 0 ? (
             <tr>
               <td
@@ -239,21 +244,38 @@ export function OrdersAdminClient() {
               return (
                 <tr
                   key={o.id}
-                  className="group transition-all hover:bg-white/[0.04]"
+                  className="group transition-all"
+                  style={{
+                    background: "transparent",
+                  }}
                 >
                   {/* Cột 1: Thông tin đơn & Sản phẩm đại diện */}
                   <td className="px-6 py-6 align-top">
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center gap-2">
-                        <span className="font-black text-lg tracking-tighter text-white">
+                        <span className="font-black text-lg tracking-tighter text-[var(--stitch-color-on-surface)]">
                           #{o.order_code}
                         </span>
                       </div>
 
                       {o.first_item?.title ? (
-                        <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-2 pr-4 ring-1 ring-white/10">
+                        <div
+                          className="flex items-center gap-3 rounded-2xl p-2 pr-4 ring-1"
+                          style={{
+                            background:
+                              "color-mix(in srgb, var(--stitch-color-surface-container-high) 75%, transparent)",
+                            boxShadow:
+                              "inset 0 0 0 1px color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 25%, transparent)",
+                          }}
+                        >
                           {o.first_item.image && (
-                            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-black/20">
+                            <div
+                              className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl"
+                              style={{
+                                background:
+                                  "color-mix(in srgb, var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container)) 85%, transparent)",
+                              }}
+                            >
                               <Image
                                 src={o.first_item.image}
                                 alt=""
@@ -265,7 +287,7 @@ export function OrdersAdminClient() {
                             </div>
                           )}
                           <div className="min-w-0">
-                            <div className="line-clamp-1 text-xs font-bold text-white/90">
+                            <div className="line-clamp-1 text-xs font-bold text-[var(--stitch-color-on-surface)]/90">
                               {o.first_item.title}
                             </div>
                             <div className="mt-0.5 text-[10px] font-black text-[var(--stitch-color-primary)]">
@@ -285,7 +307,7 @@ export function OrdersAdminClient() {
                   <td className="px-6 py-6 align-top">
                     <div className="flex flex-col gap-3">
                       <div>
-                        <div className="text-sm font-black text-white">
+                        <div className="text-sm font-black text-[var(--stitch-color-on-surface)]">
                           {o.full_name}
                         </div>
                         <div className="mt-1 flex items-center gap-1.5 text-xs font-bold text-[var(--stitch-color-primary)]">
@@ -296,7 +318,13 @@ export function OrdersAdminClient() {
                         </div>
                       </div>
 
-                      <div className="space-y-1.5 border-l-2 border-white/10 pl-3">
+                      <div
+                        className="space-y-1.5 border-l-2 pl-3"
+                        style={{
+                          borderColor:
+                            "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 35%, transparent)",
+                        }}
+                      >
                         <div className="flex items-start gap-1.5 text-xs leading-relaxed opacity-70">
                           <span className="material-symbols-outlined text-[14px] mt-0.5 shrink-0">
                             location_on
@@ -323,7 +351,7 @@ export function OrdersAdminClient() {
                   {/* Cột 3: Thanh toán */}
                   <td className="px-6 py-6 align-top">
                     <div className="flex min-h-[84px] flex-col items-end justify-between gap-3 text-right">
-                      <div className="text-xl font-black tabular-nums tracking-tighter text-white">
+                      <div className="text-xl font-black tabular-nums tracking-tighter text-[var(--stitch-color-on-surface)]">
                         {formatVndDisplay(Number(o.total ?? 0))}
                       </div>
                       <div className="flex flex-col items-end gap-1">
@@ -335,7 +363,7 @@ export function OrdersAdminClient() {
                           </div>
                         )}
                       </div>
-                      <div className="text-[10px] font-bold uppercase tracking-widest text-white/45">
+                      <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--stitch-color-on-surface-variant)]">
                         {new Date(o.created_at).toLocaleDateString("vi-VN")}{" "}
                         {new Date(o.created_at).toLocaleTimeString("vi-VN", {
                           hour: "2-digit",
@@ -352,8 +380,14 @@ export function OrdersAdminClient() {
                               void confirmBankPaidAndConfirmed(o.id);
                             }
                           }}
-                          className="mt-1 inline-flex items-center gap-1 rounded-lg bg-emerald-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-400 transition hover:bg-emerald-500/30"
-                          style={{ border: "1px solid color-mix(in srgb, #10b981 30%, transparent)" }}
+                          className="mt-1 inline-flex items-center gap-1 rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-wider transition"
+                          style={{
+                            background:
+                              "color-mix(in srgb, var(--stitch-color-success) 16%, transparent)",
+                            color: "var(--stitch-color-success)",
+                            border:
+                              "1px solid color-mix(in srgb, var(--stitch-color-success) 30%, transparent)",
+                          }}
                         >
                           <span className="material-symbols-outlined text-[14px]" aria-hidden>
                             check
@@ -371,7 +405,7 @@ export function OrdersAdminClient() {
 
                       <div className="flex flex-col gap-2">
                         {statusOptions.length <= 1 ? (
-                          <div className="text-[10px] font-bold uppercase tracking-wide text-white/40">
+                          <div className="text-[10px] font-bold uppercase tracking-wide text-[var(--stitch-color-on-surface)]/40">
                             Không còn bước tiếp theo
                           </div>
                         ) : (
@@ -384,9 +418,12 @@ export function OrdersAdminClient() {
                                   if (isLocked) return;
                                   void patchStatus(o.id, nextImmediate);
                                 }}
-                                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border bg-white/5 px-2.5 py-2 text-[9px] font-black uppercase tracking-wide text-white/85 transition enabled:hover:bg-white/10 enabled:hover:border-white/20 enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 sm:px-3 sm:text-[10px] md:w-auto md:justify-start"
+                                className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border px-2.5 py-2 text-[9px] font-black uppercase tracking-wide text-[var(--stitch-color-on-surface)] transition enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 sm:px-3 sm:text-[10px] md:w-auto md:justify-start"
                                 style={{
-                                  borderColor: "rgba(255,255,255,0.12)",
+                                  borderColor:
+                                    "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 35%, transparent)",
+                                  background:
+                                    "color-mix(in srgb, var(--stitch-color-surface-container-high) 70%, transparent)",
                                   fontFamily: "var(--stitch-font-headline)",
                                 }}
                                 title={`Chuyển sang: ${statusLabelVi(nextImmediate)}`}
@@ -397,7 +434,7 @@ export function OrdersAdminClient() {
                                 <span className="min-w-0 truncate">{statusLabelVi(nextImmediate)}</span>
                               </button>
                             ) : (
-                              <div className="text-[10px] font-bold uppercase tracking-wide text-white/40">
+                              <div className="text-[10px] font-bold uppercase tracking-wide text-[var(--stitch-color-on-surface)]/40">
                                 Không còn bước tiếp theo
                               </div>
                             )}
@@ -412,8 +449,13 @@ export function OrdersAdminClient() {
                                     void patchStatus(o.id, "CANCELLED");
                                   }
                                 }}
-                                className="inline-flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border bg-white/5 text-white/70 transition enabled:hover:bg-white/10 enabled:hover:border-white/20 enabled:hover:text-white enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
-                                style={{ borderColor: "rgba(255,255,255,0.12)" }}
+                                className="inline-flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border text-[var(--stitch-color-on-surface-variant)] transition enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
+                                style={{
+                                  borderColor:
+                                    "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 35%, transparent)",
+                                  background:
+                                    "color-mix(in srgb, var(--stitch-color-surface-container-high) 70%, transparent)",
+                                }}
                                 title="Hủy đơn"
                                 aria-label="Hủy đơn"
                               >
@@ -462,7 +504,15 @@ export function OrdersAdminClient() {
         </p>
       </header>
 
-      <div className="flex flex-wrap items-center gap-4 rounded-3xl bg-white/5 p-4">
+      <div
+        className="flex flex-wrap items-center gap-4 rounded-3xl p-4"
+        style={{
+          background:
+            "color-mix(in srgb, var(--stitch-color-surface-container-high) 70%, transparent)",
+          border:
+            "1px solid color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 25%, transparent)",
+        }}
+      >
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-[20px] opacity-60">
             filter_list
@@ -505,7 +555,11 @@ export function OrdersAdminClient() {
         )}
       </div>
 
-      {error ? <p className="text-sm text-red-500">{error}</p> : null}
+      {error ? (
+        <p className="text-sm" style={{ color: "var(--stitch-color-error)" }}>
+          {error}
+        </p>
+      ) : null}
 
       {loading ? (
         <p
@@ -531,7 +585,7 @@ export function OrdersAdminClient() {
               return (
                 <div key={status} className="space-y-4">
                   <h2
-                    className="text-xl font-bold tracking-tight text-white"
+                    className="text-xl font-bold tracking-tight"
                     style={{
                       fontFamily:
                         "var(--stitch-font-headline, var(--stitch-font-body))",
@@ -570,16 +624,16 @@ function StatusBadge({ status }: { status: string }) {
 function getStatusColor(status: string) {
   switch (status) {
     case "PENDING_CONFIRMATION":
-      return "#f59e0b"; // amber
+      return "var(--stitch-color-warning)";
     case "CONFIRMED":
       return "var(--stitch-color-primary)";
     case "SHIPPING":
-      return "#3b82f6"; // blue
+      return "var(--stitch-color-secondary)";
     case "COMPLETED":
-      return "#10b981"; // emerald
+      return "var(--stitch-color-success)";
     case "CANCELLED":
       return "var(--stitch-color-error)";
     default:
-      return "#94a3b8";
+      return "var(--stitch-color-on-surface-variant)";
   }
 }

@@ -9,7 +9,7 @@ export function HomeProductCardBadges({ product }: { product: CatalogProduct }) 
     <>
       {badge ? (
         <div
-          className="absolute left-4 top-4 z-10 rounded-full px-3 py-1 text-[10px] font-black text-white"
+          className="absolute left-4 top-4 z-10 rounded-full px-3 py-1 text-[10px] font-black text-[var(--stitch-color-on-secondary)]"
           style={{ background: "var(--stitch-color-secondary)" }}
         >
           {badge}
@@ -17,7 +17,7 @@ export function HomeProductCardBadges({ product }: { product: CatalogProduct }) 
       ) : null}
       {tag ? (
         <div
-          className="absolute right-4 top-4 z-10 rounded-full px-3 py-1 text-[10px] font-black text-white"
+          className="absolute right-4 top-4 z-10 rounded-full px-3 py-1 text-[10px] font-black text-[var(--stitch-color-on-primary)]"
           style={{ background: "var(--stitch-color-primary-dim, var(--stitch-color-primary))" }}
         >
           {tag}

@@ -259,7 +259,7 @@ export function CheckoutClient() {
             hourglass_top
           </span>
           <h1
-            className="mb-2 text-xl font-bold text-white"
+            className="mb-2 text-xl font-bold text-[var(--stitch-color-on-surface)]"
             style={{ fontFamily: "var(--stitch-font-headline)" }}
           >
             Đang xử lý đơn hàng...
@@ -293,7 +293,7 @@ export function CheckoutClient() {
             >
               hourglass_top
             </span>
-            <h1 className="mb-2 text-xl font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+            <h1 className="mb-2 text-xl font-bold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
               Đang tải giỏ hàng...
             </h1>
             <p className="text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -321,7 +321,7 @@ export function CheckoutClient() {
             shopping_cart
           </span>
           <h1
-            className="mb-2 text-xl font-bold text-white"
+            className="mb-2 text-xl font-bold text-[var(--stitch-color-on-surface)]"
             style={{ fontFamily: "var(--stitch-font-headline)" }}
           >
             Giỏ hàng trống
@@ -331,7 +331,7 @@ export function CheckoutClient() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center rounded-xl px-8 py-3 text-sm font-bold text-white transition active:scale-95"
+            className="inline-flex items-center justify-center rounded-xl px-8 py-3 text-sm font-bold text-[var(--stitch-color-on-surface)] transition active:scale-95"
             style={{
               background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
             }}
@@ -355,7 +355,7 @@ export function CheckoutClient() {
 
       <div className="mb-8 hidden md:block">
         <h1
-          className="flex items-center gap-3 text-2xl font-black uppercase italic tracking-tighter text-white md:text-3xl"
+          className="flex items-center gap-3 text-2xl font-black uppercase italic tracking-tighter text-[var(--stitch-color-on-surface)] md:text-3xl"
           style={{ fontFamily: "var(--stitch-font-headline)" }}
         >
           <span className="h-0.5 w-10" style={{ background: "var(--stitch-color-secondary)" }} />
@@ -367,7 +367,7 @@ export function CheckoutClient() {
       </div>
 
       <div className="mb-8 md:hidden">
-        <h1 className="text-2xl font-black italic tracking-tighter text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+        <h1 className="text-2xl font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
           CYBERPULSE <span style={{ color: "var(--stitch-color-primary)" }}>|</span> Secure Checkout
         </h1>
         <p className="mt-2 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -385,7 +385,7 @@ export function CheckoutClient() {
           }}
         >
           <h2
-            className="mb-6 text-lg font-bold text-white"
+            className="mb-6 text-lg font-bold text-[var(--stitch-color-on-surface)]"
             style={{ fontFamily: "var(--stitch-font-headline)" }}
           >
             Thiết lập thanh toán
@@ -532,7 +532,7 @@ export function CheckoutClient() {
                     "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 30%, transparent)",
                 }}
               >
-                <span className="min-w-0 truncate text-white">{paymentLabel}</span>
+                <span className="min-w-0 truncate text-[var(--stitch-color-on-surface)]">{paymentLabel}</span>
                 <span className="material-symbols-outlined" style={{ color: "var(--stitch-color-on-surface-variant)" }} aria-hidden>
                   chevron_right
                 </span>
@@ -560,7 +560,7 @@ export function CheckoutClient() {
                 aria-controls="voucher-panel"
                 onClick={() => setVoucherOpen((v) => !v)}
               >
-                <span className="min-w-0 truncate text-white">
+                <span className="min-w-0 truncate text-[var(--stitch-color-on-surface)]">
                   {(() => {
                     const parts = [
                       appliedDiscountVoucher ? `${appliedDiscountVoucher.title} — ${appliedDiscountVoucher.subtitle}` : null,
@@ -648,7 +648,7 @@ export function CheckoutClient() {
                           }
                         >
                           <div className="min-w-0">
-                            <div className="text-sm font-black text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                            <div className="text-sm font-black text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
                               {v.title}
                             </div>
                             <div className="mt-0.5 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -702,7 +702,7 @@ export function CheckoutClient() {
                           }}
                         >
                           <div className="min-w-0">
-                            <div className="text-sm font-black text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                            <div className="text-sm font-black text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
                               {v.title}
                             </div>
                             <div className="mt-0.5 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -730,7 +730,7 @@ export function CheckoutClient() {
                   ) : appliedDiscountVoucher || appliedShippingOffer ? (
                     <div className="mt-3 text-sm font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                       Đã áp dụng{" "}
-                      <span className="text-white">
+                      <span className="text-[var(--stitch-color-on-surface)]">
                         {[appliedDiscountVoucher?.code, appliedShippingOffer?.code].filter(Boolean).join(" + ")}
                       </span>
                       {" — "}
@@ -783,7 +783,7 @@ export function CheckoutClient() {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="text-sm font-black text-white">Hyper-Sonic Courier</p>
+                      <p className="text-sm font-black text-[var(--stitch-color-on-surface)]">Hyper-Sonic Courier</p>
                       <p className="mt-1 text-xs font-bold" style={{ color: "var(--stitch-color-secondary)" }}>
                         +{formatVndDisplay(45_000)} đ
                       </p>
@@ -823,7 +823,7 @@ export function CheckoutClient() {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="text-sm font-black text-white">Standard Orbital</p>
+                      <p className="text-sm font-black text-[var(--stitch-color-on-surface)]">Standard Orbital</p>
                       <p className="mt-1 text-xs font-bold" style={{ color: "var(--stitch-color-secondary)" }}>
                         FREE
                       </p>
@@ -877,7 +877,7 @@ export function CheckoutClient() {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="text-sm font-black text-white">Hyper-Sonic Courier</p>
+                      <p className="text-sm font-black text-[var(--stitch-color-on-surface)]">Hyper-Sonic Courier</p>
                       <p className="mt-1 text-xs font-bold" style={{ color: "var(--stitch-color-secondary)" }}>
                         +{formatVndDisplay(45_000)} đ
                       </p>
@@ -908,7 +908,7 @@ export function CheckoutClient() {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="text-sm font-black text-white">Standard Orbital</p>
+                      <p className="text-sm font-black text-[var(--stitch-color-on-surface)]">Standard Orbital</p>
                       <p className="mt-1 text-xs font-bold" style={{ color: "var(--stitch-color-secondary)" }}>
                         FREE
                       </p>
@@ -939,7 +939,7 @@ export function CheckoutClient() {
             <button
               type="submit"
               disabled={placing}
-              className="mt-2 hidden w-full rounded-xl py-3.5 text-sm font-bold text-white shadow-lg transition disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98] sm:w-auto sm:px-12 md:block"
+              className="mt-2 hidden w-full rounded-xl py-3.5 text-sm font-bold text-[var(--stitch-color-on-surface)] shadow-lg transition disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98] sm:w-auto sm:px-12 md:block"
               style={{
                 background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
               }}
@@ -1003,7 +1003,7 @@ export function CheckoutClient() {
                       <Image src={line.image} alt="" fill className="object-cover" sizes="64px" unoptimized />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="line-clamp-2 font-semibold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                      <p className="line-clamp-2 font-semibold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
                         {line.title}
                       </p>
                       <p className="mt-1 text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
@@ -1026,7 +1026,7 @@ export function CheckoutClient() {
                           >
                             −
                           </button>
-                          <span className="min-w-[2rem] text-center text-sm font-bold text-white">{line.qty}</span>
+                          <span className="min-w-[2rem] text-center text-sm font-bold text-[var(--stitch-color-on-surface)]">{line.qty}</span>
                           <button
                             type="button"
                             className="px-2.5 py-1 text-sm font-bold transition hover:opacity-80"
@@ -1047,7 +1047,7 @@ export function CheckoutClient() {
                         </button>
                       </div>
                     </div>
-                    <p className="shrink-0 text-sm font-black tabular-nums text-white">
+                    <p className="shrink-0 text-sm font-black tabular-nums text-[var(--stitch-color-on-surface)]">
                       {formatVndDisplay(line.priceVnd * line.qty)} <span className="text-[10px] font-normal">đ</span>
                     </p>
                   </li>
@@ -1057,11 +1057,11 @@ export function CheckoutClient() {
               <div className="mt-4 space-y-2 rounded-2xl p-3" style={{ background: "var(--stitch-color-surface-container-high, var(--stitch-color-surface-container))" }}>
                 <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <span>Tạm tính</span>
-                  <span className="tabular-nums text-white">{formatVndDisplay(cartSubtotalVnd)} đ</span>
+                  <span className="tabular-nums text-[var(--stitch-color-on-surface)]">{formatVndDisplay(cartSubtotalVnd)} đ</span>
                 </div>
                 <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <span>Phí vận chuyển</span>
-                  <span className="tabular-nums text-white">
+                  <span className="tabular-nums text-[var(--stitch-color-on-surface)]">
                     {shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(shippingVnd)} đ`}
                   </span>
                 </div>
@@ -1104,7 +1104,7 @@ export function CheckoutClient() {
             }}
           >
             <h2
-              className="mb-6 text-lg font-bold text-white"
+              className="mb-6 text-lg font-bold text-[var(--stitch-color-on-surface)]"
               style={{ fontFamily: "var(--stitch-font-headline)" }}
             >
               Đơn hàng
@@ -1130,7 +1130,7 @@ export function CheckoutClient() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p
-                      className="line-clamp-2 font-semibold text-white"
+                      className="line-clamp-2 font-semibold text-[var(--stitch-color-on-surface)]"
                       style={{ fontFamily: "var(--stitch-font-headline)" }}
                     >
                       {line.title}
@@ -1155,7 +1155,7 @@ export function CheckoutClient() {
                         >
                           −
                         </button>
-                        <span className="min-w-[2rem] text-center text-sm font-bold text-white">{line.qty}</span>
+                        <span className="min-w-[2rem] text-center text-sm font-bold text-[var(--stitch-color-on-surface)]">{line.qty}</span>
                         <button
                           type="button"
                           className="px-2.5 py-1 text-sm font-bold transition hover:opacity-80"
@@ -1176,7 +1176,7 @@ export function CheckoutClient() {
                       </button>
                     </div>
                   </div>
-                  <p className="shrink-0 text-sm font-bold tabular-nums text-white">
+                  <p className="shrink-0 text-sm font-bold tabular-nums text-[var(--stitch-color-on-surface)]">
                     {formatVndDisplay(line.priceVnd * line.qty)} <span className="text-[10px] font-normal">đ</span>
                   </p>
                 </li>
@@ -1192,11 +1192,11 @@ export function CheckoutClient() {
             >
               <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 <span>Tạm tính</span>
-                <span className="tabular-nums text-white">{formatVndDisplay(cartSubtotalVnd)} đ</span>
+                <span className="tabular-nums text-[var(--stitch-color-on-surface)]">{formatVndDisplay(cartSubtotalVnd)} đ</span>
               </div>
               <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 <span>Phí vận chuyển</span>
-                <span className="tabular-nums text-white">
+                <span className="tabular-nums text-[var(--stitch-color-on-surface)]">
                   {shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(shippingVnd)} đ`}
                 </span>
               </div>
@@ -1249,7 +1249,7 @@ export function CheckoutClient() {
             type="submit"
             form="checkout-form"
             disabled={placing}
-            className="flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-extrabold text-white transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+            className="flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-extrabold text-[var(--stitch-color-on-surface)] transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
             style={{
               background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
             }}

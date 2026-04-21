@@ -7,7 +7,6 @@ import { ShopHeader } from "@/components/features/shop/shared/ShopHeader";
 import {
   getAppStitchThemeStyle,
   getStitchProjectTitle,
-  isStitchDarkMode,
 } from "@/lib/stitch-app-theme";
 
 const geistSans = Geist({
@@ -57,10 +56,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const themeStyle = await getAppStitchThemeStyle();
-  const dark = await isStitchDarkMode();
 
   return (
-    <html lang="vi" className={dark ? "dark" : undefined}>
+    <html lang="vi">
       <head>
         {/* Material Symbols — không có tương đương next/font; dùng cho icon trang chủ theo Stitch */}
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}

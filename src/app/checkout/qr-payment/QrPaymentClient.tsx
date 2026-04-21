@@ -194,7 +194,7 @@ export function QrPaymentClient() {
           >
             hourglass_top
           </span>
-          <h1 className="mb-2 text-xl font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          <h1 className="mb-2 text-xl font-bold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
             Đang tải...
           </h1>
         </div>
@@ -220,7 +220,7 @@ export function QrPaymentClient() {
           >
             error
           </span>
-          <h1 className="mb-2 text-xl font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          <h1 className="mb-2 text-xl font-bold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
             Lỗi
           </h1>
           <p className="mb-8 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -259,7 +259,7 @@ export function QrPaymentClient() {
           >
             check_circle
           </span>
-          <h1 className="mb-2 text-xl font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          <h1 className="mb-2 text-xl font-bold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
             Đang chuyển hướng...
           </h1>
           <p className="text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -274,7 +274,7 @@ export function QrPaymentClient() {
     <main className="mx-auto max-w-screen-lg px-6 pb-20 pt-28 md:px-12">
       {/* Header */}
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-black italic tracking-tighter text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+        <h1 className="text-2xl font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
           Quét mã QR để thanh toán
         </h1>
         <p className="mt-2 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -306,7 +306,7 @@ export function QrPaymentClient() {
             Mã QR Thanh Toán
           </div>
 
-          <div className="mx-auto mb-4 inline-block rounded-2xl border bg-white p-4" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-primary) 30%, transparent)" }}>
+          <div className="mx-auto mb-4 inline-block rounded-2xl border bg-[var(--stitch-color-surface)] p-4" style={{ borderColor: "color-mix(in srgb, var(--stitch-color-primary) 30%, transparent)" }}>
             {qrCodeUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -322,12 +322,12 @@ export function QrPaymentClient() {
           </div>
 
           <div className="space-y-2 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-            <p className="font-black text-white">{formatVndDisplay(totalVnd)} đ</p>
-            <p>Mã đơn: <span className="font-black text-white">{orderCode}</span></p>
-            <p>Ngân hàng: <span className="font-bold text-white">{BANK.accountName}</span></p>
-            <p>Số TK: <span className="font-bold text-white">{BANK.accountNumber}</span> ({BANK.code})</p>
+            <p className="font-black text-[var(--stitch-color-on-surface)]">{formatVndDisplay(totalVnd)} đ</p>
+            <p>Mã đơn: <span className="font-black text-[var(--stitch-color-on-surface)]">{orderCode}</span></p>
+            <p>Ngân hàng: <span className="font-bold text-[var(--stitch-color-on-surface)]">{BANK.accountName}</span></p>
+            <p>Số TK: <span className="font-bold text-[var(--stitch-color-on-surface)]">{BANK.accountNumber}</span> ({BANK.code})</p>
             <p className="text-xs mt-3" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-              Vui lòng chuyển đúng số tiền và ghi nội dung: <span className="font-black text-white">TT {orderCode}</span>
+              Vui lòng chuyển đúng số tiền và ghi nội dung: <span className="font-black text-[var(--stitch-color-on-surface)]">TT {orderCode}</span>
             </p>
           </div>
         </div>
@@ -341,29 +341,29 @@ export function QrPaymentClient() {
               "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
           }}
         >
-          <h2 className="mb-4 text-lg font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          <h2 className="mb-4 text-lg font-bold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
             Hướng dẫn thanh toán
           </h2>
 
           <ol className="space-y-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
             <li className="flex gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-white" style={{ background: "var(--stitch-color-primary)" }}>1</span>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-[var(--stitch-color-on-primary)]" style={{ background: "var(--stitch-color-primary)" }}>1</span>
               <span>Mở app ngân hàng trên điện thoại</span>
             </li>
             <li className="flex gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-white" style={{ background: "var(--stitch-color-primary)" }}>2</span>
-              <span>Nhấn tính năng <span className="font-bold text-white">Quét mã QR</span> hoặc <span className="font-bold text-white">Chuyển tiền</span></span>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-[var(--stitch-color-on-primary)]" style={{ background: "var(--stitch-color-primary)" }}>2</span>
+              <span>Nhấn tính năng <span className="font-bold text-[var(--stitch-color-on-surface)]">Quét mã QR</span> hoặc <span className="font-bold text-[var(--stitch-color-on-surface)]">Chuyển tiền</span></span>
             </li>
             <li className="flex gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-white" style={{ background: "var(--stitch-color-primary)" }}>3</span>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-[var(--stitch-color-on-primary)]" style={{ background: "var(--stitch-color-primary)" }}>3</span>
               <span>Quét mã QR bên trái hoặc nhập thủ công số tài khoản</span>
             </li>
             <li className="flex gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-white" style={{ background: "var(--stitch-color-primary)" }}>4</span>
-              <span>Nhập nội dung chuyển khoản: <span className="font-bold text-white">TT {orderCode}</span></span>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-[var(--stitch-color-on-primary)]" style={{ background: "var(--stitch-color-primary)" }}>4</span>
+              <span>Nhập nội dung chuyển khoản: <span className="font-bold text-[var(--stitch-color-on-surface)]">TT {orderCode}</span></span>
             </li>
             <li className="flex gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-white" style={{ background: "var(--stitch-color-primary)" }}>5</span>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-[var(--stitch-color-on-primary)]" style={{ background: "var(--stitch-color-primary)" }}>5</span>
               <span>Xác nhận chuyển khoản</span>
             </li>
           </ol>
@@ -410,7 +410,7 @@ export function QrPaymentClient() {
             </button>
 
             {confirmSuccessText ? (
-              <p className="mt-3 text-xs font-bold" style={{ color: "#34d399" }}>
+              <p className="mt-3 text-xs font-bold" style={{ color: "var(--stitch-color-success)" }}>
                 {confirmSuccessText}
               </p>
             ) : null}

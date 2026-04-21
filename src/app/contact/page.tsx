@@ -17,25 +17,25 @@ const SUPPORT_CHANNELS: SupportChannel[] = [
   {
     name: "Zalo",
     href: "https://zalo.me/",
-    brandColor: "#0068ff",
+    brandColor: "var(--stitch-color-primary)",
     logo: zaloLogo,
   },
   {
     name: "Facebook",
     href: "https://www.facebook.com/",
-    brandColor: "#1877f2",
+    brandColor: "var(--stitch-color-secondary)",
     logo: facebookLogo,
   },
   {
     name: "Telegram",
     href: "https://t.me/",
-    brandColor: "#26a5e4",
+    brandColor: "var(--stitch-color-primary-dim, var(--stitch-color-primary))",
     logo: telegramLogo,
   },
   {
     name: "Discord",
     href: "https://discord.com/",
-    brandColor: "#5865f2",
+    brandColor: "var(--stitch-color-primary-container)",
     logo: discordLogo,
   },
 ];
@@ -69,8 +69,8 @@ export default function ContactPage() {
                 <span
                   className="inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl"
                   style={{
-                    background: "#ffffff",
-                    border: `1px solid color-mix(in srgb, ${channel.brandColor} 28%, #ffffff)`,
+                    background: "var(--stitch-color-surface)",
+                    border: `1px solid color-mix(in srgb, ${channel.brandColor} 28%, var(--stitch-color-surface))`,
                     boxShadow: `0 6px 16px color-mix(in srgb, ${channel.brandColor} 35%, transparent)`,
                   }}
                 >

@@ -45,7 +45,7 @@ export function PaymentMethodClient() {
     <main className="mx-auto max-w-screen-lg px-6 pb-28 pt-28 md:px-12">
       <div className="mb-6 flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-2xl font-black italic tracking-tighter text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          <h1 className="text-2xl font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
             Phương thức thanh toán
           </h1>
           <p className="mt-1 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -91,7 +91,7 @@ export function PaymentMethodClient() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="flex items-center gap-2 text-sm font-black text-white">
+                  <p className="flex items-center gap-2 text-sm font-black text-[var(--stitch-color-on-surface)]">
                     <span className="material-symbols-outlined" style={{ color: accentColor }} aria-hidden>
                       {m.icon}
                     </span>
@@ -114,7 +114,7 @@ export function PaymentMethodClient() {
         <button
           type="button"
           onClick={() => router.push(backHref)}
-          className="w-full rounded-full px-5 py-3 text-sm font-extrabold text-white transition active:scale-[0.98]"
+          className="w-full rounded-full px-5 py-3 text-sm font-extrabold text-[var(--stitch-color-on-primary)] transition active:scale-[0.98]"
           style={{
             background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
           }}

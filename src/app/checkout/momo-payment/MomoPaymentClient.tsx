@@ -95,10 +95,10 @@ export function MomoPaymentClient() {
           className="rounded-3xl border p-10 text-center"
           style={{
             background: "var(--stitch-color-surface-container)",
-            borderColor: "color-mix(in srgb, var(--stitch-color-error, #f87171) 20%, transparent)",
+            borderColor: "color-mix(in srgb, var(--stitch-color-error, var(--stitch-color-secondary)) 20%, transparent)",
           }}
         >
-          <h1 className="mb-2 text-xl font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          <h1 className="mb-2 text-xl font-bold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
             Lỗi
           </h1>
           <p className="mb-8 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -127,7 +127,7 @@ export function MomoPaymentClient() {
     <main className="mx-auto max-w-screen-lg px-6 pb-20 pt-28 md:px-12">
       <div className="mb-6 text-center">
         <h1
-          className="text-2xl font-black italic tracking-tighter text-white"
+          className="text-2xl font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]"
           style={{ fontFamily: "var(--stitch-font-headline)" }}
         >
           Thanh toán MoMo
@@ -148,7 +148,7 @@ export function MomoPaymentClient() {
         <div className="text-sm font-black uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
           Mã đơn
         </div>
-        <div className="mt-2 text-2xl font-black tracking-tighter text-white">#{orderCode}</div>
+        <div className="mt-2 text-2xl font-black tracking-tighter text-[var(--stitch-color-on-surface)]">#{orderCode}</div>
 
         <div className="mt-6 text-sm font-black uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
           Trạng thái thanh toán

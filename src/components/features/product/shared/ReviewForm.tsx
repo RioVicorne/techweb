@@ -86,14 +86,14 @@ export function ReviewForm({ productId, onSubmitSuccess }: ReviewFormProps) {
         >
           check_circle
         </span>
-        <p className="mt-3 text-lg font-bold text-white">Cảm ơn bạn đã đánh giá!</p>
+        <p className="mt-3 text-lg font-bold text-[var(--stitch-color-on-surface)]">Cảm ơn bạn đã đánh giá!</p>
         <p className="mt-1 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
           Đánh giá của bạn đang chờ duyệt và sẽ hiển thị sau khi được xác nhận.
         </p>
         <button
           type="button"
           onClick={() => setSuccess(false)}
-          className="mt-4 rounded-full px-5 py-2 text-sm font-bold text-white transition active:scale-95"
+          className="mt-4 rounded-full px-5 py-2 text-sm font-bold text-[var(--stitch-color-on-primary)] transition active:scale-95"
           style={{ background: "var(--stitch-color-primary)" }}
         >
           Đánh giá khác
@@ -109,7 +109,7 @@ export function ReviewForm({ productId, onSubmitSuccess }: ReviewFormProps) {
       style={{ background: "var(--stitch-color-surface-container)" }}
     >
       <h3
-        className="text-xl font-black italic tracking-tighter text-white"
+        className="text-xl font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]"
         style={{ fontFamily: "var(--stitch-font-headline)" }}
       >
         Viết đánh giá
@@ -168,7 +168,7 @@ export function ReviewForm({ productId, onSubmitSuccess }: ReviewFormProps) {
       {/* Comment */}
       <div>
         <label className="mb-2 block text-sm font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
-          Nhận xét của bạn <span style={{ color: "var(--stitch-color-error, #ef4444)" }}>*</span>
+          Nhận xét của bạn <span style={{ color: "var(--stitch-color-error)" }}>*</span>
         </label>
         <textarea
           value={comment}
@@ -188,7 +188,7 @@ export function ReviewForm({ productId, onSubmitSuccess }: ReviewFormProps) {
       {/* Reviewer Name */}
       <div>
         <label className="mb-2 block text-sm font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
-          Tên của bạn <span style={{ color: "var(--stitch-color-error, #ef4444)" }}>*</span>
+          Tên của bạn <span style={{ color: "var(--stitch-color-error)" }}>*</span>
         </label>
         <input
           type="text"
@@ -225,7 +225,7 @@ export function ReviewForm({ productId, onSubmitSuccess }: ReviewFormProps) {
 
       {/* Error */}
       {error && (
-        <p className="text-sm font-medium" style={{ color: "var(--stitch-color-error, #ef4444)" }}>
+        <p className="text-sm font-medium" style={{ color: "var(--stitch-color-error)" }}>
           {error}
         </p>
       )}
@@ -234,7 +234,7 @@ export function ReviewForm({ productId, onSubmitSuccess }: ReviewFormProps) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-full px-5 py-3 text-sm font-extrabold text-white transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-full px-5 py-3 text-sm font-extrabold text-[var(--stitch-color-on-primary)] transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
         style={{
           background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
         }}

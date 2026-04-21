@@ -42,7 +42,7 @@ export function CategoryProductCard({ product: p }: Props) {
         <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
           {p.badge && (
             <span
-              className="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow"
+              className="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-[var(--stitch-color-on-secondary)] shadow"
               style={{ background: "var(--stitch-color-secondary)" }}
             >
               {p.badge}
@@ -50,7 +50,7 @@ export function CategoryProductCard({ product: p }: Props) {
           )}
           {p.tag && (
             <span
-              className="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow"
+              className="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-[var(--stitch-color-on-primary)] shadow"
               style={{ background: "var(--stitch-color-primary)" }}
             >
               {p.tag}
@@ -74,7 +74,13 @@ export function CategoryProductCard({ product: p }: Props) {
             unoptimized
           />
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+          <div
+            className="absolute inset-0 bg-gradient-to-t via-transparent to-transparent"
+            style={{
+              background:
+                "linear-gradient(to top, color-mix(in srgb, var(--stitch-color-scrim, var(--stitch-color-on-surface)) 28%, transparent), transparent 55%)",
+            }}
+          />
         </div>
       </Link>
 
@@ -88,7 +94,7 @@ export function CategoryProductCard({ product: p }: Props) {
                 key={i}
                 className="material-symbols-outlined text-sm"
                 style={{
-                  color: i < p.stars ? "#f59e0b" : "var(--stitch-color-outline-variant)",
+                  color: i < p.stars ? "var(--stitch-color-warning)" : "var(--stitch-color-outline-variant)",
                   fontVariationSettings: `"FILL" ${i < p.stars ? 1 : 0}, "wght" 400, "GRAD" 0, "opsz" 20`,
                 }}
                 aria-hidden
@@ -145,8 +151,11 @@ export function CategoryProductCard({ product: p }: Props) {
           </button>
           <Link
             href={`/product/${p.id}`}
-            className="flex items-center justify-center rounded-2xl px-3 py-2.5 transition-all duration-200 hover:bg-white/10 active:scale-95"
-            style={{ background: "var(--stitch-color-surface-container-high)" }}
+            className="flex items-center justify-center rounded-2xl px-3 py-2.5 transition-all duration-200 active:scale-95"
+            style={{
+              background: "var(--stitch-color-surface-container-high)",
+              boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--stitch-color-primary) 10%, transparent)",
+            }}
             title="Xem chi tiết"
           >
             <span className="material-symbols-outlined text-base" aria-hidden>

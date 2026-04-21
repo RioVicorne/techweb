@@ -51,7 +51,7 @@ export function HomeMobile({
               CYBERPULSE | Kinetic Gear
             </span>
             <h1
-              className="mb-4 text-3xl font-bold italic leading-tight tracking-tighter text-white"
+              className="mb-4 text-3xl font-bold italic leading-tight tracking-tighter text-[var(--stitch-color-on-surface)]"
               style={{ fontFamily: "var(--stitch-font-headline)" }}
             >
               OVERCLOCK YOUR REALITY
@@ -75,7 +75,7 @@ export function HomeMobile({
         <section className="mb-8">
           <div className="mb-4 flex items-end justify-between gap-4">
             <h2
-              className="flex items-center gap-3 text-2xl font-black uppercase italic tracking-tighter text-white"
+              className="flex items-center gap-3 text-2xl font-black uppercase italic tracking-tighter text-[var(--stitch-color-on-surface)]"
               style={{ fontFamily: "var(--stitch-font-headline)" }}
             >
               <span
@@ -103,7 +103,7 @@ export function HomeMobile({
           <div className="mb-4 flex items-start justify-between gap-4">
             <div>
               <h2
-                className="flex items-center gap-3 text-2xl font-black uppercase italic tracking-tighter text-white"
+                className="flex items-center gap-3 text-2xl font-black uppercase italic tracking-tighter text-[var(--stitch-color-on-surface)]"
                 style={{ fontFamily: "var(--stitch-font-headline)" }}
               >
                 <span
@@ -117,7 +117,10 @@ export function HomeMobile({
               </h2>
               <div
                 className="mt-2 inline-flex items-center rounded-full px-3 py-1 text-[11px] font-black"
-                style={{ background: "var(--stitch-color-secondary)", color: "white" }}
+                style={{
+                  background: "var(--stitch-color-secondary)",
+                  color: "var(--stitch-color-on-secondary)",
+                }}
               >
                 Ưu đãi có hạn
               </div>
@@ -157,7 +160,7 @@ export function HomeMobile({
                       {/* Hide rating on list cards; show on product detail only. */}
                       <Link
                         href={`/product/${p.id}`}
-                        className="mt-1 block line-clamp-2 text-base font-bold leading-snug text-white"
+                        className="mt-1 block line-clamp-2 text-base font-bold leading-snug text-[var(--stitch-color-on-surface)]"
                         style={{ fontFamily: "var(--stitch-font-headline)" }}
                       >
                         {p.title}
@@ -170,7 +173,7 @@ export function HomeMobile({
 
                   <Link
                     href={`/product/${p.id}`}
-                    className="flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-white transition-all hover:bg-[var(--stitch-color-primary)] hover:text-[var(--stitch-color-on-primary)] active:scale-95"
+                    className="flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-[var(--stitch-color-on-surface)] transition-all hover:bg-[var(--stitch-color-primary)] hover:text-[var(--stitch-color-on-primary)] active:scale-95"
                     style={{
                       background:
                         "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
@@ -186,7 +189,7 @@ export function HomeMobile({
 
         <section id="new-drops" className="mb-12 scroll-mt-28">
           <h2
-            className="mb-4 text-2xl font-black uppercase italic tracking-tighter text-white"
+            className="mb-4 text-2xl font-black uppercase italic tracking-tighter text-[var(--stitch-color-on-surface)]"
             style={{ fontFamily: "var(--stitch-font-headline)" }}
           >
             New Drops
@@ -215,7 +218,10 @@ export function HomeMobile({
                     unoptimized
                   />
                 </div>
-                <p className="line-clamp-1 text-sm font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                <p
+                  className="line-clamp-1 text-sm font-bold text-[var(--stitch-color-on-surface)]"
+                  style={{ fontFamily: "var(--stitch-font-headline)" }}
+                >
                   {p.title}
                 </p>
                 <p className="mt-2 text-base font-black" style={{ color: "var(--stitch-color-primary)" }}>

@@ -46,7 +46,7 @@ export function ProductPageView({ product }: { product: Product }) {
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <h1
-                className="mt-3 line-clamp-2 text-3xl font-black italic leading-tight tracking-tighter text-white"
+                className="mt-3 line-clamp-2 text-3xl font-black italic leading-tight tracking-tighter text-[var(--stitch-color-on-surface)]"
                 style={{ fontFamily: "var(--stitch-font-headline)" }}
               >
                 {product.title}
@@ -78,7 +78,7 @@ export function ProductPageView({ product }: { product: Product }) {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 text-2xl font-black italic tracking-tighter text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          <h2 className="mb-4 text-2xl font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
             Thông số kỹ thuật
           </h2>
 
@@ -138,7 +138,7 @@ export function ProductPageView({ product }: { product: Product }) {
 
         <section id="user-feedback" className="mb-10 scroll-mt-28">
           <div className="mb-4 flex items-center justify-between gap-4">
-            <h2 className="text-2xl font-black italic tracking-tighter text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+            <h2 className="text-2xl font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
               Đánh giá từ người dùng
             </h2>
             <Link
@@ -168,7 +168,7 @@ export function ProductPageView({ product }: { product: Product }) {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-black text-white">{r.name}</span>
+                      <span className="text-sm font-black text-[var(--stitch-color-on-surface)]">{r.name}</span>
                       <span
                         className="rounded-full px-3 py-1 text-[10px] font-black"
                         style={{

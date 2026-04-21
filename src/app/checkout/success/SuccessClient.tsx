@@ -102,7 +102,7 @@ export function SuccessClient() {
           check_circle
         </span>
 
-        <h1 className="mb-2 text-xl font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+        <h1 className="mb-2 text-xl font-bold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
           Đặt hàng thành công
         </h1>
 
@@ -113,7 +113,7 @@ export function SuccessClient() {
         ) : order ? (
           <>
             <p className="mb-6 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-              Cảm ơn bạn, <span className="font-semibold text-white">{order.customer.name}</span>. Mã đơn hàng của bạn là{" "}
+              Cảm ơn bạn, <span className="font-semibold text-[var(--stitch-color-on-surface)]">{order.customer.name}</span>. Mã đơn hàng của bạn là{" "}
               <span className="font-black" style={{ color: "var(--stitch-color-primary)" }}>
                 {order.id}
               </span>
@@ -130,11 +130,11 @@ export function SuccessClient() {
             >
               <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 <span>Tạm tính</span>
-                <span className="tabular-nums text-white">{formatVndDisplay(order.subtotalVnd)} đ</span>
+                <span className="tabular-nums text-[var(--stitch-color-on-surface)]">{formatVndDisplay(order.subtotalVnd)} đ</span>
               </div>
               <div className="mt-2 flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 <span>Vận chuyển</span>
-                <span className="tabular-nums text-white">
+                <span className="tabular-nums text-[var(--stitch-color-on-surface)]">
                   {order.shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(order.shippingVnd)} đ`}
                 </span>
               </div>

@@ -261,7 +261,7 @@ export function OrdersClient() {
     <main className="mx-auto max-w-screen-2xl px-6 pb-20 pt-28 md:px-12">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black italic tracking-tighter text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          <h1 className="text-2xl font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
             Đơn hàng của bạn
           </h1>
           <p className="mt-1 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -348,7 +348,7 @@ export function OrdersClient() {
                       </span>
                       {n > 0 ? (
                         <span
-                          className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black text-white"
+                          className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black text-[var(--stitch-color-on-surface)]"
                           style={{ background: "var(--stitch-color-secondary)" }}
                           aria-label={`${n} đơn ${t.label}`}
                         >
@@ -371,7 +371,7 @@ export function OrdersClient() {
 
           <div className="mt-5">
             <div className="flex items-center justify-between gap-4">
-              <h2 className="text-base font-black text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+              <h2 className="text-base font-black text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
                 {activeTab ? activeTab.label : "Đơn hàng"}
               </h2>
               <Link href="/checkout" className="text-sm font-black transition hover:underline" style={{ color: "var(--stitch-color-primary)" }}>
@@ -434,16 +434,16 @@ export function OrdersClient() {
 
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0 truncate text-sm font-black text-white">RioShop</div>
+                          <div className="min-w-0 truncate text-sm font-black text-[var(--stitch-color-on-surface)]">RioShop</div>
                           <div
                             className="shrink-0 text-right text-xs font-black leading-tight"
-                            style={{ color: String(o.status || "") === "COMPLETED" ? "#10b981" : "var(--stitch-color-primary)" }}
+                            style={{ color: String(o.status || "") === "COMPLETED" ? "var(--stitch-color-success)" : "var(--stitch-color-primary)" }}
                           >
                             {orderRowStatusLabel(String(o.status || ""))}
                           </div>
                         </div>
 
-                        <div className="mt-1 line-clamp-2 text-sm font-bold text-white">
+                        <div className="mt-1 line-clamp-2 text-sm font-bold text-[var(--stitch-color-on-surface)]">
                           {o.first_item?.title || o.order_code}
                         </div>
 
@@ -488,7 +488,7 @@ export function OrdersClient() {
 
                     <div className="mt-4 flex items-center justify-end gap-3">
                       <div className="text-xs font-black" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                        Mã đơn: <span className="text-white">{o.order_code}</span>
+                        Mã đơn: <span className="text-[var(--stitch-color-on-surface)]">{o.order_code}</span>
                       </div>
                       <span
                         className="inline-flex items-center justify-center rounded-xl px-5 py-2 text-sm font-black transition active:scale-[0.99]"
@@ -518,7 +518,7 @@ export function OrdersClient() {
           }}
         >
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-base font-black text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+            <h2 className="text-base font-black text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
               Chi tiết đơn
             </h2>
             {orderId && activeTab ? (
@@ -556,7 +556,7 @@ export function OrdersClient() {
                 <div className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   Mã đơn
                 </div>
-                <div className="mt-1 text-sm font-black text-white">{detail.id}</div>
+                <div className="mt-1 text-sm font-black text-[var(--stitch-color-on-surface)]">{detail.id}</div>
                 <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <OrderCreatedAtLabel iso={detail.created_at} />
                 </div>
@@ -566,11 +566,11 @@ export function OrdersClient() {
                    style={{ borderColor: "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)" }}>
                 <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <span>Tạm tính</span>
-                  <span className="tabular-nums text-white">{formatVndDisplay(detail.subtotal_vnd)} đ</span>
+                  <span className="tabular-nums text-[var(--stitch-color-on-surface)]">{formatVndDisplay(detail.subtotal_vnd)} đ</span>
                 </div>
                 <div className="mt-2 flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   <span>Vận chuyển</span>
-                  <span className="tabular-nums text-white">
+                  <span className="tabular-nums text-[var(--stitch-color-on-surface)]">
                     {detail.shipping_vnd === 0 ? "Miễn phí" : `${formatVndDisplay(detail.shipping_vnd)} đ`}
                   </span>
                 </div>
@@ -587,14 +587,14 @@ export function OrdersClient() {
                 <div className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   Giao tới
                 </div>
-                <div className="mt-1 text-sm font-black text-white">{detail.customer?.name || "—"}</div>
+                <div className="mt-1 text-sm font-black text-[var(--stitch-color-on-surface)]">{detail.customer?.name || "—"}</div>
                 <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   {detail.customer?.phone ? `SĐT: ${detail.customer.phone}` : null}
                   {detail.customer?.phone && detail.customer?.email ? " • " : null}
                   {detail.customer?.email ? `Email: ${detail.customer.email}` : null}
                 </div>
                 <div className="mt-2 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                  Địa chỉ: <span className="text-white">{detail.customer?.address || "—"}</span>
+                  Địa chỉ: <span className="text-[var(--stitch-color-on-surface)]">{detail.customer?.address || "—"}</span>
                 </div>
               </div>
 
@@ -628,7 +628,7 @@ export function OrdersClient() {
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <div className="text-sm font-black text-white">
+                          <div className="text-sm font-black text-[var(--stitch-color-on-surface)]">
                             {s.label}
                           </div>
                           <div className="text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -651,7 +651,7 @@ export function OrdersClient() {
                         <span className="material-symbols-outlined text-[20px]" aria-hidden>cancel</span>
                       </div>
                       <div className="min-w-0">
-                        <div className="text-sm font-black text-white">Đã hủy</div>
+                        <div className="text-sm font-black text-[var(--stitch-color-on-surface)]">Đã hủy</div>
                         <div className="text-xs opacity-60">Đơn hàng đã được quản trị viên hủy</div>
                       </div>
                     </div>

@@ -66,16 +66,38 @@ export const defaultStitchTheme: Required<
 > & StitchDesignThemeInput = {
   colorMode: "LIGHT",
   roundness: "ROUND_TWELVE",
-  customColor: "#2563eb",
+  customColor: "#14b8c8",
   namedColors: {
-    primary: "#2563eb",
+    background: "#f8fcfd",
+    onBackground: "#05232b",
+    primary: "#0ea5b9",
     onPrimary: "#ffffff",
-    secondary: "#0ea5e9",
-    surface: "#f8fafc",
-    surfaceContainer: "#ffffff",
-    outline: "#e2e8f0",
-    onSurface: "#0f172a",
-    onSurfaceVariant: "#64748b",
+    primaryContainer: "#d7f6fb",
+    onPrimaryContainer: "#0b4e5a",
+    primaryDim: "#0891a6",
+    secondary: "#06b6d4",
+    onSecondary: "#ffffff",
+    secondaryContainer: "#ccf5fb",
+    onSecondaryContainer: "#0a4a57",
+    surface: "#ffffff",
+    surfaceBright: "#ffffff",
+    surfaceContainer: "#f3fbfd",
+    surfaceContainerLow: "#f7fdff",
+    surfaceContainerHigh: "#edf8fb",
+    surfaceContainerHighest: "#e4f3f8",
+    surfaceContainerLowest: "#ffffff",
+    outline: "#b8dce5",
+    outlineVariant: "#d4eaf0",
+    onSurface: "#0f2a33",
+    onSurfaceVariant: "#4f6b74",
+    error: "#dc2626",
+    errorContainer: "#fee2e2",
+    onError: "#ffffff",
+    onErrorContainer: "#7f1d1d",
+    warning: "#d97706",
+    onWarning: "#ffffff",
+    success: "#059669",
+    onSuccess: "#ffffff",
   },
   headlineFont: "GEIST",
   bodyFont: "GEIST",
@@ -83,14 +105,36 @@ export const defaultStitchTheme: Required<
 };
 
 export const darkStitchNamedColors: Record<string, string> = {
-  primary: "#60a5fa",
-  onPrimary: "#0f172a",
-  secondary: "#38bdf8",
-  surface: "#020617",
-  surfaceContainer: "#0f172a",
-  outline: "#334155",
-  onSurface: "#f1f5f9",
-  onSurfaceVariant: "#94a3b8",
+  background: "#f2fbfd",
+  onBackground: "#041d24",
+  primary: "#0891a6",
+  onPrimary: "#ffffff",
+  primaryContainer: "#c8eff7",
+  onPrimaryContainer: "#083d47",
+  primaryDim: "#0e7490",
+  secondary: "#06b6d4",
+  onSecondary: "#ffffff",
+  secondaryContainer: "#d2f3f8",
+  onSecondaryContainer: "#0a4a57",
+  surface: "#f7fcfe",
+  surfaceBright: "#ffffff",
+  surfaceContainer: "#eef9fc",
+  surfaceContainerLow: "#f4fbfd",
+  surfaceContainerHigh: "#e8f5f9",
+  surfaceContainerHighest: "#deedf3",
+  surfaceContainerLowest: "#ffffff",
+  outline: "#b6d6de",
+  outlineVariant: "#cfe5eb",
+  onSurface: "#102830",
+  onSurfaceVariant: "#4d6972",
+  error: "#dc2626",
+  errorContainer: "#fee2e2",
+  onError: "#ffffff",
+  onErrorContainer: "#7f1d1d",
+  warning: "#d97706",
+  onWarning: "#ffffff",
+  success: "#059669",
+  onSuccess: "#ffffff",
 };
 
 /** Stitch API often returns snake_case keys; map to camelCase for token lookup. */
@@ -146,17 +190,56 @@ export function stitchThemeToStyle(
     ["--stitch-color-on-primary" as string]:
       pick(colors, "onPrimary") ?? "#fff",
     ["--stitch-color-secondary" as string]:
-      pick(colors, "secondary") ?? "#0ea5e9",
+      pick(colors, "secondary") ?? "#06b6d4",
+    ["--stitch-color-on-secondary" as string]:
+      pick(colors, "onSecondary") ?? "#ffffff",
     ["--stitch-color-surface" as string]:
-      pick(colors, "surface") ?? "#f8fafc",
+      pick(colors, "surface") ?? "#ffffff",
     ["--stitch-color-surface-container" as string]:
-      pick(colors, "surfaceContainer") ?? "#fff",
+      pick(colors, "surfaceContainer") ?? "#f3fbfd",
+    ["--stitch-color-surface-container-low" as string]:
+      pick(colors, "surfaceContainerLow") ?? "#f7fdff",
+    ["--stitch-color-surface-container-lowest" as string]:
+      pick(colors, "surfaceContainerLowest") ?? "#ffffff",
+    ["--stitch-color-surface-container-high" as string]:
+      pick(colors, "surfaceContainerHigh") ?? "#edf8fb",
+    ["--stitch-color-surface-container-highest" as string]:
+      pick(colors, "surfaceContainerHighest") ?? "#e4f3f8",
     ["--stitch-color-outline" as string]:
-      pick(colors, "outline") ?? "#e2e8f0",
+      pick(colors, "outline") ?? "#b8dce5",
+    ["--stitch-color-outline-variant" as string]:
+      pick(colors, "outlineVariant") ?? "#d4eaf0",
     ["--stitch-color-on-surface" as string]:
-      pick(colors, "onSurface") ?? "#0f172a",
+      pick(colors, "onSurface") ?? "#0f2a33",
     ["--stitch-color-on-surface-variant" as string]:
-      pick(colors, "onSurfaceVariant") ?? "#64748b",
+      pick(colors, "onSurfaceVariant") ?? "#4f6b74",
+    ["--stitch-color-background" as string]:
+      pick(colors, "background") ?? "#f8fcfd",
+    ["--stitch-color-on-background" as string]:
+      pick(colors, "onBackground") ?? "#05232b",
+    ["--stitch-color-primary-container" as string]:
+      pick(colors, "primaryContainer") ?? "#d7f6fb",
+    ["--stitch-color-on-primary-container" as string]:
+      pick(colors, "onPrimaryContainer") ?? "#0b4e5a",
+    ["--stitch-color-secondary-container" as string]:
+      pick(colors, "secondaryContainer") ?? "#ccf5fb",
+    ["--stitch-color-on-secondary-container" as string]:
+      pick(colors, "onSecondaryContainer") ?? "#0a4a57",
+    ["--stitch-color-error" as string]: pick(colors, "error") ?? "#dc2626",
+    ["--stitch-color-error-container" as string]:
+      pick(colors, "errorContainer") ?? "#fee2e2",
+    ["--stitch-color-on-error" as string]:
+      pick(colors, "onError") ?? "#ffffff",
+    ["--stitch-color-on-error-container" as string]:
+      pick(colors, "onErrorContainer") ?? "#7f1d1d",
+    ["--stitch-color-warning" as string]:
+      pick(colors, "warning") ?? "#d97706",
+    ["--stitch-color-on-warning" as string]:
+      pick(colors, "onWarning") ?? "#ffffff",
+    ["--stitch-color-success" as string]:
+      pick(colors, "success") ?? "#059669",
+    ["--stitch-color-on-success" as string]:
+      pick(colors, "onSuccess") ?? "#ffffff",
     ["--stitch-seed" as string]: seed,
   };
 

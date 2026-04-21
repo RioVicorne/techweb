@@ -594,7 +594,7 @@ export function AccountClient() {
 
                     <div className="min-w-0">
                       <div
-                        className="line-clamp-1 text-base font-black text-white"
+                        className="line-clamp-1 text-base font-black text-[var(--stitch-color-on-surface)]"
                         style={{ fontFamily: "var(--stitch-font-headline)" }}
                       >
                         {fullName ? fullName : "Tài khoản"}
@@ -651,7 +651,7 @@ export function AccountClient() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h1
-                      className="text-2xl font-black italic tracking-tighter text-white"
+                      className="text-2xl font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]"
                       style={{ fontFamily: "var(--stitch-font-headline)" }}
                     >
                       Chỉnh sửa thông tin
@@ -698,7 +698,7 @@ export function AccountClient() {
                       Full name
                     </div>
                     <input
-                      className="mt-2 w-full bg-transparent text-sm font-bold text-white outline-none"
+                      className="mt-2 w-full bg-transparent text-sm font-bold text-[var(--stitch-color-on-surface)] outline-none"
                       placeholder="Your name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
@@ -719,7 +719,7 @@ export function AccountClient() {
                       Phone
                     </div>
                     <input
-                      className="mt-2 w-full bg-transparent text-sm font-bold text-white outline-none"
+                      className="mt-2 w-full bg-transparent text-sm font-bold text-[var(--stitch-color-on-surface)] outline-none"
                       placeholder="090..."
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
@@ -742,10 +742,10 @@ export function AccountClient() {
                 <div className="flex gap-3">
                   <button
                     type="button"
-                    className="flex flex-1 items-center justify-center rounded-xl py-3 text-sm font-bold text-white transition active:scale-[0.99] disabled:opacity-60"
+                    className="flex flex-1 items-center justify-center rounded-xl py-3 text-sm font-bold text-[var(--stitch-color-on-surface)] transition active:scale-[0.99] disabled:opacity-60"
                     style={{
                       background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
-                      color: "var(--stitch-color-on-primary-fixed, black)",
+                      color: "var(--stitch-color-on-primary)",
                     }}
                     disabled={saving}
                     onClick={async () => {
@@ -801,7 +801,7 @@ export function AccountClient() {
             }}
           >
             <div className="flex items-center justify-between gap-4">
-              <h2 className="text-lg font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+              <h2 className="text-lg font-bold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
                 Trạng thái giao hàng
               </h2>
               <Link
@@ -871,7 +871,7 @@ export function AccountClient() {
                           </span>
                           {n > 0 ? (
                             <span
-                              className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black text-white"
+                              className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black text-[var(--stitch-color-on-surface)]"
                               style={{ background: "var(--stitch-color-secondary)" }}
                               aria-label={`${n} đơn ${t.label}`}
                             >
@@ -925,7 +925,7 @@ export function AccountClient() {
                       >
                         Đơn hàng bạn vừa xem
                       </div>
-                      <div className="mt-1 truncate text-sm font-black text-white">
+                      <div className="mt-1 truncate text-sm font-black text-[var(--stitch-color-on-surface)]">
                         {selectedOrder.orderId}
                       </div>
                       <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -958,11 +958,11 @@ export function AccountClient() {
                   <div className="mt-4 grid gap-2 text-sm">
                     <div className="flex justify-between" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                       <span>Tạm tính</span>
-                      <span className="tabular-nums text-white">{formatVndDisplay(selectedOrder.subtotalVnd)} đ</span>
+                      <span className="tabular-nums text-[var(--stitch-color-on-surface)]">{formatVndDisplay(selectedOrder.subtotalVnd)} đ</span>
                     </div>
                     <div className="flex justify-between" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                       <span>Vận chuyển</span>
-                      <span className="tabular-nums text-white">
+                      <span className="tabular-nums text-[var(--stitch-color-on-surface)]">
                         {selectedOrder.shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(selectedOrder.shippingVnd)} đ`}
                       </span>
                     </div>
@@ -979,14 +979,14 @@ export function AccountClient() {
                          borderColor:
                            "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
                        }}>
-                    <div className="text-xs font-black text-white">{selectedOrder.customerName || "—"}</div>
+                    <div className="text-xs font-black text-[var(--stitch-color-on-surface)]">{selectedOrder.customerName || "—"}</div>
                     <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                       {selectedOrder.phone ? `SĐT: ${selectedOrder.phone}` : null}
                       {selectedOrder.phone && selectedOrder.email ? " • " : null}
                       {selectedOrder.email ? `Email: ${selectedOrder.email}` : null}
                     </div>
                     <div className="mt-2 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-                      Địa chỉ: <span className="text-white">{selectedOrder.address || "—"}</span>
+                      Địa chỉ: <span className="text-[var(--stitch-color-on-surface)]">{selectedOrder.address || "—"}</span>
                     </div>
                   </div>
                 </div>
@@ -1001,7 +1001,7 @@ export function AccountClient() {
                     color: "var(--stitch-color-on-surface-variant)",
                   }}
                 >
-                  Không tìm thấy đơn hàng <span className="font-black text-white">{selectedOrderId}</span>.
+                  Không tìm thấy đơn hàng <span className="font-black text-[var(--stitch-color-on-surface)]">{selectedOrderId}</span>.
                 </div>
               ) : null}
             </div>
@@ -1023,7 +1023,7 @@ export function AccountClient() {
                   >
                     Địa chỉ giao hàng
                   </div>
-                  <div className="mt-1 text-sm font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+                  <div className="mt-1 text-sm font-bold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
                     {shippingAddressDisplay || "Chưa thiết lập"}
                   </div>
                 </div>
@@ -1059,7 +1059,7 @@ export function AccountClient() {
                     </div>
                     <div className="relative">
                       <select
-                        className="w-full appearance-none rounded-xl px-4 py-3 pr-10 text-sm font-bold text-white outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)] disabled:opacity-60"
+                        className="w-full appearance-none rounded-xl px-4 py-3 pr-10 text-sm font-bold text-[var(--stitch-color-on-surface)] outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)] disabled:opacity-60"
                         value={shippingAddress.provinceCode}
                         disabled={!vnAddressData}
                         onChange={(e) =>
@@ -1102,7 +1102,7 @@ export function AccountClient() {
                     </div>
                     <div className="relative">
                       <select
-                        className="w-full appearance-none rounded-xl px-4 py-3 pr-10 text-sm font-bold text-white outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)] disabled:opacity-60"
+                        className="w-full appearance-none rounded-xl px-4 py-3 pr-10 text-sm font-bold text-[var(--stitch-color-on-surface)] outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)] disabled:opacity-60"
                         value={shippingAddress.districtCode}
                         onChange={(e) =>
                           setShippingAddress((a) => ({ ...a, districtCode: e.target.value, wardCode: "" }))
@@ -1144,7 +1144,7 @@ export function AccountClient() {
                     </div>
                     <div className="relative">
                       <select
-                        className="w-full appearance-none rounded-xl px-4 py-3 pr-10 text-sm font-bold text-white outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)] disabled:opacity-60"
+                        className="w-full appearance-none rounded-xl px-4 py-3 pr-10 text-sm font-bold text-[var(--stitch-color-on-surface)] outline-none transition focus:ring-2 focus:ring-[var(--stitch-color-secondary)] disabled:opacity-60"
                         value={shippingAddress.wardCode}
                         onChange={(e) => setShippingAddress((a) => ({ ...a, wardCode: e.target.value }))}
                         disabled={!vnAddressData || !shippingAddress.districtCode}
@@ -1183,7 +1183,7 @@ export function AccountClient() {
                       Số nhà + Tên đường
                     </div>
                     <input
-                      className="w-full rounded-xl bg-transparent px-3 py-2 text-sm font-bold text-white outline-none"
+                      className="w-full rounded-xl bg-transparent px-3 py-2 text-sm font-bold text-[var(--stitch-color-on-surface)] outline-none"
                       placeholder="VD: 12 Nguyễn Huệ"
                       value={shippingAddress.street}
                       onChange={(e) => setShippingAddress((a) => ({ ...a, street: e.target.value }))}
@@ -1203,10 +1203,10 @@ export function AccountClient() {
                   <div className="flex gap-3 pt-1">
                     <button
                       type="button"
-                      className="flex flex-1 items-center justify-center rounded-xl py-3 text-sm font-bold text-white transition active:scale-[0.99] disabled:opacity-60"
+                      className="flex flex-1 items-center justify-center rounded-xl py-3 text-sm font-bold text-[var(--stitch-color-on-surface)] transition active:scale-[0.99] disabled:opacity-60"
                       style={{
                         background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
-                        color: "var(--stitch-color-on-primary-fixed, black)",
+                        color: "var(--stitch-color-on-primary)",
                       }}
                       disabled={savingAddress}
                       onClick={async () => {
@@ -1273,7 +1273,7 @@ export function AccountClient() {
             }}
           >
             <div className="flex items-center justify-between gap-4">
-              <h2 className="text-lg font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+              <h2 className="text-lg font-bold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
                 Voucher / Ưu đãi của bạn
               </h2>
               <button
@@ -1324,7 +1324,7 @@ export function AccountClient() {
             }}
           >
             <div className="flex items-center justify-between gap-4">
-              <h2 className="text-lg font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+              <h2 className="text-lg font-bold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
                 Điểm tích luỹ / Hạng thành viên
               </h2>
               <div className="text-xs font-bold" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -1355,7 +1355,7 @@ export function AccountClient() {
             </div>
 
             <div className="mt-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-              Còn <span className="font-black text-white">{loyaltyRemaining}</span> điểm lên hạng.
+              Còn <span className="font-black text-[var(--stitch-color-on-surface)]">{loyaltyRemaining}</span> điểm lên hạng.
             </div>
           </section>
         </div>
@@ -1370,7 +1370,7 @@ export function AccountClient() {
           }}
         >
           <div>
-            <h3 className="text-lg font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+            <h3 className="text-lg font-bold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
               Sản phẩm đã mua
             </h3>
 
@@ -1401,7 +1401,7 @@ export function AccountClient() {
                         <img src={p.img} alt={p.title} className="h-full w-full object-cover" />
                       </div>
                       <div className="p-3">
-                        <div className="line-clamp-1 text-sm font-bold text-white">{p.title}</div>
+                        <div className="line-clamp-1 text-sm font-bold text-[var(--stitch-color-on-surface)]">{p.title}</div>
                         <div className="mt-1 text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
                           {p.price} <span className="text-[10px] font-normal">đ</span>
                         </div>
@@ -1432,7 +1432,7 @@ export function AccountClient() {
                         ) : null}
                       </div>
                       <div className="min-w-0">
-                        <div className="line-clamp-1 text-sm font-black text-white">{x.title}</div>
+                        <div className="line-clamp-1 text-sm font-black text-[var(--stitch-color-on-surface)]">{x.title}</div>
                         <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                           Mua gần nhất: {new Date(x.last_purchased_at).toLocaleDateString()} • SL: {x.total_qty}
                         </div>
@@ -1455,7 +1455,7 @@ export function AccountClient() {
           <div className="mt-8">
             <h3
               id="recent-orders"
-              className="text-lg font-bold text-white"
+              className="text-lg font-bold text-[var(--stitch-color-on-surface)]"
               style={{ fontFamily: "var(--stitch-font-headline)" }}
             >
               Đơn hàng gần đây
@@ -1484,7 +1484,7 @@ export function AccountClient() {
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div className="min-w-0">
-                        <div className="truncate text-sm font-black text-white">{o.order_code}</div>
+                        <div className="truncate text-sm font-black text-[var(--stitch-color-on-surface)]">{o.order_code}</div>
                         <div className="mt-1 text-xs" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                           {new Date(o.created_at).toLocaleString()}
                         </div>

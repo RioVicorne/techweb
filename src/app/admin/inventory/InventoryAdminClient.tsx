@@ -58,7 +58,11 @@ export function InventoryAdminClient() {
         </p>
       </header>
 
-      {error ? <p className="text-sm text-red-500">{error}</p> : null}
+      {error ? (
+        <p className="text-sm" style={{ color: "var(--stitch-color-error)" }}>
+          {error}
+        </p>
+      ) : null}
 
       {loading ? (
         <p className="text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -100,7 +104,7 @@ export function InventoryAdminClient() {
                 rows.map((r) => (
                   <tr
                     key={r.variantId}
-                    className="group border-t transition-colors hover:bg-white/[0.02]"
+                    className="group border-t transition-colors hover:bg-[color:color-mix(in_srgb,var(--stitch-color-primary)_6%,transparent)]"
                     style={{
                       borderColor:
                         "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 15%, transparent)",
@@ -125,7 +129,7 @@ export function InventoryAdminClient() {
                           )}
                         </div>
                         <div className="flex flex-col gap-1">
-                          <div className="font-bold text-white leading-tight">{r.productName}</div>
+                          <div className="font-bold text-[var(--stitch-color-on-surface)] leading-tight">{r.productName}</div>
                           <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
                             <span 
                               className="rounded px-1.5 py-0.5" 
@@ -159,12 +163,12 @@ export function InventoryAdminClient() {
                           background: r.available <= 0 
                             ? "var(--stitch-color-error-container)" 
                             : r.available <= 5 
-                              ? "color-mix(in srgb, #f59e0b 20%, transparent)" 
+                              ? "color-mix(in srgb, var(--stitch-color-warning) 20%, transparent)" 
                               : "color-mix(in srgb, var(--stitch-color-primary) 15%, transparent)",
                           color: r.available <= 0 
                             ? "var(--stitch-color-on-error-container)" 
                             : r.available <= 5 
-                              ? "#f59e0b" 
+                              ? "var(--stitch-color-warning)" 
                               : "var(--stitch-color-primary)"
                         }}
                       >

@@ -66,7 +66,11 @@ export function AdminDashboardClient() {
   }
 
   if (error || !stats) {
-    return <p className="text-sm text-red-500">{error ?? "Lỗi"}</p>;
+    return (
+      <p className="text-sm" style={{ color: "var(--stitch-color-error)" }}>
+        {error ?? "Lỗi"}
+      </p>
+    );
   }
 
   return (
@@ -132,7 +136,11 @@ export function AdminDashboardClient() {
             statusEntries.map(([st, n]) => (
               <li 
                 key={st} 
-                className="flex items-center justify-between gap-4 rounded-2xl bg-white/5 px-4 py-3 text-sm font-bold transition-transform hover:scale-[1.01]"
+                className="flex items-center justify-between gap-4 rounded-2xl px-4 py-3 text-sm font-bold transition-transform hover:scale-[1.01]"
+                style={{
+                  background:
+                    "color-mix(in srgb, var(--stitch-color-surface-container-high) 84%, transparent)",
+                }}
               >
                 <div className="flex items-center gap-3">
                   <div 
@@ -241,10 +249,10 @@ function KpiCard(props: {
 
 function getStatusColor(status: string) {
   switch (status) {
-    case "PENDING_CONFIRMATION": return "#f59e0b"; // amber
+    case "PENDING_CONFIRMATION": return "var(--stitch-color-warning)";
     case "CONFIRMED": return "var(--stitch-color-primary)";
-    case "SHIPPING": return "#3b82f6"; // blue
-    case "COMPLETED": return "#10b981"; // emerald
+    case "SHIPPING": return "var(--stitch-color-secondary)";
+    case "COMPLETED": return "var(--stitch-color-success)";
     case "CANCELLED": return "var(--stitch-color-error)";
     default: return "var(--stitch-color-outline)";
   }

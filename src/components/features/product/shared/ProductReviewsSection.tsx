@@ -113,7 +113,7 @@ export function ProductReviewsSection({ productId }: ProductReviewsSectionProps)
         className="rounded-3xl p-6 text-center"
         style={{ background: "var(--stitch-color-surface-container)" }}
       >
-        <p className="text-sm font-medium" style={{ color: "var(--stitch-color-error, #ef4444)" }}>
+        <p className="text-sm font-medium" style={{ color: "var(--stitch-color-error)" }}>
           {error}
         </p>
       </div>
@@ -135,7 +135,7 @@ export function ProductReviewsSection({ productId }: ProductReviewsSectionProps)
           style={{ background: "var(--stitch-color-surface-container)" }}
         >
           <h3
-            className="mb-4 text-lg font-black italic tracking-tighter text-white"
+            className="mb-4 text-lg font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]"
             style={{ fontFamily: "var(--stitch-font-headline)" }}
           >
             Tổng quan đánh giá
@@ -144,7 +144,7 @@ export function ProductReviewsSection({ productId }: ProductReviewsSectionProps)
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:gap-10">
             {/* Average */}
             <div className="flex flex-col items-center">
-              <span className="text-5xl font-black text-white">{avgRating.toFixed(1)}</span>
+              <span className="text-5xl font-black text-[var(--stitch-color-on-surface)]">{avgRating.toFixed(1)}</span>
               <div className="mt-2">{renderStars(Math.round(avgRating))}</div>
               <p className="mt-1 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 {totalReviews} đánh giá
@@ -166,7 +166,7 @@ export function ProductReviewsSection({ productId }: ProductReviewsSectionProps)
       {/* Reviews List */}
       <div>
         <h3
-          className="mb-4 text-lg font-black italic tracking-tighter text-white"
+          className="mb-4 text-lg font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]"
           style={{ fontFamily: "var(--stitch-font-headline)" }}
         >
           Đánh giá từ khách hàng {totalReviews > 0 && `(${totalReviews})`}
@@ -201,7 +201,7 @@ export function ProductReviewsSection({ productId }: ProductReviewsSectionProps)
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-black text-white">{review.reviewer_name}</span>
+                      <span className="text-sm font-black text-[var(--stitch-color-on-surface)]">{review.reviewer_name}</span>
                       {review.is_verified_purchase && (
                         <span
                           className="rounded-full px-2 py-0.5 text-[10px] font-black"
@@ -216,7 +216,7 @@ export function ProductReviewsSection({ productId }: ProductReviewsSectionProps)
                     </div>
                     <div className="mt-1">{renderStars(review.rating, "text-base")}</div>
                     {review.title && (
-                      <p className="mt-2 text-sm font-bold text-white">{review.title}</p>
+                      <p className="mt-2 text-sm font-bold text-[var(--stitch-color-on-surface)]">{review.title}</p>
                     )}
                     <p
                       className="mt-2 text-sm leading-relaxed"

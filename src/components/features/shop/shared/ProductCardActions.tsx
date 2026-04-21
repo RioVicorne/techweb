@@ -17,7 +17,7 @@ export function ProductCardActions({ product }: { product: Product }) {
         type="button"
         aria-label="Thêm vào giỏ hàng"
         title="Thêm vào giỏ hàng"
-        className="flex w-12 shrink-0 items-center justify-center rounded-xl py-3 text-white transition-all hover:bg-[var(--stitch-color-primary)] hover:text-[var(--stitch-color-on-primary)] active:scale-95"
+        className="flex w-12 shrink-0 items-center justify-center rounded-xl py-3 text-[var(--stitch-color-on-surface)] transition-all hover:bg-[var(--stitch-color-primary)] hover:text-[var(--stitch-color-on-primary)] active:scale-95"
         style={{
           background:
             "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",
@@ -30,7 +30,7 @@ export function ProductCardActions({ product }: { product: Product }) {
       </button>
       <button
         type="button"
-        className="flex min-w-0 flex-1 items-center justify-center rounded-xl py-3 font-bold text-white transition-all hover:bg-[var(--stitch-color-primary)] hover:text-[var(--stitch-color-on-primary)] active:scale-95"
+        className="flex min-w-0 flex-1 items-center justify-center rounded-xl py-3 font-bold text-[var(--stitch-color-on-surface)] transition-all hover:bg-[var(--stitch-color-primary)] hover:text-[var(--stitch-color-on-primary)] active:scale-95"
         style={{
           background:
             "var(--stitch-color-surface-container-highest, var(--stitch-color-surface-container))",

@@ -48,7 +48,7 @@ export function StickyProductCTA({ product }: { product: Product }) {
       <div className="flex items-stretch gap-3">
         <button
           type="button"
-          className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-extrabold text-white transition active:scale-[0.98]"
+          className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-extrabold text-[var(--stitch-color-on-primary)] transition active:scale-[0.98]"
           style={{
             background: `linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)`,
           }}

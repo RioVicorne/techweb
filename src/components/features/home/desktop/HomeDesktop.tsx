@@ -101,7 +101,7 @@ export function HomeDesktop({
               className="absolute inset-0 opacity-90"
               style={{
                 background:
-                  "linear-gradient(to top, var(--stitch-color-surface) 0%, transparent 55%)",
+                  "linear-gradient(to top, color-mix(in srgb, var(--stitch-color-primary) 62%, transparent) 0%, transparent 62%)",
               }}
             />
             <div className="absolute bottom-8 left-8 max-w-lg md:bottom-10 md:left-10">
@@ -115,18 +115,18 @@ export function HomeDesktop({
                 Phiên bản giới hạn
               </span>
               <h1
-                className="mb-4 text-4xl font-bold italic leading-tight tracking-tighter text-white md:text-6xl"
+                className="mb-4 text-4xl font-bold italic leading-tight tracking-tighter text-[var(--stitch-color-on-primary)] md:text-6xl"
                 style={{ fontFamily: "var(--stitch-font-headline)" }}
               >
                 CYBERPULSE{" "}
-                <span style={{ color: "var(--stitch-color-primary)" }}>
+                <span style={{ color: "var(--stitch-color-secondary-container)" }}>
                   ELITE X
                 </span>
               </h1>
-              <p
-                className="mb-8 text-lg font-medium"
-                style={{ color: "var(--stitch-color-on-surface-variant)" }}
-              >
+                <p
+                  className="mb-8 text-lg font-medium"
+                  style={{ color: "var(--stitch-color-on-primary)" }}
+                >
                 Phản hồi xúc giác thế hệ mới — độ trễ gần như bằng không. Trải
                 nghiệm chơi cạnh tranh đỉnh cao.
               </p>
@@ -134,8 +134,8 @@ export function HomeDesktop({
                 href={HOME_EXPLORE_HREF}
                 className="group inline-flex min-h-[44px] items-center gap-3 rounded-full px-8 py-4 font-extrabold transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--stitch-color-surface)]"
                 style={{
-                  background: "#ffffff",
-                  color: "var(--stitch-color-surface)",
+                  background: "var(--stitch-color-primary)",
+                  color: "var(--stitch-color-on-primary)",
                 }}
               >
                 {HOME_CTA_LABEL}
@@ -163,18 +163,18 @@ export function HomeDesktop({
                 className="absolute inset-0 flex flex-col justify-end bg-gradient-to-r p-6 md:p-8"
                 style={{
                   background:
-                    "linear-gradient(to right, color-mix(in srgb, var(--stitch-color-surface-container-lowest, #000) 80%, transparent), transparent)",
+                    "linear-gradient(to right, color-mix(in srgb, var(--stitch-color-primary) 42%, transparent), transparent)",
                 }}
               >
                 <h2
-                  className="mb-1 text-2xl font-bold text-white"
+                  className="mb-1 text-2xl font-bold text-[var(--stitch-color-on-primary)]"
                   style={{ fontFamily: "var(--stitch-font-headline)" }}
                 >
                   RTX SERIES
                 </h2>
                 <p
                   className="text-sm font-bold"
-                  style={{ color: "var(--stitch-color-tertiary)" }}
+                  style={{ color: "var(--stitch-color-on-primary)" }}
                 >
                   UP TO 25% OFF
                 </p>
@@ -194,18 +194,18 @@ export function HomeDesktop({
                 className="absolute inset-0 flex flex-col justify-end bg-gradient-to-r p-6 md:p-8"
                 style={{
                   background:
-                    "linear-gradient(to right, color-mix(in srgb, var(--stitch-color-surface-container-lowest, #000) 80%, transparent), transparent)",
+                    "linear-gradient(to right, color-mix(in srgb, var(--stitch-color-primary) 42%, transparent), transparent)",
                 }}
               >
                 <h2
-                  className="mb-1 text-2xl font-bold text-white"
+                  className="mb-1 text-2xl font-bold text-[var(--stitch-color-on-primary)]"
                   style={{ fontFamily: "var(--stitch-font-headline)" }}
                 >
                   PRO GEAR
                 </h2>
                 <p
                   className="text-sm font-bold"
-                  style={{ color: "var(--stitch-color-primary)" }}
+                  style={{ color: "var(--stitch-color-on-primary)" }}
                 >
                   LEVEL UP YOUR CONSOLE
                 </p>
@@ -218,7 +218,7 @@ export function HomeDesktop({
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2
-                className="flex items-center gap-3 text-2xl font-black uppercase italic tracking-tighter text-white md:text-3xl"
+                className="flex items-center gap-3 text-2xl font-black uppercase italic tracking-tighter text-[var(--stitch-color-on-surface)] md:text-3xl"
                 style={{ fontFamily: "var(--stitch-font-headline)" }}
               >
                 <span
@@ -253,7 +253,7 @@ export function HomeDesktop({
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2
-                className="text-2xl font-black italic tracking-tighter text-white md:text-3xl"
+                className="text-2xl font-black italic tracking-tighter text-[var(--stitch-color-on-surface)] md:text-3xl"
                 style={{ fontFamily: "var(--stitch-font-headline)" }}
               >
                 New Drops

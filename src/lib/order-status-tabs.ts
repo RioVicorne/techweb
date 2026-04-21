@@ -37,16 +37,25 @@ export function orderRowStatusLabel(status: string): string {
 export function orderStatusTabColor(tabKey: string): { fg: string; bg: string } {
   switch (tabKey) {
     case "pending":
-      return { fg: "#f59e0b", bg: "color-mix(in srgb, #f59e0b 18%, transparent)" };
+      return {
+        fg: "var(--stitch-color-warning)",
+        bg: "color-mix(in srgb, var(--stitch-color-warning) 18%, transparent)",
+      };
     case "preparing":
       return {
         fg: "var(--stitch-color-secondary)",
         bg: "color-mix(in srgb, var(--stitch-color-secondary) 18%, transparent)",
       };
     case "shipping":
-      return { fg: "#3b82f6", bg: "color-mix(in srgb, #3b82f6 18%, transparent)" };
+      return {
+        fg: "var(--stitch-color-primary)",
+        bg: "color-mix(in srgb, var(--stitch-color-primary) 18%, transparent)",
+      };
     case "delivered":
-      return { fg: "#10b981", bg: "color-mix(in srgb, #10b981 18%, transparent)" };
+      return {
+        fg: "var(--stitch-color-success)",
+        bg: "color-mix(in srgb, var(--stitch-color-success) 18%, transparent)",
+      };
     case "cancelled":
       return {
         fg: "var(--stitch-color-error)",

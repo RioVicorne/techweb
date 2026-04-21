@@ -753,13 +753,13 @@ export function ProductsAdminClient() {
   const statusColor = (s: string | null) => {
     switch (s) {
       case "active":
-        return "var(--stitch-color-primary, #22c55e)";
+        return "var(--stitch-color-primary)";
       case "draft":
-        return "var(--stitch-color-warning, #f59e0b)";
+        return "var(--stitch-color-warning)";
       case "archived":
-        return "var(--stitch-color-on-surface-variant, #9ca3af)";
+        return "var(--stitch-color-on-surface-variant)";
       default:
-        return "var(--stitch-color-on-surface-variant, #9ca3af)";
+        return "var(--stitch-color-on-surface-variant)";
     }
   };
 
@@ -893,8 +893,8 @@ export function ProductsAdminClient() {
           <button
             type="button"
             onClick={openAdd}
-            className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
-            style={{ background: "var(--stitch-color-primary, #6366f1)" }}
+            className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-[var(--stitch-color-on-surface)] transition hover:opacity-90"
+            style={{ background: "var(--stitch-color-primary)" }}
           >
             <span className="material-symbols-outlined text-[20px]">add</span>
             Thêm sản phẩm
@@ -925,8 +925,8 @@ export function ProductsAdminClient() {
           style={{
             borderColor:
               csvSummary.failed > 0
-                ? "var(--stitch-color-warning, #f59e0b)"
-                : "var(--stitch-color-primary, #22c55e)",
+                ? "var(--stitch-color-warning)"
+                : "var(--stitch-color-primary)",
             color: "var(--stitch-color-on-surface)",
             background:
               csvSummary.failed > 0
@@ -953,8 +953,8 @@ export function ProductsAdminClient() {
         <div
           className="mb-4 rounded-xl border p-4 text-sm"
           style={{
-            borderColor: "var(--stitch-color-error, #f87171)",
-            color: "var(--stitch-color-error, #f87171)",
+            borderColor: "var(--stitch-color-error)",
+            color: "var(--stitch-color-error)",
             background:
               "color-mix(in srgb, var(--stitch-color-error) 8%, transparent)",
           }}
@@ -1158,7 +1158,7 @@ export function ProductsAdminClient() {
                               onClick={() => setConfirmDelete({ id: p.id, name: p.name })}
                               className="rounded-lg p-2 text-xs font-bold transition hover:opacity-80"
                               style={{
-                                color: "var(--stitch-color-error, #f87171)",
+                                color: "var(--stitch-color-error)",
                               }}
                               title="Xóa"
                               disabled={deleteId === p.id}
@@ -1183,7 +1183,7 @@ export function ProductsAdminClient() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div
             className="absolute inset-0"
-            style={{ background: "rgba(0,0,0,0.55)" }}
+            style={{ background: "color-mix(in srgb, var(--stitch-color-scrim, var(--stitch-color-on-surface)) 55%, transparent)" }}
             onClick={() => (deleteId ? null : setConfirmDelete(null))}
           />
           <div
@@ -1192,7 +1192,8 @@ export function ProductsAdminClient() {
               background: "var(--stitch-color-surface)",
               borderColor:
                 "color-mix(in srgb, var(--stitch-color-outline-variant) 40%, transparent)",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+              boxShadow:
+                "0 20px 60px color-mix(in srgb, var(--stitch-color-primary) 18%, transparent)",
             }}
           >
             <h3 className="text-base font-bold" style={{ color: "var(--stitch-color-on-surface)" }}>
@@ -1219,8 +1220,8 @@ export function ProductsAdminClient() {
               <button
                 type="button"
                 onClick={() => handleDelete(confirmDelete.id)}
-                className="flex-1 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-60"
-                style={{ background: "var(--stitch-color-error, #ef4444)" }}
+                className="flex-1 rounded-xl px-4 py-2.5 text-sm font-bold text-[var(--stitch-color-on-surface)] transition hover:opacity-90 disabled:opacity-60"
+                style={{ background: "var(--stitch-color-error)" }}
                 disabled={deleteId === confirmDelete.id}
               >
                 {deleteId === confirmDelete.id ? "Đang xóa..." : "Xóa sản phẩm"}
@@ -1235,14 +1236,15 @@ export function ProductsAdminClient() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="absolute inset-0"
-            style={{ background: "rgba(0,0,0,0.5)" }}
+            style={{ background: "color-mix(in srgb, var(--stitch-color-scrim, var(--stitch-color-on-surface)) 50%, transparent)" }}
             onClick={() => setFormOpen(false)}
           />
           <div
             className="relative w-full max-w-xl rounded-2xl p-6"
             style={{
               background: "var(--stitch-color-surface)",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              boxShadow:
+              "0 20px 60px color-mix(in srgb, var(--stitch-color-primary) 16%, transparent)",
             }}
           >
             <div className="mb-5 flex items-center justify-between">
@@ -1523,7 +1525,7 @@ export function ProductsAdminClient() {
                       )
                     }
                     className="rounded-lg px-2 py-1 text-xs font-bold transition hover:opacity-80"
-                    style={{ color: "var(--stitch-color-primary, #6366f1)" }}
+                    style={{ color: "var(--stitch-color-primary)" }}
                     disabled={form.imageUrls.length >= 5}
                   >
                     + Thêm ảnh
@@ -1567,7 +1569,7 @@ export function ProductsAdminClient() {
                           })
                         }
                         className="rounded-lg p-2 transition hover:opacity-80"
-                        style={{ color: "var(--stitch-color-error, #f87171)" }}
+                        style={{ color: "var(--stitch-color-error)" }}
                         title="Xóa ảnh"
                       >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -1619,8 +1621,8 @@ export function ProductsAdminClient() {
                 <button
                   type="submit"
                   disabled={submitting || !form.name.trim()}
-                  className="flex-1 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition disabled:opacity-50"
-                  style={{ background: "var(--stitch-color-primary, #6366f1)" }}
+                  className="flex-1 rounded-xl px-4 py-2.5 text-sm font-bold text-[var(--stitch-color-on-surface)] transition disabled:opacity-50"
+                  style={{ background: "var(--stitch-color-primary)" }}
                 >
                   {submitting
                     ? "Đang lưu..."

@@ -184,10 +184,17 @@ export function LoginClient() {
       className="flex min-h-[100dvh] items-center p-4 pt-24 lg:pt-4"
       style={{
         background:
-          "radial-gradient(circle at 20% 30%, rgba(133, 173, 255, 0.05) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(255, 108, 144, 0.05) 0%, transparent 40%)",
+          "radial-gradient(circle at 20% 30%, color-mix(in srgb, var(--stitch-color-primary) 9%, transparent) 0%, transparent 40%), radial-gradient(circle at 80% 70%, color-mix(in srgb, var(--stitch-color-secondary) 7%, transparent) 0%, transparent 40%)",
       }}
     >
-      <div className="relative mx-auto grid w-full max-w-6xl grid-cols-1 overflow-hidden rounded-[2rem] border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)] md:grid-cols-2">
+      <div
+        className="relative mx-auto grid w-full max-w-6xl grid-cols-1 overflow-hidden rounded-[2rem] border md:grid-cols-2"
+        style={{
+          borderColor:
+            "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 24%, transparent)",
+          boxShadow: "0 0 50px color-mix(in srgb, var(--stitch-color-primary) 18%, transparent)",
+        }}
+      >
         {/* Left (Desktop only) */}
         <div
           className={`relative hidden flex-col justify-between overflow-hidden p-12 md:flex md:transform-gpu md:transition-transform md:duration-700 md:ease-[cubic-bezier(0.22,1,0.36,1)] ${
@@ -203,14 +210,17 @@ export function LoginClient() {
             <div className="login-shape login-shape-b absolute right-8 top-20 h-32 w-32 rounded-full border-2 border-[color:var(--stitch-color-secondary)]/45" />
             <div className="login-shape login-shape-c absolute bottom-24 left-20 h-24 w-24 rotate-45 rounded-2xl border border-[color:var(--stitch-color-tertiary)]/50 bg-[color:var(--stitch-color-tertiary)]/10" />
             <div className="login-shape login-shape-d absolute bottom-14 right-16 h-48 w-48 rounded-[3rem] border border-[color:var(--stitch-color-primary)]/20" />
-            <div className="login-shape login-shape-e absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-white/30" />
+            <div className="login-shape login-shape-e absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[color:var(--stitch-color-outline)]/40" />
           </div>
 
           <div className="relative z-10">
             <Link href="/" className="flex items-center gap-3">
               <div
-                className="flex h-10 w-10 items-center justify-center rounded-lg shadow-[0_0_15px_rgba(133,173,255,0.4)]"
-                style={{ background: "var(--stitch-color-primary)" }}
+                className="flex h-10 w-10 items-center justify-center rounded-lg"
+                style={{
+                  background: "var(--stitch-color-primary)",
+                  boxShadow: "0 0 15px color-mix(in srgb, var(--stitch-color-primary) 35%, transparent)",
+                }}
               >
                 <span
                   className="material-symbols-outlined font-bold"
@@ -245,7 +255,7 @@ export function LoginClient() {
                 </span>
               ) : null}
               <span>{typedAfterAccent}</span>
-              {showCaret ? <span className="ml-1 text-white/80">|</span> : null}
+              {showCaret ? <span className="ml-1 text-[var(--stitch-color-on-surface)]/80">|</span> : null}
             </h1>
             <p
               className="max-w-md text-lg font-medium"
@@ -276,7 +286,7 @@ export function LoginClient() {
                 <span className="material-symbols-outlined text-xl" style={{ color: "var(--stitch-color-primary)" }}>
                   shield_lock
                 </span>
-                <p className="mt-1 text-[11px] font-semibold text-white">Bảo mật</p>
+                <p className="mt-1 text-[11px] font-semibold text-[var(--stitch-color-on-surface)]">Bảo mật</p>
                 <p className="text-[10px]" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   SSL 256-bit
                 </p>
@@ -285,7 +295,7 @@ export function LoginClient() {
                 <span className="material-symbols-outlined text-xl" style={{ color: "var(--stitch-color-primary)" }}>
                   speed
                 </span>
-                <p className="mt-1 text-[11px] font-semibold text-white">Hiệu năng</p>
+                <p className="mt-1 text-[11px] font-semibold text-[var(--stitch-color-on-surface)]">Hiệu năng</p>
                 <p className="text-[10px]" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   Tối ưu realtime
                 </p>
@@ -294,7 +304,7 @@ export function LoginClient() {
                 <span className="material-symbols-outlined text-xl" style={{ color: "var(--stitch-color-primary)" }}>
                   support_agent
                 </span>
-                <p className="mt-1 text-[11px] font-semibold text-white">Hỗ trợ</p>
+                <p className="mt-1 text-[11px] font-semibold text-[var(--stitch-color-on-surface)]">Hỗ trợ</p>
                 <p className="text-[10px]" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                   24/7 liên tục
                 </p>
@@ -309,14 +319,15 @@ export function LoginClient() {
             isSignup ? "md:-translate-x-full" : "md:translate-x-0"
           }`}
           style={{
-            background: "rgba(24, 24, 43, 0.7)",
+            background:
+              "color-mix(in srgb, var(--stitch-color-surface) 72%, var(--stitch-color-surface-container-high) 28%)",
             backdropFilter: "blur(20px)",
           }}
         >
           <div className="relative z-10">
             <div className="mb-10">
               <h2
-                className="mb-2 text-3xl font-bold text-white"
+                className="mb-2 text-3xl font-bold text-[var(--stitch-color-on-surface)]"
                 style={{ fontFamily: "var(--stitch-font-headline)" }}
               >
                 {mode === "login" ? "Chào mừng quay lại" : "Tạo tài khoản"}
@@ -333,7 +344,7 @@ export function LoginClient() {
 
             <form className="space-y-6" onSubmit={onSubmit}>
             {error ? (
-              <p className="px-1 text-sm font-medium text-red-400">
+              <p className="px-1 text-sm font-medium text-[var(--stitch-color-error)]">
                 {error}
               </p>
             ) : null}
@@ -355,10 +366,10 @@ export function LoginClient() {
                   </span>
                 </div>
                 <input
-                  className="w-full rounded-xl border py-4 pl-12 pr-4 text-white placeholder:text-[color:var(--stitch-color-outline-variant)] outline-none transition-all focus:ring-2 focus:ring-[color:var(--stitch-color-primary)]/50"
+                  className="w-full rounded-xl border py-4 pl-12 pr-4 text-[var(--stitch-color-on-surface)] placeholder:text-[color:var(--stitch-color-outline-variant)] outline-none transition-all focus:ring-2 focus:ring-[color:var(--stitch-color-primary)]/50"
                   style={{
                     background: "var(--stitch-color-surface-container-high)",
-                    borderColor: error ? "#ef4444" : "transparent",
+                    borderColor: error ? "var(--stitch-color-error)" : "transparent",
                   }}
                   placeholder="Email"
                   type="email"
@@ -392,10 +403,10 @@ export function LoginClient() {
                   <span className="material-symbols-outlined">lock_open</span>
                 </div>
                 <input
-                  className="w-full rounded-xl border py-4 pl-12 pr-12 text-white placeholder:text-[color:var(--stitch-color-outline-variant)] outline-none transition-all focus:ring-2 focus:ring-[color:var(--stitch-color-primary)]/50"
+                  className="w-full rounded-xl border py-4 pl-12 pr-12 text-[var(--stitch-color-on-surface)] placeholder:text-[color:var(--stitch-color-outline-variant)] outline-none transition-all focus:ring-2 focus:ring-[color:var(--stitch-color-primary)]/50"
                   style={{
                     background: "var(--stitch-color-surface-container-high)",
-                    borderColor: error ? "#ef4444" : "transparent",
+                    borderColor: error ? "var(--stitch-color-error)" : "transparent",
                   }}
                   placeholder="••••••••"
                   type={showPw ? "text" : "password"}
@@ -435,10 +446,10 @@ export function LoginClient() {
                     <span className="material-symbols-outlined">lock</span>
                   </div>
                   <input
-                    className="w-full rounded-xl border py-4 pl-12 pr-12 text-white placeholder:text-[color:var(--stitch-color-outline-variant)] outline-none transition-all focus:ring-2 focus:ring-[color:var(--stitch-color-primary)]/50"
+                    className="w-full rounded-xl border py-4 pl-12 pr-12 text-[var(--stitch-color-on-surface)] placeholder:text-[color:var(--stitch-color-outline-variant)] outline-none transition-all focus:ring-2 focus:ring-[color:var(--stitch-color-primary)]/50"
                     style={{
                       background: "var(--stitch-color-surface-container-high)",
-                      borderColor: error ? "#ef4444" : "transparent",
+                      borderColor: error ? "var(--stitch-color-error)" : "transparent",
                     }}
                     placeholder="••••••••"
                     type={showConfirmPw ? "text" : "password"}
@@ -496,8 +507,8 @@ export function LoginClient() {
               style={{
                 background:
                   "linear-gradient(135deg, var(--stitch-color-primary) 0%, var(--stitch-color-primary-dim, var(--stitch-color-primary)) 100%)",
-                color: "var(--stitch-color-on-primary-fixed, black)",
-                boxShadow: "0 0 25px rgba(133,173,255,0.3)",
+                color: "var(--stitch-color-on-primary)",
+                boxShadow: "0 0 25px color-mix(in srgb, var(--stitch-color-primary) 28%, transparent)",
               }}
               type="submit"
               disabled={busy}

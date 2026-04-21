@@ -34,8 +34,10 @@ function CategoryNavDropdownUI({
     <div className="group relative">
       <Link
         href="/category"
-        className={`inline-flex items-center gap-1 rounded-md pb-1 font-bold transition-colors duration-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)] ${
-          activeAny ? "border-b-2 text-white" : "text-slate-400"
+        className={`inline-flex items-center gap-1 rounded-md pb-1 font-bold transition-colors duration-300 hover:text-[var(--stitch-color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)] ${
+          activeAny
+            ? "border-b-2 text-[var(--stitch-color-primary)]"
+            : "text-[var(--stitch-color-on-surface-variant)]"
         }`}
         style={
           activeAny
@@ -208,10 +210,12 @@ export function ShopHeader() {
 
   return (
     <header
-      className="fixed top-0 z-50 w-full shadow-[0_0_20px_rgba(133,173,255,0.1)] backdrop-blur-xl"
+      className="fixed top-0 z-50 w-full backdrop-blur-xl"
       style={{
         background:
           "color-mix(in srgb, var(--stitch-color-background, var(--stitch-color-surface)) 80%, transparent)",
+        boxShadow:
+          "0 0 20px color-mix(in srgb, var(--stitch-color-primary) 12%, transparent)",
       }}
     >
       <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-6 py-4 md:px-8">
@@ -239,8 +243,10 @@ export function ShopHeader() {
             <Link
               href="/"
               prefetch
-              className={`rounded-md pb-1 font-medium transition-colors duration-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)] ${
-                pathname === "/" ? "border-b-2 font-bold text-white" : "text-slate-400"
+              className={`rounded-md pb-1 font-medium transition-colors duration-300 hover:text-[var(--stitch-color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)] ${
+                pathname === "/"
+                  ? "border-b-2 font-bold text-[var(--stitch-color-primary)]"
+                  : "text-[var(--stitch-color-on-surface-variant)]"
               }`}
               style={
                 pathname === "/"
@@ -271,8 +277,10 @@ export function ShopHeader() {
                   key={tab.label}
                   href={tab.href}
                   prefetch
-                  className={`rounded-md pb-1 font-medium transition-colors duration-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)] ${
-                    active ? "border-b-2 font-bold text-white" : "text-slate-400"
+                  className={`rounded-md pb-1 font-medium transition-colors duration-300 hover:text-[var(--stitch-color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)] ${
+                    active
+                      ? "border-b-2 font-bold text-[var(--stitch-color-primary)]"
+                      : "text-[var(--stitch-color-on-surface-variant)]"
                   }`}
                   style={
                     active
@@ -327,7 +335,7 @@ export function ShopHeader() {
               <span className="material-symbols-outlined text-[22px] leading-none">shopping_cart</span>
               {itemCount > 0 ? (
                 <span
-                  className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
+                  className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-[var(--stitch-color-on-secondary)]"
                   style={{ background: "var(--stitch-color-secondary)" }}
                 >
                   {itemCount > 99 ? "99+" : itemCount}

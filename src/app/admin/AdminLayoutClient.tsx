@@ -162,7 +162,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                 type="button"
                 onClick={() => void logout()}
                 className="flex items-center gap-2 text-xs font-bold transition hover:opacity-80"
-                style={{ color: "var(--stitch-color-error, #f87171)" }}
+                style={{ color: "var(--stitch-color-error)" }}
               >
                 <span className="material-symbols-outlined text-[16px]">logout</span>
                 Đăng xuất

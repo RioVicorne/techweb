@@ -11,11 +11,13 @@ export function HomeDesktopProductGrid({ products }: { products: CatalogProduct[
         <Link
           key={p.id}
           href={`/product/${p.id}`}
-          className="group/card relative block rounded-3xl border p-4 transition-all duration-300 hover:opacity-95 active:scale-[0.99] hover:bg-[var(--stitch-color-surface-bright,var(--stitch-color-surface-container))]"
+          className="group/card relative block rounded-3xl border p-4 transition-all duration-300 hover:opacity-95 hover:border-[var(--stitch-color-primary)] active:scale-[0.99] hover:bg-[var(--stitch-color-surface-bright,var(--stitch-color-surface-container-high))]"
           style={{
-            background: "var(--stitch-color-surface-container)",
+            background: "var(--stitch-color-surface-container-high)",
             borderColor:
-              "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+              "color-mix(in srgb, var(--stitch-color-secondary) 34%, var(--stitch-color-outline))",
+            boxShadow:
+              "inset 0 0 0 1px color-mix(in srgb, var(--stitch-color-primary-container) 35%, transparent)",
           }}
           aria-label={`Xem sản phẩm: ${p.title}`}
         >
@@ -36,7 +38,13 @@ export function HomeDesktopProductGrid({ products }: { products: CatalogProduct[
             />
           </div>
           {/* Hide rating on list cards; show on product detail only. */}
-          <h3 className="mb-2 line-clamp-2 text-sm font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          <h3
+            className="mb-2 line-clamp-2 text-sm font-bold"
+            style={{
+              fontFamily: "var(--stitch-font-headline)",
+              color: "var(--stitch-color-on-surface)",
+            }}
+          >
             {p.title}
           </h3>
 

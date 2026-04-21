@@ -56,11 +56,17 @@ export function SearchClient() {
     <main className="mx-auto max-w-screen-2xl px-6 pb-20 pt-28 md:px-12">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black italic tracking-tighter text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          <h1
+            className="text-2xl font-black italic tracking-tighter"
+            style={{
+              fontFamily: "var(--stitch-font-headline)",
+              color: "var(--stitch-color-on-surface)",
+            }}
+          >
             Tìm kiếm
           </h1>
           <p className="mt-1 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-            Từ khóa: <span className="font-black text-white">{q || "—"}</span>
+            Từ khóa: <span className="font-black text-[var(--stitch-color-on-surface)]">{q || "—"}</span>
           </p>
         </div>
         <Link href="/" className="text-sm font-black transition hover:underline" style={{ color: "var(--stitch-color-primary)" }}>
@@ -98,7 +104,7 @@ export function SearchClient() {
                 <img src={p.img} alt={p.title} className="h-full w-full object-cover" />
               </div>
               <div className="p-3">
-                <div className="line-clamp-2 text-sm font-black text-white">{p.title}</div>
+                <div className="line-clamp-2 text-sm font-black text-[var(--stitch-color-on-surface)]">{p.title}</div>
                 <div className="mt-2 text-sm font-black" style={{ color: "var(--stitch-color-primary)" }}>
                   {p.price} <span className="text-[10px] font-normal">đ</span>
                 </div>

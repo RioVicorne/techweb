@@ -115,7 +115,11 @@ export function AdminLoginClient() {
             />
           </div>
 
-          {error ? <p className="text-sm text-red-500">{error}</p> : null}
+          {error ? (
+            <p className="text-sm" style={{ color: "var(--stitch-color-error)" }}>
+              {error}
+            </p>
+          ) : null}
 
           <button
             type="submit"

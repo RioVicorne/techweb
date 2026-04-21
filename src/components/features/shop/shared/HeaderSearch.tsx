@@ -40,7 +40,7 @@ function SearchHitsDropdown({
                 <img src={p.img} alt="" className="h-full w-full object-cover" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-black text-white">{p.title}</div>
+                <div className="truncate text-sm font-black text-[var(--stitch-color-on-surface)]">{p.title}</div>
                 <div className="mt-0.5 text-xs font-black" style={{ color: "var(--stitch-color-primary)" }}>
                   {p.price} đ
                 </div>

@@ -116,7 +116,7 @@ export function ProductDetailClient({
           {/* Product Info */}
           <div className="flex flex-col justify-center">
             <h1
-              className="line-clamp-2 text-3xl font-black italic leading-tight tracking-tighter text-white md:text-4xl"
+              className="line-clamp-2 text-3xl font-black italic leading-tight tracking-tighter text-[var(--stitch-color-on-surface)] md:text-4xl"
               style={{ fontFamily: "var(--stitch-font-headline)" }}
             >
               {product.title}
@@ -182,7 +182,7 @@ export function ProductDetailClient({
             aria-expanded={isSpecsOpen}
           >
             <span
-              className="text-2xl font-black italic tracking-tighter text-white"
+              className="text-2xl font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]"
               style={{ fontFamily: "var(--stitch-font-headline)" }}
             >
               Thông số kỹ thuật
@@ -252,7 +252,7 @@ export function ProductDetailClient({
             aria-expanded={isReviewsOpen}
           >
             <span
-              className="text-2xl font-black italic tracking-tighter text-white"
+              className="text-2xl font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]"
               style={{ fontFamily: "var(--stitch-font-headline)" }}
             >
               Đánh giá từ khách hàng
@@ -284,7 +284,7 @@ export function ProductDetailClient({
         {/* Related Products */}
         <section className="mb-12">
           <h2
-            className="mb-6 text-2xl font-black italic tracking-tighter text-white"
+            className="mb-6 text-2xl font-black italic tracking-tighter text-[var(--stitch-color-on-surface)]"
             style={{ fontFamily: "var(--stitch-font-headline)" }}
           >
             Sản phẩm liên quan
@@ -328,7 +328,7 @@ export function ProductDetailClient({
                     />
                   </div>
                   <div className="p-3">
-                    <p className="line-clamp-2 text-sm font-bold text-white transition-colors group-hover:text-[var(--stitch-color-primary)]">
+                    <p className="line-clamp-2 text-sm font-bold text-[var(--stitch-color-on-surface)] transition-colors group-hover:text-[var(--stitch-color-primary)]">
                       {rp.title}
                     </p>
                     <p className="mt-1 text-base font-black" style={{ color: "var(--stitch-color-primary)" }}>

@@ -82,7 +82,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
             "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
         }}
       >
-        <h1 className="mb-2 text-xl font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+        <h1 className="mb-2 text-xl font-bold text-[var(--stitch-color-on-surface)]" style={{ fontFamily: "var(--stitch-font-headline)" }}>
           Thông tin đơn hàng
         </h1>
 
@@ -93,7 +93,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
         ) : order ? (
           <>
             <p className="mb-6 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
-              Khách hàng: <span className="font-semibold text-white">{order.customer.name}</span> • Mã đơn:{" "}
+              Khách hàng: <span className="font-semibold text-[var(--stitch-color-on-surface)]">{order.customer.name}</span> • Mã đơn:{" "}
               <span className="font-black" style={{ color: "var(--stitch-color-primary)" }}>
                 {order.id}
               </span>
@@ -109,11 +109,11 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
             >
               <div className="flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 <span>Tạm tính</span>
-                <span className="tabular-nums text-white">{formatVndDisplay(order.subtotalVnd)} đ</span>
+                <span className="tabular-nums text-[var(--stitch-color-on-surface)]">{formatVndDisplay(order.subtotalVnd)} đ</span>
               </div>
               <div className="mt-2 flex justify-between text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
                 <span>Vận chuyển</span>
-                <span className="tabular-nums text-white">
+                <span className="tabular-nums text-[var(--stitch-color-on-surface)]">
                   {order.shippingVnd === 0 ? "Miễn phí" : `${formatVndDisplay(order.shippingVnd)} đ`}
                 </span>
               </div>

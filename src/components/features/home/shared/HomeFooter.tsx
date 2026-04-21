@@ -58,14 +58,20 @@ export function HomeFooter() {
         </div>
 
         <div>
-          <h4 className="mb-4 font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          <h4
+            className="mb-4 font-bold"
+            style={{
+              fontFamily: "var(--stitch-font-headline)",
+              color: "var(--stitch-color-on-surface)",
+            }}
+          >
             Liên kết nhanh
           </h4>
           <ul className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
             <li>
               <Link
                 href="/contact"
-                className="inline-block rounded transition hover:translate-x-1 hover:text-pink-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
+                className="inline-block rounded transition hover:translate-x-1 hover:text-[var(--stitch-color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
               >
                 Hỗ trợ
               </Link>
@@ -73,7 +79,7 @@ export function HomeFooter() {
             <li>
               <Link
                 href="/category"
-                className="inline-block rounded transition hover:translate-x-1 hover:text-pink-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
+                className="inline-block rounded transition hover:translate-x-1 hover:text-[var(--stitch-color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
               >
                 Ưu đãi / quà tặng
               </Link>
@@ -81,7 +87,7 @@ export function HomeFooter() {
             <li>
               <Link
                 href="/terms"
-                className="inline-block rounded transition hover:translate-x-1 hover:text-pink-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
+                className="inline-block rounded transition hover:translate-x-1 hover:text-[var(--stitch-color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
               >
                 Điều khoản dịch vụ
               </Link>
@@ -89,7 +95,7 @@ export function HomeFooter() {
             <li>
               <Link
                 href="/privacy"
-                className="inline-block rounded transition hover:translate-x-1 hover:text-pink-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
+                className="inline-block rounded transition hover:translate-x-1 hover:text-[var(--stitch-color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
               >
                 Chính sách bảo mật
               </Link>
@@ -98,14 +104,20 @@ export function HomeFooter() {
         </div>
 
         <div>
-          <h4 className="mb-4 font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          <h4
+            className="mb-4 font-bold"
+            style={{
+              fontFamily: "var(--stitch-font-headline)",
+              color: "var(--stitch-color-on-surface)",
+            }}
+          >
             Tài khoản
           </h4>
           <ul className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
             <li>
               <Link
                 href="/account"
-                className="inline-block rounded transition hover:translate-x-1 hover:text-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
+                className="inline-block rounded transition hover:translate-x-1 hover:text-[var(--stitch-color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
               >
                 Hồ sơ
               </Link>
@@ -113,7 +125,7 @@ export function HomeFooter() {
             <li>
               <Link
                 href="/orders"
-                className="inline-block rounded transition hover:translate-x-1 hover:text-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
+                className="inline-block rounded transition hover:translate-x-1 hover:text-[var(--stitch-color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
               >
                 Đơn hàng
               </Link>
@@ -121,7 +133,7 @@ export function HomeFooter() {
             <li>
               <Link
                 href="/account"
-                className="inline-block rounded transition hover:translate-x-1 hover:text-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
+                className="inline-block rounded transition hover:translate-x-1 hover:text-[var(--stitch-color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
               >
                 Yêu thích
               </Link>
@@ -129,7 +141,7 @@ export function HomeFooter() {
             <li>
               <Link
                 href="/account"
-                className="inline-block rounded transition hover:translate-x-1 hover:text-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
+                className="inline-block rounded transition hover:translate-x-1 hover:text-[var(--stitch-color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--stitch-color-secondary)]"
               >
                 Cài đặt
               </Link>
@@ -138,7 +150,13 @@ export function HomeFooter() {
         </div>
 
         <div id="contact" className="scroll-mt-28 space-y-4">
-          <h4 className="font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+          <h4
+            className="font-bold"
+            style={{
+              fontFamily: "var(--stitch-font-headline)",
+              color: "var(--stitch-color-on-surface)",
+            }}
+          >
             Liên hệ
           </h4>
           <p className="text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>
@@ -149,7 +167,13 @@ export function HomeFooter() {
             . Phản hồi trong giờ hành chính.
           </p>
           <div>
-            <h4 className="mb-2 font-bold text-white" style={{ fontFamily: "var(--stitch-font-headline)" }}>
+            <h4
+              className="mb-2 font-bold"
+              style={{
+                fontFamily: "var(--stitch-font-headline)",
+                color: "var(--stitch-color-on-surface)",
+              }}
+            >
               Bản tin
             </h4>
             <p className="mb-3 text-sm" style={{ color: "var(--stitch-color-on-surface-variant)" }}>

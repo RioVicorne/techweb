@@ -11,7 +11,8 @@ type CategoryChip = {
 const DEFAULT_HERO = {
   headline: "Sản phẩm",
   sub: "Khám phá bộ sưu tập gaming gear đỉnh cao",
-  gradient: "from-[#6366f1]/30 via-[#8b5cf6]/20 to-transparent",
+  gradient:
+    "from-[color:color-mix(in_srgb,var(--stitch-color-primary)_30%,transparent)] via-[color:color-mix(in_srgb,var(--stitch-color-secondary)_20%,transparent)] to-transparent",
 };
 
 export default async function CategoryPage({
@@ -127,7 +128,10 @@ export default async function CategoryPage({
                 <Link
                   href="/category"
                   className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold transition-all hover:opacity-80"
-                  style={{ background: "var(--stitch-color-error-container, #fee2e2)", color: "var(--stitch-color-on-error-container, #991b1b)" }}
+                  style={{
+                    background: "var(--stitch-color-error-container)",
+                    color: "var(--stitch-color-on-error-container)",
+                  }}
                 >
                   <span className="material-symbols-outlined text-sm" aria-hidden>close</span>
                   Xoá bộ lọc
@@ -214,7 +218,7 @@ export default async function CategoryPage({
                 </p>
                 <Link
                   href="/category"
-                  className="mt-6 rounded-2xl px-6 py-2.5 text-sm font-bold text-white transition-all active:scale-95"
+                  className="mt-6 rounded-2xl px-6 py-2.5 text-sm font-bold text-[var(--stitch-color-on-primary)] transition-all active:scale-95"
                   style={{ background: "var(--stitch-color-primary)" }}
                 >
                   Xem tất cả sản phẩm
