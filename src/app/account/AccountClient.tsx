@@ -795,9 +795,10 @@ export function AccountClient() {
           <section
             className="rounded-3xl border p-6 md:p-8"
             style={{
-              background: "var(--stitch-color-surface-container)",
-              borderColor:
-                "color-mix(in srgb, var(--stitch-color-outline-variant, var(--stitch-color-outline)) 10%, transparent)",
+              background: "var(--stitch-color-surface-container-high)",
+              borderColor: "color-mix(in srgb, var(--stitch-color-secondary) 34%, var(--stitch-color-outline))",
+              boxShadow:
+                "inset 0 0 0 1px color-mix(in srgb, var(--stitch-color-primary-container) 35%, transparent)",
             }}
           >
             <div className="flex items-center justify-between gap-4">
@@ -872,7 +873,7 @@ export function AccountClient() {
                           {n > 0 ? (
                             <span
                               className="absolute -right-2 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black"
-                              style={{ background: c.fg, color: "#fff" }}
+                              style={{ background: c.fg, color: "var(--stitch-color-on-primary)" }}
                               aria-label={`${n} đơn ${t.label}`}
                             >
                               {n > 99 ? "99+" : n}
