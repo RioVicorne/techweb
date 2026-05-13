@@ -13,10 +13,6 @@ body {
   color: var(--stitch-color-on-surface);
 }
 
-body.maintenance-active > *:not(.maintenance-popup) {
-  display: none !important;
-}
-
 body.maintenance-active {
   overflow: hidden;
 }
