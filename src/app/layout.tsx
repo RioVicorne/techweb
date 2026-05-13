@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Manrope, Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/cart-context";
+import { MaintenancePopup } from "./MaintenancePopup";
 import { MobileBottomNav } from "@/components/layout/mobile/MobileBottomNav";
 import { ShopHeader } from "@/components/features/shop/shared/ShopHeader";
 import {
@@ -76,6 +77,7 @@ export default async function RootLayout({
           <div className="min-h-dvh pb-24 lg:pb-0">{children}</div>
           <MobileBottomNav />
         </CartProvider>
+        <MaintenancePopup />
       </body>
     </html>
   );
